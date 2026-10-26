@@ -1,0 +1,435 @@
+{
+  "bind_landmarks_m": {
+    "Hips": [
+      0,
+      0.998,
+      0
+    ],
+    "Spine2": [
+      0,
+      1.347,
+      -0.043
+    ],
+    "Neck": [
+      0,
+      1.498,
+      -0.035
+    ],
+    "Head": [
+      0,
+      1.601,
+      -0.003
+    ],
+    "HeadTop_End": [
+      0,
+      1.786,
+      0.063
+    ],
+    "LeftShoulder": [
+      0.061,
+      1.438,
+      -0.036
+    ],
+    "LeftArm": [
+      0.188,
+      1.436,
+      -0.062
+    ],
+    "LeftForeArm": [
+      0.462,
+      1.436,
+      -0.062
+    ],
+    "LeftHand": [
+      0.738,
+      1.436,
+      -0.062
+    ],
+    "LeftUpLeg": [
+      0.091,
+      0.931,
+      -0.001
+    ],
+    "LeftLeg": [
+      0.094,
+      0.525,
+      -0.006
+    ],
+    "LeftFoot": [
+      0.091,
+      0.105,
+      -0.026
+    ],
+    "LeftToeBase": [
+      0.095,
+      0.033,
+      0.113
+    ]
+  },
+  "source": "Mixamo Y Bot + 35 Mixamo clips, processed by scripts/assets/convert_mixamo.mjs",
+  "units": "metres, y-up, character faces +z",
+  "height_m": 1.805,
+  "bones": 65,
+  "vertices": [
+    {
+      "name": "Alpha_Surface",
+      "count": 21094
+    },
+    {
+      "name": "Alpha_Joints",
+      "count": 10514
+    }
+  ],
+  "clips": {
+    "Breathing_Idle": {
+      "kind": "loop",
+      "duration_s": 9.9333,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.019
+      }
+    },
+    "Jog_Forward": {
+      "kind": "loop",
+      "duration_s": 0.8333,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.07
+      },
+      "phase0_s": 0.2,
+      "natural_speed_mps": 2.451
+    },
+    "Run_forward": {
+      "kind": "loop",
+      "duration_s": 0.6333,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.048
+      },
+      "phase0_s": 0.133,
+      "natural_speed_mps": 5.595
+    },
+    "Sprint": {
+      "kind": "loop",
+      "duration_s": 0.5333,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 3.155,
+        "dy_max": 0.073
+      },
+      "phase0_s": 0.133,
+      "natural_speed_mps": 5.916
+    },
+    "Running_Backward": {
+      "kind": "loop",
+      "duration_s": 0.6333,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.041
+      },
+      "phase0_s": 0.133,
+      "natural_speed_mps": 3.049
+    },
+    "Jog_Strafe_Left": {
+      "kind": "loop",
+      "duration_s": 0.7,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.044
+      },
+      "phase0_s": 0.167,
+      "natural_speed_mps": 2.873
+    },
+    "Jog_Strafe_Right": {
+      "kind": "loop",
+      "duration_s": 0.7333,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0.004,
+        "dy_max": 0.048
+      },
+      "phase0_s": 0.533,
+      "natural_speed_mps": 2.242
+    },
+    "Running_Turn_180": {
+      "kind": "oneshot",
+      "duration_s": 0.6667,
+      "root_motion_m": {
+        "dx": -0.003,
+        "dz": -0.013,
+        "dy_max": 0.292
+      }
+    },
+    "Dribble": {
+      "kind": "loop",
+      "duration_s": 1.7333,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 4.637,
+        "dy_max": 0.123
+      },
+      "phase0_s": 1.1,
+      "natural_speed_mps": 2.675
+    },
+    "Goalkeeper_Idle": {
+      "kind": "loop",
+      "duration_s": 4.6333,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.042
+      }
+    },
+    "Soccer_Pass": {
+      "kind": "kick",
+      "duration_s": 1.6,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.061
+      },
+      "contact_s": 0.417,
+      "contact_part": "right",
+      "contact_speed_mps": 9.26
+    },
+    "long_pass": {
+      "kind": "kick",
+      "duration_s": 1.6667,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 5.035,
+        "dy_max": 0.159
+      },
+      "contact_s": 0.467,
+      "contact_part": "right",
+      "contact_speed_mps": 9.82
+    },
+    "Strike_Foward": {
+      "kind": "kick",
+      "duration_s": 1.3,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.213
+      },
+      "contact_s": 0.467,
+      "contact_part": "right",
+      "contact_speed_mps": 15.02
+    },
+    "Goalkeeper_Drop_Kick": {
+      "kind": "kick",
+      "duration_s": 3.9,
+      "root_motion_m": {
+        "dx": -0.224,
+        "dz": 3.321,
+        "dy_max": 0.238
+      },
+      "contact_s": 2.1,
+      "contact_part": "right",
+      "contact_speed_mps": 14.76
+    },
+    "standing_Header": {
+      "kind": "head",
+      "duration_s": 1.4333,
+      "root_motion_m": {
+        "dx": 0.003,
+        "dz": 0,
+        "dy_max": 0.055
+      },
+      "contact_s": 0.483,
+      "contact_part": "head",
+      "contact_speed_mps": 3.82
+    },
+    "jumping_Header": {
+      "kind": "head",
+      "duration_s": 2.3667,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.342
+      },
+      "contact_s": 0.883,
+      "contact_part": "head",
+      "contact_speed_mps": 2.75
+    },
+    "Receive_ground_pass": {
+      "kind": "oneshot",
+      "duration_s": 5.1333,
+      "root_motion_m": {
+        "dx": -0.078,
+        "dz": 2.727,
+        "dy_max": 0.121
+      }
+    },
+    "Receive_aerial_pass": {
+      "kind": "oneshot",
+      "duration_s": 1.4,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.209
+      }
+    },
+    "Throw_In": {
+      "kind": "oneshot",
+      "duration_s": 2.7667,
+      "root_motion_m": {
+        "dx": -0.397,
+        "dz": 3.142,
+        "dy_max": 0.149
+      }
+    },
+    "Soccer_Tackle": {
+      "kind": "kick",
+      "duration_s": 2.7333,
+      "root_motion_m": {
+        "dx": 0.744,
+        "dz": 3.79,
+        "dy_max": 0.794
+      },
+      "contact_s": 0.633,
+      "contact_part": "right",
+      "contact_speed_mps": 12.11
+    },
+    "Slide_Tackle": {
+      "kind": "oneshot",
+      "duration_s": 1.7667,
+      "root_motion_m": {
+        "dx": 0.018,
+        "dz": 4.427,
+        "dy_max": 0.713
+      }
+    },
+    "Soccer_Trip": {
+      "kind": "oneshot",
+      "duration_s": 1.6,
+      "root_motion_m": {
+        "dx": -1.153,
+        "dz": 3.912,
+        "dy_max": 0.779
+      }
+    },
+    "Getting_Up": {
+      "kind": "oneshot",
+      "duration_s": 7.6,
+      "root_motion_m": {
+        "dx": 0.006,
+        "dz": -0.664,
+        "dy_max": 0.837
+      }
+    },
+    "Goalkeeper_Diving_Save_left": {
+      "kind": "oneshot",
+      "duration_s": 3.4,
+      "root_motion_m": {
+        "dx": 2.166,
+        "dz": 1.805,
+        "dy_max": 0.76
+      }
+    },
+    "Goalkeeper_Diving_Save_Right": {
+      "kind": "oneshot",
+      "duration_s": 3.2333,
+      "root_motion_m": {
+        "dx": -2.691,
+        "dz": 1.017,
+        "dy_max": 0.756
+      }
+    },
+    "Goalkeeper_Body_Block_left": {
+      "kind": "oneshot",
+      "duration_s": 2.6333,
+      "root_motion_m": {
+        "dx": 0.246,
+        "dz": 0.66,
+        "dy_max": 0.771
+      }
+    },
+    "Goalkeeper_Body_Block_right": {
+      "kind": "oneshot",
+      "duration_s": 2.4667,
+      "root_motion_m": {
+        "dx": -0.388,
+        "dz": 0.464,
+        "dy_max": 0.759
+      }
+    },
+    "Goalkeeper_Catch_highshot": {
+      "kind": "oneshot",
+      "duration_s": 2.7333,
+      "root_motion_m": {
+        "dx": -0.043,
+        "dz": 0.548,
+        "dy_max": 0.505
+      }
+    },
+    "Goalkeeper_Catch_lowshot": {
+      "kind": "oneshot",
+      "duration_s": 2.1,
+      "root_motion_m": {
+        "dx": -0.75,
+        "dz": 0.899,
+        "dy_max": 0.129
+      }
+    },
+    "Goalkeeper_Overhand_Throw": {
+      "kind": "oneshot",
+      "duration_s": 2.8333,
+      "root_motion_m": {
+        "dx": 0.034,
+        "dz": 3.787,
+        "dy_max": 0.062
+      }
+    },
+    "Goalkeeper_Scoop": {
+      "kind": "oneshot",
+      "duration_s": 2.6,
+      "root_motion_m": {
+        "dx": -0.493,
+        "dz": 3.902,
+        "dy_max": 0.216
+      }
+    },
+    "celebration_Cheering": {
+      "kind": "oneshot",
+      "duration_s": 1.9,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.031
+      }
+    },
+    "celebration_Fist_Pump": {
+      "kind": "oneshot",
+      "duration_s": 3.8,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.029
+      }
+    },
+    "celebration_Victory": {
+      "kind": "oneshot",
+      "duration_s": 4.5,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.105
+      }
+    },
+    "Disappointed": {
+      "kind": "oneshot",
+      "duration_s": 4.2,
+      "root_motion_m": {
+        "dx": 0,
+        "dz": 0,
+        "dy_max": 0.006
+      }
+    }
+  }
+}

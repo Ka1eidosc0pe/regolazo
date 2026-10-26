@@ -11,7 +11,10 @@
     "lint": "eslint .",
     "test": "vitest run",
     "e2e": "playwright test",
-    "gen:types": "json2ts -i ../shared/schemas/json/contracts.schema.json -o src/types/generated/contracts.ts --additionalProperties false --unreachableDefinitions"
+    "gen:types": "json2ts -i ../shared/schemas/json/contracts.schema.json -o src/types/generated/contracts.ts --additionalProperties false --unreachableDefinitions",
+    "art": "node scripts/capture-art.ts",
+    "dev-clip": "node scripts/make-dev-clip.ts",
+    "assets": "node ../scripts/assets/convert_mixamo.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
