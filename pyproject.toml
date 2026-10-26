@@ -41,7 +41,7 @@ ignore = ["RUF012"]  # Pydantic copies mutable defaults per instance
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-exclude = ["^web/", "^data/", "^assets/", "^runs/"]
+exclude = ["^web/", "^data/", "^assets/", "^runs/", "^\\.claude/"]
 
 [[tool.mypy.overrides]]
 module = ["*.tests.*"]
