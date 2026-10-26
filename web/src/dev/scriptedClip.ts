@@ -307,16 +307,22 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
       b.vel = [b.vel[0] + dvx * k, b.vel[1] + dvy * k];
       b.pos = [clamp(b.pos[0] + b.vel[0] * dt, -HALF_L - 2, HALF_L + 2), clamp(b.pos[1] + b.vel[1] * dt, -HALF_W - 2, HALF_W + 2)];
 
-      // facing: towards motion when moving fast, otherwise towards the ball
       const sp = Math.hypot(b.vel[0], b.vel[1]);
       const toBall = Math.atan2(ball[1] - b.pos[1], ball[0] - b.pos[0]);
       const moveDir = Math.atan2(b.vel[1], b.vel[0]);
-      let want = sp > 2.2 ? moveDir : toBall;
-      if (sp > 0.8 && sp < 4.5 && Math.abs(angleDelta(moveDir, toBall)) > 1.9) want = toBall; // backpedal
-      if (owner === p.id && sp < 1.5) {
-        // shaping to pass: face the next kick target
+      let want: number;
+      if (owner === p.id) {
+        // Ball carrier: the ball sits ahead of the facing, so "face the ball" would lock the facing wherever it was
+        // at receipt (usually back towards the passer). Face the carry direction when moving, otherwise shape
+        // towards the next pass.
         const next = kicks.find((kk) => kk.by === p.id && kk.t >= s);
-        if (next) want = Math.atan2(next.target[1] - b.pos[1], next.target[0] - b.pos[0]);
+        if (sp > 0.8) want = moveDir;
+        else if (next) want = Math.atan2(next.target[1] - b.pos[1], next.target[0] - b.pos[0]);
+        else want = b.facing;
+      } else {
+        // off the ball: towards motion when moving fast, otherwise towards the ball
+        want = sp > 2.2 ? moveDir : toBall;
+        if (sp > 0.8 && sp < 4.5 && Math.abs(angleDelta(moveDir, toBall)) > 1.9) want = toBall; // backpedal
       }
       const nextKick = kicks.find((kk) => kk.by === p.id && kk.t >= s && kk.t - s < 0.6);
       if (nextKick) want = Math.atan2(nextKick.target[1] - b.pos[1], nextKick.target[0] - b.pos[0]);
@@ -334,9 +340,9 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
       } else {
         const rel = angleDelta(b.facing, moveDir);
         if (sp < 0.5) anim = "idle";
+        else if (owner === p.id && sp > 1.2) anim = "dribble";
         else if (Math.abs(rel) > 2.2) anim = "jog_back";
         else if (Math.abs(rel) > 0.9 && sp < 4.5) anim = rel > 0 ? "strafe_left" : "strafe_right";
-        else if (owner === p.id && sp > 1.2) anim = "dribble";
         else if (sp < 3.6) anim = "jog";
         else if (sp < 6.2) anim = "run";
         else anim = "sprint";

@@ -60,6 +60,20 @@ describe("scripted dev clip", () => {
   it("uses the renderer's strike convention", () => {
     expect(CLIP_CONTACT_S).toBe(CONTACT_S);
   });
+  it("ball carriers face where they carry the ball, never backpedal with it", () => {
+    for (const f of clip.frames) {
+      const owner = f.possession.player;
+      if (!owner) continue;
+      const p = f.players.find((q) => q.id === owner)!;
+      const speed = Math.hypot(p.vel[0], p.vel[1]);
+      if (speed < 1.5) continue;
+      const where = `${owner} at t=${(f.t - clip.frames[0]!.t).toFixed(2)}s`;
+      expect(["jog_back", "strafe_left", "strafe_right"], where).not.toContain(p.anim);
+      expect(Math.abs(angleDelta(p.facing, Math.atan2(p.vel[1], p.vel[0]))), where).toBeLessThan(Math.PI / 2);
+      const ahead = (f.ball.pos[0] - p.pos[0]) * p.vel[0] + (f.ball.pos[1] - p.pos[1]) * p.vel[1];
+      expect(ahead, `ball behind ${where}`).toBeGreaterThan(0);
+    }
+  });
 });
 
 describe("interpolation", () => {
