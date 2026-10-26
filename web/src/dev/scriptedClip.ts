@@ -68,6 +68,24 @@ function lerpWaypoints(w: Waypoint[], t: number): Vec | null {
   return w[w.length - 1]!.p;
 }
 
+/** Velocity of the scripted run at t (the waypoint segment's slope), so steering can feed it forward. */
+function waypointVelocity(w: Waypoint[], t: number): Vec {
+  for (let i = 0; i < w.length - 1; i++) {
+    const a = w[i]!;
+    const b = w[i + 1]!;
+    if (t >= a.t && t < b.t) {
+      const d = Math.max(1e-6, b.t - a.t);
+      return [(b.p[0] - a.p[0]) / d, (b.p[1] - a.p[1]) / d];
+    }
+  }
+  return [0, 0];
+}
+
+/** A receiver controls the ball only within this distance of it (metres, pitch plane). */
+const CONTROL_R = 1.0;
+/** Highest ball a receiver can bring down (chest / thigh). */
+const CONTROL_Z = 1.6;
+
 export interface ScriptOptions {
   t0?: number;
   duration?: number;
@@ -104,9 +122,10 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
     { t: 16.25, by: H("ST"), anim: "header_jumping", target: [52.0, -2.0, 0.9], arrive: 16.75, kind: "shot" },
     // keeper parry (the keeper "kicks" the ball away with a dive)
     { t: 16.75, by: A("GK"), anim: "gk_dive_left", target: [44.5, -9.5, 0.11], arrive: 17.75, kind: "lofted", receiver: H("RCM"), receiveAnim: "receive_ground" },
-    { t: 18.3, by: H("RCM"), anim: "shoot", target: [53.2, 2.9, 1.05], arrive: 18.62, kind: "shot", spin: [0, 0, 9] },
+    // ~13 m in 0.55 s: a ~24 m/s (86 km/h) strike
+    { t: 18.3, by: H("RCM"), anim: "shoot", target: [53.2, 2.9, 1.05], arrive: 18.85, kind: "shot", spin: [0, 0, 9] },
   ];
-  const GOAL_T = 18.62;
+  const GOAL_T = 18.85;
 
   // Scripted runs (world frame; home attacks +x).
   const runs: Record<string, Waypoint[]> = {
@@ -199,8 +218,10 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
     // --- kicks
     for (const k of kicks) {
       if (Math.abs(s - k.t) < dt / 2) {
+        // The kick fires on the tick nearest its scheduled time; the flight starts at that tick (s), not at k.t,
+        // otherwise the first frame would place the ball a fraction of a tick "before" the foot.
         const from: [number, number, number] = [...ball];
-        const T = k.arrive - k.t;
+        const T = k.arrive - s;
         const dx = k.target[0] - from[0];
         const dy = k.target[1] - from[1];
         const d = Math.hypot(dx, dy);
@@ -211,7 +232,7 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
         } else {
           v0 = [dx / T, dy / T, (k.target[2] - from[2] + 0.5 * G * T * T) / T];
         }
-        flight = { k, p0: from, v0 };
+        flight = { k: { ...k, t: s }, p0: from, v0 };
         owner = null;
         lastTouch = k.by;
         spin = k.spin ?? [0, 0, 0];
@@ -224,9 +245,12 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
       }
     }
     // --- ball
+    const inFlightThisTick = flight !== null;
+    let controlledThisTick = false;
     if (flight) {
       const ft = s - flight.k.t;
-      const { p0, v0, k } = flight;
+      const { p0, v0 } = flight;
+      const k: Kick = flight.k;
       if (k.kind === "ground") {
         const sp = Math.hypot(v0[0], v0[1]);
         const tt = Math.min(ft, sp / ROLL_DECEL);
@@ -244,12 +268,24 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
       }
       if (ft >= k.arrive - k.t - 1e-6) {
         if (k.receiver) {
-          owner = k.receiver;
-          lastTouch = k.receiver;
-          keyframe = true;
-          flight = null;
-          ballVel = [0, 0, 0];
-          spin = [0, 0, 0];
+          // Possession only changes when the receiver can actually reach the ball; otherwise it keeps travelling
+          // (a lofted ball lands and rolls on) and the receiver chases it.
+          const r = body(k.receiver).pos;
+          if (Math.hypot(ball[0] - r[0], ball[1] - r[1]) <= CONTROL_R && ball[2] <= CONTROL_Z) {
+            owner = k.receiver;
+            lastTouch = k.receiver;
+            keyframe = true;
+            controlledThisTick = true;
+            flight = null;
+            ballVel = [ballVel[0] * 0.3, ballVel[1] * 0.3, Math.min(0, ballVel[2])];
+            spin = [0, 0, 0];
+          } else if (k.kind !== "ground" && ball[2] <= 0.12) {
+            flight = {
+              k: { ...k, kind: "ground", t: s, arrive: s },
+              p0: [...ball],
+              v0: [ballVel[0] * 0.55, ballVel[1] * 0.55, 0],
+            };
+          }
         } else if (k.kind === "shot" && k.by !== H("RCM")) {
           // header reaches the keeper; the parry kick takes over
         } else {
@@ -257,7 +293,8 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
         }
       }
     }
-    if (afterGoal && !flight) {
+    if (afterGoal && !flight && !inFlightThisTick) {
+      // (only from the tick after the flight ended, so the ball is not advanced twice in one tick)
       // ball settles in the goal
       ball = [Math.min(54.2, ball[0] + ballVel[0] * dt), ball[1] + ballVel[1] * dt, Math.max(0.11, ball[2] + ballVel[2] * dt)];
       ballVel = [ballVel[0] * 0.8, ballVel[1] * 0.8, ball[2] > 0.12 ? ballVel[2] - G * dt : -ballVel[2] * 0.3];
@@ -274,8 +311,15 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
       const p = b.meta;
       const scripted = lerpWaypoints(runs[p.id] ?? [], s);
       let target: Vec;
-      if (scripted) {
+      let feedForward: Vec = [0, 0];
+      // A pass that has arrived but not yet been controlled: the intended receiver goes to the ball.
+      const chasing = flight?.k.receiver === p.id && s >= flight.k.arrive;
+      if (chasing) {
+        target = [ball[0], ball[1]];
+        feedForward = [ballVel[0], ballVel[1]];
+      } else if (scripted) {
         target = scripted;
+        feedForward = waypointVelocity(runs[p.id] ?? [], s);
       } else if (afterGoal) {
         const scorer = body(H("RCM")).pos;
         target = p.team === "home" && p.position !== "GK" ? [scorer[0] - 4 + rng() * 0.2, scorer[1] + 3] : [baseOf(p)[0] * 0.5, baseOf(p)[1] * 0.6];
@@ -293,7 +337,8 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
       }
       if (owner === p.id) target = [target[0], target[1]];
       const maxV = p.physical.max_speed_mps * 0.92;
-      const desired: Vec = [(target[0] - b.pos[0]) * 1.1, (target[1] - b.pos[1]) * 1.1];
+      // feed-forward of the run's own velocity removes the steady-state lag of a pure proportional chase
+      const desired: Vec = [feedForward[0] + (target[0] - b.pos[0]) * 1.1, feedForward[1] + (target[1] - b.pos[1]) * 1.1];
       const dm = Math.hypot(desired[0], desired[1]);
       if (dm > maxV) {
         desired[0] *= maxV / dm;
@@ -355,12 +400,23 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
     }
 
     // ball at the owner's feet (dribbling touches)
-    if (owner) {
+    if (owner && !controlledThisTick) {
+      // (not on the tick of the first touch: the flight already moved the ball this tick)
       const o = body(owner);
       const sp = Math.hypot(o.vel[0], o.vel[1]);
       const lead = 0.45 + Math.min(1.2, sp * 0.12) * (0.5 + 0.5 * Math.sin(s * 7.5));
-      const nb: [number, number, number] = [o.pos[0] + Math.cos(o.facing) * lead, o.pos[1] + Math.sin(o.facing) * lead, 0.11];
-      ballVel = [(nb[0] - ball[0]) * HZ, (nb[1] - ball[1]) * HZ, 0];
+      const foot: [number, number, number] = [o.pos[0] + Math.cos(o.facing) * lead, o.pos[1] + Math.sin(o.facing) * lead, 0.11];
+      // Ease onto the foot (first touch, then dribbling touches) instead of teleporting: carry the player's own
+      // motion (so the ball doesn't trail a moving carrier) and close a share of the remaining gap each tick. A
+      // ball controlled in the air drops onto the foot under gravity.
+      const carried: [number, number] = [ball[0] + o.vel[0] * dt, ball[1] + o.vel[1] * dt];
+      const zVel = ball[2] > 0.12 ? ballVel[2] - G * dt : 0;
+      const nb: [number, number, number] = [
+        carried[0] + (foot[0] - carried[0]) * 0.35,
+        carried[1] + (foot[1] - carried[1]) * 0.35,
+        Math.max(0.11, ball[2] + zVel * dt),
+      ];
+      ballVel = [(nb[0] - ball[0]) * HZ, (nb[1] - ball[1]) * HZ, nb[2] > 0.11 ? zVel : 0];
       ball = nb;
     }
 

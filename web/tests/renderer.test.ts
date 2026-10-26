@@ -70,8 +70,26 @@ describe("scripted dev clip", () => {
       const where = `${owner} at t=${(f.t - clip.frames[0]!.t).toFixed(2)}s`;
       expect(["jog_back", "strafe_left", "strafe_right"], where).not.toContain(p.anim);
       expect(Math.abs(angleDelta(p.facing, Math.atan2(p.vel[1], p.vel[0]))), where).toBeLessThan(Math.PI / 2);
+      // during the first touch the ball is still arriving from the passer, so it may be level with or behind the run
+      if (p.anim.startsWith("receive_")) continue;
       const ahead = (f.ball.pos[0] - p.pos[0]) * p.vel[0] + (f.ball.pos[1] - p.pos[1]) * p.vel[1];
       expect(ahead, `ball behind ${where}`).toBeGreaterThan(0);
+    }
+  });
+  it("receivers only gain the ball when they can reach it, and the ball never teleports", () => {
+    const t0 = clip.frames[0]!.t;
+    for (let i = 1; i < clip.frames.length; i++) {
+      const a = clip.frames[i - 1]!;
+      const b = clip.frames[i]!;
+      const owner = b.possession.player;
+      if (owner && owner !== a.possession.player) {
+        const p = a.players.find((q) => q.id === owner)!;
+        const gap = Math.hypot(a.ball.pos[0] - p.pos[0], a.ball.pos[1] - p.pos[1]);
+        expect(gap, `${owner} gains the ball at t=${(b.t - t0).toFixed(2)}s from ${gap.toFixed(2)} m`).toBeLessThanOrEqual(1.05);
+      }
+      const moved = Math.hypot(b.ball.pos[0] - a.ball.pos[0], b.ball.pos[1] - a.ball.pos[1], b.ball.pos[2] - a.ball.pos[2]);
+      const speed = Math.max(Math.hypot(...a.ball.vel), Math.hypot(...b.ball.vel));
+      expect(moved, `ball jumps ${moved.toFixed(2)} m at t=${(b.t - t0).toFixed(2)}s`).toBeLessThanOrEqual(speed * 0.04 + 0.3);
     }
   });
 });
