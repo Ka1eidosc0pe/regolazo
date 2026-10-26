@@ -36,3 +36,4 @@ assets/third_party/
 
 # Agent worktrees
 .claude/worktrees/
+.claude/launch.json
