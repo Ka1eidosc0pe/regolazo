@@ -1,6 +1,6 @@
 // Reference screenshots for the art direction (docs/art/). Usage:
 //   node scripts/capture-art.ts [--out ../docs/art] [--only name1,name2]
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { CameraMode } from "../src/camera/director.ts";
 import type { V3 } from "../src/coords.ts";
@@ -29,6 +29,8 @@ export const SHOTS: Shot[] = [
 const args = process.argv.slice(2);
 const outIdx = args.indexOf("--out");
 const out = outIdx >= 0 ? args[outIdx + 1]! : join(REPO_ROOT, "docs/art");
+const shotsIdx = args.indexOf("--shots");
+const shots: Shot[] = shotsIdx >= 0 ? (JSON.parse(readFileSync(args[shotsIdx + 1]!, "utf8")) as Shot[]) : SHOTS;
 const onlyIdx = args.indexOf("--only");
 const only = onlyIdx >= 0 ? new Set(args[onlyIdx + 1]!.split(",")) : null;
 mkdirSync(out, { recursive: true });
@@ -36,7 +38,7 @@ mkdirSync(out, { recursive: true });
 const h = await startHarness();
 try {
   const page = await h.open("w=1920&h=1080&paused=1");
-  for (const s of SHOTS) {
+  for (const s of shots) {
     if (only && !only.has(s.name)) continue;
     await page.evaluate((shot) => {
       const r = window.regolazo!;

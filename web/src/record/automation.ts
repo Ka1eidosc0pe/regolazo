@@ -13,6 +13,8 @@ export interface Automation {
   /** Free camera in world coordinates (pitch frame, z up). */
   setFreePose(pos: V3, look: V3, fov: number): void;
   setClean(clean: boolean): void;
+  /** Performance experiments: hide named objects, toggle shadows / bloom. */
+  debug(flags: { hide?: string[]; shadows?: boolean; bloom?: boolean }): void;
   info(): { t: number; start: number; end: number; fps: number; mode: CameraMode; width: number; height: number; renderer: string };
 }
 
@@ -37,6 +39,14 @@ export function installAutomation(app: App, ready: Promise<void>, THREE: typeof 
     },
     setFreePose(pos, look, fov) {
       app.director.setFreePose(new THREE.Vector3(...worldToThree(...pos)), new THREE.Vector3(...worldToThree(...look)), fov, 0);
+    },
+    debug(flags) {
+      for (const name of flags.hide ?? []) {
+        const o = app.scene.getObjectByName(name);
+        if (o) o.visible = false;
+      }
+      if (flags.shadows !== undefined) app.renderer.shadowMap.enabled = flags.shadows;
+      if (flags.bloom !== undefined) app.post.bloom.enabled = flags.bloom;
     },
     setClean(clean) {
       document.body.dataset.clean = clean ? "1" : "0";

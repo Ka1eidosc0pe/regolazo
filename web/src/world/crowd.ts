@@ -1,7 +1,6 @@
 // Instanced crowd: ~30k seated figures on the tier treads, animated in the vertex shader (sway, bob, rise and
 // arms up when excited), plus a sparse layer of twinkling phone lights.
 import * as THREE from "three";
-import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { mulberry32 } from "../coords.ts";
 import type { PathPoint } from "./bowl.ts";
 import { LOWER, UPPER, type Tier } from "./stadium.ts";
@@ -13,31 +12,11 @@ export interface Crowd {
   update(t: number, excitement: number): void;
 }
 
-function personGeometry(): THREE.BufferGeometry {
-  const parts: THREE.BufferGeometry[] = [];
-  const tag = (g0: THREE.BufferGeometry, arm: number) => {
-    const g = g0.index ? g0.toNonIndexed() : g0;
-    const n = g.getAttribute("position").count;
-    g.setAttribute("aArm", new THREE.Float32BufferAttribute(new Array(n).fill(arm), 1));
-    g.deleteAttribute("uv");
-    return g;
-  };
-  const torso = new THREE.CapsuleGeometry(0.17, 0.3, 2, 8);
-  torso.scale(1.15, 1, 0.75);
-  torso.translate(0, 0.66, 0);
-  parts.push(tag(torso, 0));
-  const head = new THREE.IcosahedronGeometry(0.11, 1);
-  head.translate(0, 1.0, 0.0);
-  parts.push(tag(head, 0));
-  const legs = new THREE.BoxGeometry(0.38, 0.16, 0.42);
-  legs.translate(0, 0.38, 0.14);
-  parts.push(tag(legs, 0));
-  for (const s of [-1, 1]) {
-    const arm = new THREE.CapsuleGeometry(0.045, 0.34, 2, 6);
-    arm.translate(s * 0.26, 0.62, 0.04);
-    parts.push(tag(arm, s));
-  }
-  return mergeGeometries(parts)!;
+/** A camera-agnostic "card" per spectator; the silhouette (head, torso, lap, raised arms) is drawn in the shader. */
+function cardGeometry(): THREE.BufferGeometry {
+  const g = new THREE.PlaneGeometry(0.66, 1.25);
+  g.translate(0, 0.625, 0.05);
+  return g;
 }
 
 const PALETTE_HOME = ["#0b3d91", "#0b3d91", "#4cc9f0", "#f2f4f8", "#13254a", "#0b3d91", "#1d2738", "#3a4458"];
@@ -82,10 +61,10 @@ export function createCrowd(path: PathPoint[]): Crowd {
   place(LOWER, 0.9);
   place(UPPER, 0.86);
 
-  const geo = personGeometry();
+  const geo = cardGeometry();
   const count = seats.length;
   const phase = new Float32Array(count);
-  const mat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+  const mat = new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide, alphaToCoverage: true });
   const uniforms = { uTime: { value: 0 }, uExcite: { value: 0 } };
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
@@ -96,7 +75,10 @@ export function createCrowd(path: PathPoint[]): Crowd {
 uniform float uTime;
 uniform float uExcite;
 attribute float aPhase;
-attribute float aArm;`,
+varying vec2 vCard;
+varying float vHype;
+varying float vPhase;
+varying float vDim;`,
       )
       .replace(
         "#include <begin_vertex>",
@@ -104,37 +86,64 @@ attribute float aArm;`,
   float ph = aPhase * 6.2831;
   float hype = clamp(uExcite * (0.6 + 0.6 * fract(aPhase * 7.13)), 0.0, 1.0);
   float bounce = max(0.0, sin(uTime * 7.5 + ph)) * 0.22 * hype;
-  float sway = sin(uTime * 1.3 + ph) * 0.03;
-  float rise = hype * 0.32;
-  if (abs(aArm) > 0.5) {
-    // arms up: rotate about the shoulder
-    float up = hype * (0.75 + 0.25 * sin(uTime * 6.0 + ph));
-    vec3 sh = vec3(aArm * 0.26, 0.86, 0.04);
-    vec3 rel = transformed - sh;
-    float a = -up * 2.7;
-    rel = vec3(rel.x, rel.y * cos(a) - rel.z * sin(a), rel.y * sin(a) + rel.z * cos(a));
-    transformed = sh + rel;
-  }
-  transformed.x += sway;
-  transformed.y += rise + bounce;`,
+  vCard = vec2(position.x, position.y);
+  vHype = hype * (0.75 + 0.25 * sin(uTime * 6.0 + ph));
+  vPhase = aPhase;
+  transformed.x += sin(uTime * 1.3 + ph) * 0.03;
+  transformed.y += hype * 0.3 + bounce;`,
       )
       .replace(
         "#include <color_vertex>",
         `#include <color_vertex>
-  #ifdef USE_INSTANCING_COLOR
   float wy = (modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).y;
-  vColor.rgb *= 0.42 * mix(1.0, 0.55, smoothstep(4.0, 30.0, wy));
-  #endif`,
+  vDim = 0.42 * mix(1.0, 0.55, smoothstep(4.0, 30.0, wy));`,
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        `#include <common>
+varying vec2 vCard;
+varying float vHype;
+varying float vPhase;
+varying float vDim;
+float sdBox(vec2 p, vec2 b, float r) { vec2 d = abs(p) - b + r; return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r; }
+float sdSeg(vec2 p, vec2 a, vec2 b, float r) { vec2 pa = p - a, ba = b - a; float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0); return length(pa - ba * h) - r; }`,
+      )
+      .replace(
+        "#include <color_fragment>",
+        `#include <color_fragment>
+  vec2 q = vCard;
+  float head = length(q - vec2(0.0, 1.0)) - 0.105;
+  float torso = sdBox(q - vec2(0.0, 0.64), vec2(0.185, 0.24), 0.08);
+  float lap = sdBox(q - vec2(0.0, 0.38), vec2(0.17, 0.08), 0.04);
+  float up = vHype;
+  vec2 sh = vec2(0.17, 0.8);
+  vec2 hand = vec2(0.24 + 0.05 * up, 0.8 + 0.42 * up);
+  float arms = min(sdSeg(q, sh, hand, 0.045), sdSeg(q, sh * vec2(-1.0, 1.0), hand * vec2(-1.0, 1.0), 0.045));
+  arms = mix(1.0, arms, step(0.15, up));
+  float body = min(min(torso, lap), arms);
+  float d = min(head, body);
+  float aa = max(fwidth(d), 1e-4);
+  float mask = 1.0 - smoothstep(-aa, aa, d);
+  if (mask < 0.5) discard;
+  diffuseColor.a = mask;
+  // skin tones for heads (and raised forearms), cylindrical shading for a rounded read
+  float sk = fract(vPhase * 13.7);
+  vec3 skin = mix(vec3(0.85, 0.62, 0.48), vec3(0.28, 0.17, 0.11), sk);
+  if (head < 0.0) diffuseColor.rgb = skin * 0.8;
+  float prof = 1.0 - pow(clamp(abs(q.x) / 0.22, 0.0, 1.0), 2.0) * 0.45;
+  float top = 0.85 + 0.25 * smoothstep(0.3, 1.1, q.y);
+  diffuseColor.rgb *= prof * top * vDim;`,
       );
   };
-  mat.customProgramCacheKey = () => "regolazo-crowd-v1";
+  mat.customProgramCacheKey = () => "regolazo-crowd-v2";
   const mesh = new THREE.InstancedMesh(geo, mat, count);
   const m4 = new THREE.Matrix4();
   const q = new THREE.Quaternion();
   const color = new THREE.Color();
   const up = new THREE.Vector3(0, 1, 0);
   seats.forEach((s, i) => {
-    const yaw = Math.atan2(-s.nx, s.ny) + (rng() - 0.5) * 0.3;
+    const yaw = Math.atan2(-s.nx, s.ny) + (rng() - 0.5) * 0.12;
     q.setFromAxisAngle(up, yaw);
     const sc = 0.92 + rng() * 0.16;
     m4.compose(new THREE.Vector3(s.x, s.h, -s.y), q, new THREE.Vector3(sc, sc, sc));

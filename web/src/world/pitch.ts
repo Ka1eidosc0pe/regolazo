@@ -111,7 +111,7 @@ vec3 pitchPerturb(vec3 surfPos, vec3 surfNorm, float h, float faceDir) {
 export function createPitch(): THREE.Mesh {
   const geo = new THREE.PlaneGeometry(150, 110, 1, 1);
   geo.rotateX(-Math.PI / 2);
-  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0, envMapIntensity: 1.15 });
+  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0, envMapIntensity: 0.9 });
   const uniforms = { uWet: { value: 1.0 } };
   mat.userData.uniforms = uniforms;
   mat.onBeforeCompile = (shader) => {

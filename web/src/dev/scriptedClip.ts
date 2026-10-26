@@ -130,8 +130,12 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
   };
   // One-shot animation schedule: [player, anim, start, end, mirror]
   const oneShots: [string, PlayerAnim, number, number, boolean][] = [];
+  const footOf = (id: string) => players.find((p) => p.id === id)?.preferred_foot ?? "right";
   for (const k of kicks) {
-    oneShots.push([k.by, k.anim, k.t - CONTACT_S, k.t + (k.anim.startsWith("gk_dive") ? 2.0 : 0.75), k.mirror ?? false]);
+    // left-footed strikes play the right-footed clips mirrored
+    const footed = !k.anim.startsWith("gk_") && !k.anim.startsWith("header");
+    const mirror = k.mirror ?? (footed && footOf(k.by) === "left");
+    oneShots.push([k.by, k.anim, k.t - CONTACT_S, k.t + (k.anim.startsWith("gk_dive") ? 2.0 : 0.75), mirror]);
     if (k.receiver && k.receiveAnim) oneShots.push([k.receiver, k.receiveAnim, k.arrive - 0.15, k.arrive + 0.55, false]);
   }
   oneShots.push([A("GK"), "get_up", 18.8, 21.5, false]);

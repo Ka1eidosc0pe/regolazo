@@ -24,7 +24,9 @@ export async function startHarness(opts: { headed?: boolean; port?: number } = {
   const server = await createServer({ root: WEB_ROOT, server: { port, strictPort: true }, logLevel: "error" });
   await server.listen();
   const base = `http://localhost:${port}`;
-  const browser = await chromium.launch({ headless: !opts.headed, args: GPU_ARGS });
+  // headed Chromium already uses the GPU; the ANGLE/Metal flags are for headless
+  const browser = await chromium.launch({ headless: !opts.headed, args: opts.headed ? ["--ignore-gpu-blocklist"] : GPU_ARGS });
+  browser.on("disconnected", () => console.log("[harness] browser disconnected"));
   return {
     server,
     browser,
