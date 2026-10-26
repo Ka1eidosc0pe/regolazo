@@ -1,5 +1,7 @@
 """Frame helpers. Contracts store world coordinates; models and taxonomy thresholds use the attacking frame."""
 
+import math
+
 from shared.schemas.common import Period, TeamSide, Vec2, Vec3
 
 
@@ -18,6 +20,15 @@ def to_attacking_frame[V: (Vec2, Vec3)](
     if len(v) == 2:
         return (-v[0], -v[1])
     return (-v[0], -v[1], v[2])
+
+
+def angle_to_attacking_frame(
+    angle_rad: float, team: TeamSide, period: Period, home_attacks_positive_x_first_half: bool = True
+) -> float:
+    """World-frame direction (radians from +x, CCW) -> attacking frame, wrapped to (-pi, pi]."""
+    if not attacks_positive_x(team, period, home_attacks_positive_x_first_half):
+        angle_rad += math.pi
+    return math.atan2(math.sin(angle_rad), math.cos(angle_rad))
 
 
 def statsbomb_to_attacking_frame(x_sb: float, y_sb: float) -> Vec2:

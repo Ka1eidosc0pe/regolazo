@@ -186,6 +186,15 @@
           "minimum": 0,
           "type": "number"
         },
+        "anim_mirror": {
+          "default": false,
+          "type": "boolean"
+        },
+        "anim_variant": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
         "stamina": {
           "default": 1.0,
           "maximum": 1,
@@ -205,6 +214,8 @@
         "z",
         "anim",
         "anim_t",
+        "anim_mirror",
+        "anim_variant",
         "stamina",
         "on_pitch"
       ],
@@ -243,7 +254,7 @@
             }
           ]
         },
-        "sequence_id": {
+        "possession_id": {
           "minimum": 0,
           "type": "integer"
         }
@@ -251,7 +262,7 @@
       "required": [
         "team",
         "player",
-        "sequence_id"
+        "possession_id"
       ],
       "title": "Possession",
       "type": "object"

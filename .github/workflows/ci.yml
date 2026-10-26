@@ -49,6 +49,8 @@ jobs:
         run: npm run typecheck
       - name: Unit tests
         run: npm test
+      - name: TS-built messages up to date
+        run: git diff --exit-code ../shared/fixtures/from_ts
       - name: Build
         run: npm run build
       - name: E2E smoke

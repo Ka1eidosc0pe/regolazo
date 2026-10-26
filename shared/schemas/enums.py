@@ -204,3 +204,35 @@ PlayPattern = Literal[
     "from_counter",
     "other",
 ]
+
+OPTIONAL_FOR_COVERAGE: frozenset[str] = frozenset(
+    {
+        # event types
+        "foul_won",
+        "own_goal",
+        # qualifier values that are rare or not required by PLAN.md section 2.4
+        "wayward",
+        "saved_to_post",
+        "overhead_kick",
+        "diving_header",
+        "backheel",
+        "pick_up",
+        "collected_twice",
+        "goal_conceded",
+        "six_seconds",
+        "dive",
+        "backpass_pickup",
+        "dangerous_play",
+        "drop_ball",
+        "second_yellow",
+        "red",
+        "no_touch",
+        "left_hand",
+        "right_hand",
+        "success_out",
+        "lost_out",
+        "touched_in",
+    }
+)
+"""Values the Step 3 event-coverage gate and the Step 6 per-qualifier P/R gate do not have to hit.
+Everything else in these enums is core: it must occur in simulated matches and be scored for the Spotter."""

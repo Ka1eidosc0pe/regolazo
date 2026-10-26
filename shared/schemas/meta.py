@@ -58,6 +58,10 @@ Archetype = Literal[
 ]
 
 Foot = Literal["left", "right"]
+KitPattern = Literal["plain", "stripes", "hoops", "sash", "halves", "chevron"]
+CrestShape = Literal["shield", "circle", "roundel", "diamond", "hexagon"]
+CrestEmblem = Literal["star", "wave", "bird", "lion", "tower", "bolt", "anchor", "oak"]
+Weather = Literal["clear_night", "light_rain_night", "misty_night"]
 
 
 class PlayerAttributes(Contract):
@@ -129,17 +133,17 @@ class KitColors(Contract):
     accent: HexColor
     number: HexColor
     """Colour of shirt numbers and names."""
-    pattern: Literal["plain", "stripes", "hoops", "sash", "halves", "chevron"] = "plain"
+    pattern: KitPattern = "plain"
 
 
 class CrestSpec(Contract):
     """Parameters for the generated (original) crest."""
 
-    shape: Literal["shield", "circle", "roundel", "diamond", "hexagon"]
+    shape: CrestShape
     monogram: Annotated[str, Field(min_length=1, max_length=3)]
     primary: HexColor
     secondary: HexColor
-    emblem: Literal["star", "wave", "bird", "lion", "tower", "bolt", "anchor", "oak"]
+    emblem: CrestEmblem
 
 
 class TeamMeta(Contract):
@@ -175,4 +179,4 @@ class MatchMeta(Contract):
     home_attacks_positive_x_first_half: bool = True
     kickoff_team: TeamSide = "home"
     venue: str
-    weather: Literal["clear_night", "light_rain_night", "misty_night"] = "clear_night"
+    weather: Weather = "clear_night"

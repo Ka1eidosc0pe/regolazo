@@ -11,6 +11,12 @@ export type ActionType = (typeof ACTION_TYPE)[number];
 export const ARCHETYPE = ["advanced_playmaker", "deep_lying_playmaker", "box_to_box", "ball_winning_midfielder", "poacher", "target_forward", "inside_forward", "touchline_winger", "overlapping_fullback", "inverted_fullback", "ball_playing_centre_back", "stopper", "sweeper_keeper", "shot_stopper"] as const;
 export type Archetype = (typeof ARCHETYPE)[number];
 
+export const BADGE_METRIC = ["top_speed", "sprint_speed", "distance_covered", "sprint_count", "shot_speed", "pass_distance"] as const;
+export type BadgeMetric = (typeof BADGE_METRIC)[number];
+
+export const BADGE_UNIT = ["km/h", "m/s", "m", "km", "count"] as const;
+export type BadgeUnit = (typeof BADGE_UNIT)[number];
+
 export const BLOCK_TYPE = ["shot_block", "pass_block", "cross_block"] as const;
 export type BlockType = (typeof BLOCK_TYPE)[number];
 
@@ -34,6 +40,15 @@ export type ConsequenceKind = (typeof CONSEQUENCE_KIND)[number];
 
 export const CORNER_DELIVERY = ["inswinging", "outswinging", "straight"] as const;
 export type CornerDelivery = (typeof CORNER_DELIVERY)[number];
+
+export const CREST_EMBLEM = ["star", "wave", "bird", "lion", "tower", "bolt", "anchor", "oak"] as const;
+export type CrestEmblem = (typeof CREST_EMBLEM)[number];
+
+export const CREST_SHAPE = ["shield", "circle", "roundel", "diamond", "hexagon"] as const;
+export type CrestShape = (typeof CREST_SHAPE)[number];
+
+export const CUE_TYPE = ["name_tag", "threshold_badge", "pass_card", "shot_card", "momentum_chart", "control_chaos", "accuracy_panel", "rewind_prompt", "caption", "milestone", "highlight"] as const;
+export type CueType = (typeof CUE_TYPE)[number];
 
 export const DEFENSIVE_BLOCK = ["high_press", "mid_block", "low_block"] as const;
 export type DefensiveBlock = (typeof DEFENSIVE_BLOCK)[number];
@@ -74,11 +89,20 @@ export type GkPosition = (typeof GK_POSITION)[number];
 export const GK_TECHNIQUE = ["standing", "diving"] as const;
 export type GkTechnique = (typeof GK_TECHNIQUE)[number];
 
+export const HIGHLIGHT_STYLE = ["ring", "spotlight", "trail", "arrow"] as const;
+export type HighlightStyle = (typeof HIGHLIGHT_STYLE)[number];
+
 export const INTENT_KIND = ["pass_player", "pass_space", "shot", "carry", "clearance"] as const;
 export type IntentKind = (typeof INTENT_KIND)[number];
 
 export const INTERCEPTION_OUTCOME = ["won", "success_in_play", "success_out", "lost"] as const;
 export type InterceptionOutcome = (typeof INTERCEPTION_OUTCOME)[number];
+
+export const KIT_PATTERN = ["plain", "stripes", "hoops", "sash", "halves", "chevron"] as const;
+export type KitPattern = (typeof KIT_PATTERN)[number];
+
+export const LABEL_CLASS = ["player_home", "player_away", "goalkeeper_home", "goalkeeper_away", "referee", "ball"] as const;
+export type LabelClass = (typeof LABEL_CLASS)[number];
 
 export const MATCH_STATUS = ["pre_match", "first_half", "half_time", "second_half", "full_time"] as const;
 export type MatchStatus = (typeof MATCH_STATUS)[number];
@@ -173,5 +197,11 @@ export type TeamSide = (typeof TEAM_SIDE)[number];
 export const TOUCH_QUALITY = ["clean", "loose", "miscontrol"] as const;
 export type TouchQuality = (typeof TOUCH_QUALITY)[number];
 
+export const VERDICT_FRAMING = ["beat_the_odds", "unlucky", "as_expected", "bold_and_paid_off", "same_call_as_reality"] as const;
+export type VerdictFraming = (typeof VERDICT_FRAMING)[number];
+
 export const VIEWER_MODE = ["analyst", "casual"] as const;
 export type ViewerMode = (typeof VIEWER_MODE)[number];
+
+export const WEATHER = ["clear_night", "light_rain_night", "misty_night"] as const;
+export type Weather = (typeof WEATHER)[number];

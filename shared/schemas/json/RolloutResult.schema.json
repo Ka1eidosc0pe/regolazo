@@ -403,19 +403,26 @@
           "type": "string"
         },
         "body_part": {
-          "enum": [
-            "right_foot",
-            "left_foot",
-            "head",
-            "chest",
-            "other",
-            "hands",
-            "no_touch",
-            "left_hand",
-            "right_hand",
-            "both_hands"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "outcome": {
           "enum": [
@@ -510,6 +517,13 @@
       "additionalProperties": false,
       "description": "1-sigma execution uncertainty at the intended end point, sized by the player's skill and pressure.",
       "properties": {
+        "plane": {
+          "enum": [
+            "pitch",
+            "goal_mouth"
+          ],
+          "type": "string"
+        },
         "center": {
           "maxItems": 3,
           "minItems": 3,
@@ -540,6 +554,7 @@
         }
       },
       "required": [
+        "plane",
         "center",
         "semi_major_m",
         "semi_minor_m",
@@ -942,6 +957,41 @@
             }
           ]
         },
+        "track_id": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "secondary_track_id": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rollout_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "location": {
           "anyOf": [
             {
@@ -1189,6 +1239,9 @@
         "duration_s",
         "team",
         "player",
+        "track_id",
+        "secondary_track_id",
+        "rollout_id",
         "location",
         "end_location",
         "possession_id",
@@ -1256,6 +1309,116 @@
         "pass_id"
       ],
       "title": "OffsideQ",
+      "type": "object"
+    },
+    "OptionEvaluation": {
+      "additionalProperties": false,
+      "description": "One option available to the ball carrier, scored by the analytics models.",
+      "properties": {
+        "option_id": {
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/ActionIntent"
+        },
+        "resolved": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResolvedAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "label": {
+          "type": "string"
+        },
+        "label_key": {
+          "type": "string"
+        },
+        "label_args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "type": "object"
+        },
+        "p_success": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "p_success_baseline": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value_if_success": {
+          "type": "number"
+        },
+        "xg": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "xt_gain": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "decision_value": {
+          "type": "number"
+        },
+        "viable": {
+          "default": true,
+          "type": "boolean"
+        },
+        "is_real": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "option_id",
+        "intent",
+        "resolved",
+        "label",
+        "label_key",
+        "label_args",
+        "p_success",
+        "p_success_baseline",
+        "value_if_success",
+        "xg",
+        "xt_gain",
+        "decision_value",
+        "viable",
+        "is_real"
+      ],
+      "title": "OptionEvaluation",
       "type": "object"
     },
     "OutOfPlayQ": {
@@ -1367,12 +1530,19 @@
           "type": "string"
         },
         "height": {
-          "enum": [
-            "ground",
-            "low",
-            "high"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "ground",
+                "low",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "length_class": {
           "enum": [
@@ -1383,43 +1553,64 @@
           "type": "string"
         },
         "body_part": {
-          "enum": [
-            "right_foot",
-            "left_foot",
-            "head",
-            "chest",
-            "other",
-            "hands",
-            "no_touch",
-            "left_hand",
-            "right_hand",
-            "both_hands"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "technique": {
-          "enum": [
-            "standard",
-            "driven",
-            "lofted",
-            "chipped",
-            "curled",
-            "outside_of_boot",
-            "backheel"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "pass_type": {
-          "enum": [
-            "standard",
-            "cross",
-            "cutback",
-            "through_ball",
-            "layoff",
-            "flick_on",
-            "back_pass"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "cross",
+                "cutback",
+                "through_ball",
+                "layoff",
+                "flick_on",
+                "back_pass"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "restart": {
           "anyOf": [
@@ -1792,6 +1983,15 @@
           "minimum": 0,
           "type": "number"
         },
+        "anim_mirror": {
+          "default": false,
+          "type": "boolean"
+        },
+        "anim_variant": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
         "stamina": {
           "default": 1.0,
           "maximum": 1,
@@ -1811,6 +2011,8 @@
         "z",
         "anim",
         "anim_t",
+        "anim_mirror",
+        "anim_variant",
         "stamina",
         "on_pitch"
       ],
@@ -1849,7 +2051,7 @@
             }
           ]
         },
-        "sequence_id": {
+        "possession_id": {
           "minimum": 0,
           "type": "integer"
         }
@@ -1857,7 +2059,7 @@
       "required": [
         "team",
         "player",
-        "sequence_id"
+        "possession_id"
       ],
       "title": "Possession",
       "type": "object"
@@ -1925,12 +2127,19 @@
           "type": "string"
         },
         "pressed_player": {
-          "examples": [
-            "H07",
-            "A10"
-          ],
-          "pattern": "^[HA]\\d{2}$",
-          "type": "string"
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "pressed_role": {
           "enum": [
@@ -2005,20 +2214,34 @@
           "type": "string"
         },
         "touch_quality": {
-          "enum": [
-            "clean",
-            "loose",
-            "miscontrol"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "clean",
+                "loose",
+                "miscontrol"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "body_orientation": {
-          "enum": [
-            "open",
-            "half_turn",
-            "back_to_goal"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "open",
+                "half_turn",
+                "back_to_goal"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "first_touch_body_part": {
           "anyOf": [
@@ -2356,6 +2579,48 @@
           "maximum": 1.0,
           "minimum": 0.0,
           "type": "number"
+        },
+        "available_pass_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "standard",
+              "driven",
+              "lofted",
+              "chipped",
+              "curled",
+              "outside_of_boot",
+              "backheel"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "available_shot_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "driven",
+              "placed",
+              "finesse",
+              "chip",
+              "volley",
+              "half_volley",
+              "header",
+              "diving_header",
+              "toe_poke",
+              "backheel",
+              "overhead_kick"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "max_curve": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
         }
       },
       "required": [
@@ -2373,7 +2638,10 @@
         "preview_arc",
         "override_rejected",
         "weak_foot",
-        "execution_quality"
+        "execution_quality",
+        "available_pass_techniques",
+        "available_shot_techniques",
+        "max_curve"
       ],
       "title": "ResolvedAction",
       "type": "object"
@@ -2681,48 +2949,69 @@
           "type": "string"
         },
         "body_part": {
-          "enum": [
-            "right_foot",
-            "left_foot",
-            "head",
-            "chest",
-            "other",
-            "hands",
-            "no_touch",
-            "left_hand",
-            "right_hand",
-            "both_hands"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "technique": {
-          "enum": [
-            "driven",
-            "placed",
-            "finesse",
-            "chip",
-            "volley",
-            "half_volley",
-            "header",
-            "diving_header",
-            "toe_poke",
-            "backheel",
-            "overhead_kick"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "situation": {
-          "enum": [
-            "open_play",
-            "counter_attack",
-            "corner_phase",
-            "free_kick_phase",
-            "throw_in_phase",
-            "direct_free_kick",
-            "penalty",
-            "kick_off"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "open_play",
+                "counter_attack",
+                "corner_phase",
+                "free_kick_phase",
+                "throw_in_phase",
+                "direct_free_kick",
+                "penalty",
+                "kick_off"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "ball_speed_mps": {
           "minimum": 0,
@@ -3224,6 +3513,9 @@
     "resolved": {
       "$ref": "#/$defs/ResolvedAction"
     },
+    "evaluation": {
+      "$ref": "#/$defs/OptionEvaluation"
+    },
     "frames": {
       "default": [],
       "items": {
@@ -3248,6 +3540,7 @@
     "snapshot_ref",
     "seed",
     "resolved",
+    "evaluation",
     "frames",
     "events",
     "outcome"

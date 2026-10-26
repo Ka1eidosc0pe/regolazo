@@ -30,3 +30,14 @@ def test_statsbomb_conversion_landmarks() -> None:
     assert abs(x - 42.0) < 1e-9 and y == 34.0
     gy, gz = statsbomb_goal_plane(36, 2.67)  # SB left post, crossbar height
     assert abs(gy - 3.66) < 1e-9 and abs(gz - 2.44) < 1e-9
+
+
+def test_angle_to_attacking_frame() -> None:
+    import math
+
+    from shared.geometry import angle_to_attacking_frame
+
+    assert angle_to_attacking_frame(0.3, "home", 1) == 0.3
+    # away in period 1 attacks -x: a world pass along -x is straight forward for them
+    assert abs(angle_to_attacking_frame(math.pi, "away", 1)) < 1e-12
+    assert abs(angle_to_attacking_frame(-math.pi / 2, "away", 1) - math.pi / 2) < 1e-12

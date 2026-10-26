@@ -1,0 +1,442 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/Recap.json",
+  "$defs": {
+    "PlayerStats": {
+      "additionalProperties": false,
+      "properties": {
+        "team": {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "touches": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "passes": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "passes_completed": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "key_passes": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "progressive_passes": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "progressive_carries": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "shots": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "goals": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "assists": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "xg": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "xt_generated": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "take_ons_won": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tackles_won": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "interceptions": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "pressures": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "distance_m": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "top_speed_kmh": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "sprints": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "high_intensity_runs": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "longest_pass_m": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "fastest_shot_kmh": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "team",
+        "touches",
+        "passes",
+        "passes_completed",
+        "key_passes",
+        "progressive_passes",
+        "progressive_carries",
+        "shots",
+        "goals",
+        "assists",
+        "xg",
+        "xt_generated",
+        "take_ons_won",
+        "tackles_won",
+        "interceptions",
+        "pressures",
+        "distance_m",
+        "top_speed_kmh",
+        "sprints",
+        "high_intensity_runs",
+        "longest_pass_m",
+        "fastest_shot_kmh"
+      ],
+      "title": "PlayerStats",
+      "type": "object"
+    },
+    "StatsSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "1.0.0",
+          "type": "string"
+        },
+        "t": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "teams": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TeamStats"
+          },
+          "propertyNames": {
+            "enum": [
+              "home",
+              "away"
+            ]
+          },
+          "type": "object"
+        },
+        "players": {
+          "patternProperties": {
+            "^[HA]\\d{2}$": {
+              "$ref": "#/$defs/PlayerStats"
+            }
+          },
+          "propertyNames": {
+            "examples": [
+              "H07",
+              "A10"
+            ]
+          },
+          "type": "object"
+        },
+        "control_chaos": {
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "momentum": {
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "milestones": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "t",
+        "teams",
+        "players",
+        "control_chaos",
+        "momentum",
+        "milestones"
+      ],
+      "title": "StatsSnapshot",
+      "type": "object"
+    },
+    "TeamStats": {
+      "additionalProperties": false,
+      "properties": {
+        "goals": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "shots": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "shots_on_target": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "xg": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "passes": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "passes_completed": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "pass_accuracy": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "possession": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "progressive_passes": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "final_third_entries": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "pressures": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "ppda": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "field_tilt": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "xt_generated": {
+          "default": 0.0,
+          "type": "number"
+        },
+        "distance_km": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "sprints": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "corners": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "fouls": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "goals",
+        "shots",
+        "shots_on_target",
+        "xg",
+        "passes",
+        "passes_completed",
+        "pass_accuracy",
+        "possession",
+        "progressive_passes",
+        "final_third_entries",
+        "pressures",
+        "ppda",
+        "field_tilt",
+        "xt_generated",
+        "distance_km",
+        "sprints",
+        "corners",
+        "fouls"
+      ],
+      "title": "TeamStats",
+      "type": "object"
+    },
+    "WhatIf": {
+      "additionalProperties": false,
+      "properties": {
+        "moment_id": {
+          "type": "string"
+        },
+        "verdict_framing": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "p_goal_alternative": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "p_goal_real": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "narrative_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "moment_id",
+        "verdict_framing",
+        "p_goal_alternative",
+        "p_goal_real",
+        "narrative_id"
+      ],
+      "title": "WhatIf",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Full-time recap (PLAN.md Step 10). Text lives in Narratives; this holds structure and references.",
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "type": "string"
+    },
+    "match_id": {
+      "type": "string"
+    },
+    "final_stats": {
+      "$ref": "#/$defs/StatsSnapshot"
+    },
+    "key_moment_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "what_ifs": {
+      "items": {
+        "$ref": "#/$defs/WhatIf"
+      },
+      "type": "array"
+    },
+    "player_of_the_match": {
+      "examples": [
+        "H07",
+        "A10"
+      ],
+      "pattern": "^[HA]\\d{2}$",
+      "type": "string"
+    },
+    "narrative_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "match_id",
+    "final_stats",
+    "key_moment_ids",
+    "what_ifs",
+    "player_of_the_match",
+    "narrative_ids"
+  ],
+  "title": "Recap",
+  "type": "object"
+}

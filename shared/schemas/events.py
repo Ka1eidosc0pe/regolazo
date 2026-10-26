@@ -65,6 +65,8 @@ from shared.schemas.enums import (
 
 NonNeg = Annotated[float, Field(ge=0)]
 
+ON_TARGET_OUTCOMES: frozenset[str] = frozenset({"goal", "saved", "saved_to_post"})
+
 
 # --- Tier A qualifiers --------------------------------------------------------------------------------------
 
@@ -74,11 +76,11 @@ class PassQ(Contract):
     recipient: PlayerId | None
     """Intended receiver; None for passes into space with no clear target."""
     outcome: PassOutcome
-    height: PassHeight
+    height: PassHeight | None
     length_class: PassLength
-    body_part: BodyPart
-    technique: PassTechnique
-    pass_type: PassType
+    body_part: BodyPart | None
+    technique: PassTechnique | None
+    pass_type: PassType | None
     restart: RestartType | None = None
     corner_delivery: CornerDelivery | None = None
     gk_distribution: GkDistribution | None = None
@@ -107,8 +109,8 @@ class ReceiptQ(Contract):
     kind: Literal["ball_receipt"] = "ball_receipt"
     passer: PlayerId | None
     outcome: ReceiptOutcome
-    touch_quality: TouchQuality
-    body_orientation: BodyOrientation
+    touch_quality: TouchQuality | None
+    body_orientation: BodyOrientation | None
     first_touch_body_part: BodyPart | None = None
     pressure_distance_m: NonNeg | None = None
     aerial: bool = False
@@ -137,9 +139,9 @@ class ShotQ(Contract):
     kind: Literal["shot"] = "shot"
     keeper: PlayerId | None
     outcome: ShotOutcome
-    body_part: BodyPart
-    technique: ShotTechnique
-    situation: ShotSituation
+    body_part: BodyPart | None
+    technique: ShotTechnique | None
+    situation: ShotSituation | None
     ball_speed_mps: NonNeg
     distance_to_goal_m: NonNeg
     angle_rad: NonNeg
@@ -161,6 +163,14 @@ class ShotQ(Contract):
     gk_event_id: EventId | None = None
     freeze_frame_ref: str | None = None
     """Snapshot handle of the SimState at contact (ground truth)."""
+
+    @model_validator(mode="after")
+    def _check_target(self) -> Self:
+        if self.on_target != (self.outcome in ON_TARGET_OUTCOMES):
+            raise ValueError(f"on_target={self.on_target} contradicts outcome {self.outcome!r}")
+        if self.psxg is not None and not self.on_target:
+            raise ValueError("psxg is only defined for on-target shots")
+        return self
 
 
 class DuelQ(Contract):
@@ -188,7 +198,7 @@ class BlockQ(Contract):
 
 class ClearanceQ(Contract):
     kind: Literal["clearance"] = "clearance"
-    body_part: BodyPart
+    body_part: BodyPart | None
     outcome: ClearanceOutcome
     aerial_won: bool = False
 
@@ -261,7 +271,8 @@ class OffsideQ(Contract):
 
 class PressureQ(Contract):
     kind: Literal["pressure"] = "pressure"
-    pressed_player: PlayerId
+    pressed_player: PlayerId | None
+    """None when the Spotter only knows the pressed player's track (see MatchEvent.secondary_track_id)."""
     pressed_role: PressedRole
     min_distance_m: NonNeg
     closing_speed_mps: float
@@ -370,6 +381,15 @@ QUALIFIER_KIND: dict[str, str | None] = {
 }
 """Which qualifier block each event type carries (None = no qualifiers)."""
 
+GROUND_TRUTH_REQUIRED: dict[str, tuple[str, ...]] = {
+    "pass": ("height", "body_part", "technique", "pass_type"),
+    "ball_receipt": ("touch_quality", "body_orientation"),
+    "shot": ("body_part", "technique", "situation"),
+    "clearance": ("body_part",),
+    "pressure": ("pressed_player",),
+}
+"""Qualifier fields that are nullable only for detected events (the Spotter may not see them)."""
+
 
 class MatchEvent(Contract):
     schema_version: str = SCHEMA_VERSION
@@ -387,7 +407,13 @@ class MatchEvent(Contract):
     duration_s: NonNeg = 0.0
     team: TeamSide | None
     player: PlayerId | None
-    """Primary actor; None for team-level events (period_start, pressing_sequence)."""
+    """Primary actor; None for team-level events (period_start, pressing_sequence) or unidentified tracks."""
+    track_id: Annotated[int, Field(ge=0)] | None = None
+    """Spotter track of the primary actor (detected events; the Spotter may not know the player id)."""
+    secondary_track_id: Annotated[int, Field(ge=0)] | None = None
+    """Spotter track of the second actor (recipient, opponent, pressed player)."""
+    rollout_id: str | None = None
+    """Set on events produced inside a Rewind rollout; their ids are namespaced ``ev_r_<rollout>_<n>``."""
     location: Vec3 | None
     """World frame. Ball position at the start for on-ball events, actor position otherwise."""
     end_location: Vec3 | None = None
@@ -408,8 +434,18 @@ class MatchEvent(Contract):
             raise ValueError(f"event type {self.type!r} takes no qualifiers, got {actual!r}")
         if expected is not None and actual != expected and not (self.source == "detected" and actual is None):
             raise ValueError(f"event type {self.type!r} needs qualifiers of kind {expected!r}, got {actual!r}")
-        if self.source == "ground_truth" and self.confidence is not None:
-            raise ValueError("ground-truth events carry no confidence")
+        if self.source == "ground_truth":
+            if self.confidence is not None:
+                raise ValueError("ground-truth events carry no confidence")
+            if self.track_id is not None or self.secondary_track_id is not None:
+                raise ValueError("track ids are for detected events")
+            if self.qualifiers is not None:
+                required = GROUND_TRUTH_REQUIRED.get(self.qualifiers.kind, ())
+                missing = [f for f in required if getattr(self.qualifiers, f) is None]
+                if missing:
+                    raise ValueError(f"ground-truth {self.type!r} needs qualifiers {missing}")
+        if self.rollout_id is not None and not self.id.startswith("ev_r_"):
+            raise ValueError("rollout events must use ids of the form ev_r_<rollout>_<n>")
         return self
 
 

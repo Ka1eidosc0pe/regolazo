@@ -57,7 +57,7 @@
     "launch": {
       "speed_mps": 17.5,
       "elevation_rad": 0.03,
-      "azimuth_rad": -0.52,
+      "azimuth_rad": -0.4,
       "spin": [
         0.0,
         0.0,
@@ -66,6 +66,7 @@
     },
     "curve_applied": 0.3,
     "ellipse": {
+      "plane": "pitch",
       "center": [
         38.0,
         -4.0,
@@ -73,7 +74,7 @@
       ],
       "semi_major_m": 1.8,
       "semi_minor_m": 0.9,
-      "angle_rad": -0.52
+      "angle_rad": -0.476
     },
     "preview_arc": [
       [
@@ -82,13 +83,18 @@
         0.11
       ],
       [
-        25.9,
-        3.4,
+        24.6,
+        4.0,
         0.11
       ],
       [
-        32.4,
-        -0.6,
+        30.8,
+        1.0,
+        0.11
+      ],
+      [
+        35.0,
+        -1.8,
         0.11
       ],
       [
@@ -99,7 +105,17 @@
     ],
     "override_rejected": false,
     "weak_foot": false,
-    "execution_quality": 0.84
+    "execution_quality": 0.84,
+    "available_pass_techniques": [
+      "standard",
+      "driven",
+      "lofted",
+      "chipped",
+      "curled",
+      "outside_of_boot"
+    ],
+    "available_shot_techniques": [],
+    "max_curve": 0.85
   },
   "real_event_id": "ev_004209",
   "consequence": {
@@ -149,6 +165,10 @@
       },
       "resolved": null,
       "label": "Through ball to Demir",
+      "label_key": "option.through_ball",
+      "label_args": {
+        "player": "H09"
+      },
       "p_success": 0.58,
       "p_success_baseline": 0.49,
       "value_if_success": 0.21,
@@ -174,6 +194,10 @@
       },
       "resolved": null,
       "label": "Pass to the overlapping Mensah",
+      "label_key": "option.pass_to_player",
+      "label_args": {
+        "player": "H02"
+      },
       "p_success": 0.86,
       "p_success_baseline": 0.84,
       "value_if_success": 0.09,
@@ -203,6 +227,8 @@
       },
       "resolved": null,
       "label": "Shoot from distance",
+      "label_key": "option.long_shot",
+      "label_args": {},
       "p_success": 0.03,
       "p_success_baseline": null,
       "value_if_success": 1.0,

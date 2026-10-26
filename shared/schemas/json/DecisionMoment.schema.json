@@ -258,6 +258,13 @@
       "additionalProperties": false,
       "description": "1-sigma execution uncertainty at the intended end point, sized by the player's skill and pressure.",
       "properties": {
+        "plane": {
+          "enum": [
+            "pitch",
+            "goal_mouth"
+          ],
+          "type": "string"
+        },
         "center": {
           "maxItems": 3,
           "minItems": 3,
@@ -288,6 +295,7 @@
         }
       },
       "required": [
+        "plane",
         "center",
         "semi_major_m",
         "semi_minor_m",
@@ -319,6 +327,16 @@
         },
         "label": {
           "type": "string"
+        },
+        "label_key": {
+          "type": "string"
+        },
+        "label_args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "type": "object"
         },
         "p_success": {
           "maximum": 1.0,
@@ -382,6 +400,8 @@
         "intent",
         "resolved",
         "label",
+        "label_key",
+        "label_args",
         "p_success",
         "p_success_baseline",
         "value_if_success",
@@ -592,6 +612,48 @@
           "maximum": 1.0,
           "minimum": 0.0,
           "type": "number"
+        },
+        "available_pass_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "standard",
+              "driven",
+              "lofted",
+              "chipped",
+              "curled",
+              "outside_of_boot",
+              "backheel"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "available_shot_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "driven",
+              "placed",
+              "finesse",
+              "chip",
+              "volley",
+              "half_volley",
+              "header",
+              "diving_header",
+              "toe_poke",
+              "backheel",
+              "overhead_kick"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "max_curve": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
         }
       },
       "required": [
@@ -609,7 +671,10 @@
         "preview_arc",
         "override_rejected",
         "weak_foot",
-        "execution_quality"
+        "execution_quality",
+        "available_pass_techniques",
+        "available_shot_techniques",
+        "max_curve"
       ],
       "title": "ResolvedAction",
       "type": "object"

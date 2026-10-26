@@ -5,9 +5,9 @@ into a ``ResolvedAction`` (technique, body part, ball launch and execution uncer
 player's attributes. Fan and AI actions go through the same resolver and the same physics.
 """
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from shared.schemas.common import Contract, PlayerId, Probability, Vec2, Vec3
 from shared.schemas.enums import BodyPart, PassHeight, PassTechnique, PassType, ShotTechnique
@@ -38,6 +38,16 @@ class ActionIntent(Contract):
     shot_technique_override: ShotTechnique | None = None
     source: Literal["ai", "fan"] = "ai"
 
+    @model_validator(mode="after")
+    def _check_target(self) -> Self:
+        if self.kind == "pass_player" and self.target_player is None:
+            raise ValueError("pass_player needs target_player")
+        if self.kind in ("pass_space", "shot") and self.target is None:
+            raise ValueError(f"{self.kind} needs target")
+        if self.kind == "carry" and self.target is None and not self.path:
+            raise ValueError("carry needs a target or a path")
+        return self
+
 
 class BallLaunch(Contract):
     speed_mps: Annotated[float, Field(ge=0, le=45)]
@@ -50,6 +60,9 @@ class BallLaunch(Contract):
 class ExecutionEllipse(Contract):
     """1-sigma execution uncertainty at the intended end point, sized by the player's skill and pressure."""
 
+    plane: Literal["pitch", "goal_mouth"]
+    """pitch: ellipse on the grass (passes, carries). goal_mouth: ellipse on the plane x = goal line (shots);
+    the axes are then (y, z) on that plane."""
     center: Vec3
     semi_major_m: Annotated[float, Field(ge=0)]
     semi_minor_m: Annotated[float, Field(ge=0)]
@@ -78,3 +91,8 @@ class ResolvedAction(Contract):
     weak_foot: bool = False
     execution_quality: Probability = 1.0
     """0..1 skill factor applied to noise (1 = elite, unpressured)."""
+    available_pass_techniques: list[PassTechnique] = []
+    available_shot_techniques: list[ShotTechnique] = []
+    """Techniques this player can choose here (radial picker); the resolver's default is the field above."""
+    max_curve: Annotated[float, Field(ge=0, le=1)] = 0.0
+    """Largest |curve| this player can put on this ball (attribute cap), for the drag-and-bend UI."""

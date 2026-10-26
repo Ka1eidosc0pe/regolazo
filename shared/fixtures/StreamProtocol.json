@@ -1,0 +1,480 @@
+{
+  "server": {
+    "type": "frame",
+    "state": {
+      "schema_version": "1.0.0",
+      "tick": 58310,
+      "t": 2332.4,
+      "period": 1,
+      "status": "first_half",
+      "ball": {
+        "pos": [
+          19.0,
+          6.199999999999999,
+          0.11
+        ],
+        "vel": [
+          6.2,
+          0.4,
+          0.0
+        ],
+        "spin": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "in_play": true,
+        "last_touch": "H10"
+      },
+      "players": [
+        {
+          "id": "H01",
+          "pos": [
+            -45.0,
+            0.0
+          ],
+          "vel": [
+            0.5,
+            0.0
+          ],
+          "facing": 0.0,
+          "z": 0.0,
+          "anim": "gk_idle",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H02",
+          "pos": [
+            14.0,
+            -24.0
+          ],
+          "vel": [
+            6.8,
+            0.2
+          ],
+          "facing": 0.029,
+          "z": 0.0,
+          "anim": "sprint",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H05",
+          "pos": [
+            -12.0,
+            -9.0
+          ],
+          "vel": [
+            2.0,
+            0.0
+          ],
+          "facing": 0.0,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H04",
+          "pos": [
+            -13.0,
+            8.0
+          ],
+          "vel": [
+            2.0,
+            0.0
+          ],
+          "facing": 0.0,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H03",
+          "pos": [
+            2.0,
+            22.0
+          ],
+          "vel": [
+            3.0,
+            -0.5
+          ],
+          "facing": -0.165,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H06",
+          "pos": [
+            5.0,
+            2.0
+          ],
+          "vel": [
+            3.5,
+            0.3
+          ],
+          "facing": 0.086,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H08",
+          "pos": [
+            12.0,
+            -8.0
+          ],
+          "vel": [
+            5.0,
+            0.5
+          ],
+          "facing": 0.1,
+          "z": 0.0,
+          "anim": "run",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H10",
+          "pos": [
+            18.4,
+            6.1
+          ],
+          "vel": [
+            6.2,
+            0.4
+          ],
+          "facing": 0.064,
+          "z": 0.0,
+          "anim": "dribble",
+          "anim_t": 0.6,
+          "anim_mirror": true,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H07",
+          "pos": [
+            28.0,
+            -20.0
+          ],
+          "vel": [
+            5.5,
+            1.0
+          ],
+          "facing": 0.18,
+          "z": 0.0,
+          "anim": "run",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H11",
+          "pos": [
+            27.0,
+            18.0
+          ],
+          "vel": [
+            5.0,
+            -1.2
+          ],
+          "facing": -0.236,
+          "z": 0.0,
+          "anim": "run",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "H09",
+          "pos": [
+            31.0,
+            -2.0
+          ],
+          "vel": [
+            6.5,
+            -0.6
+          ],
+          "facing": -0.092,
+          "z": 0.0,
+          "anim": "sprint",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A01",
+          "pos": [
+            50.5,
+            0.0
+          ],
+          "vel": [
+            0.0,
+            0.0
+          ],
+          "facing": 3.142,
+          "z": 0.0,
+          "anim": "gk_idle",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A02",
+          "pos": [
+            34.0,
+            20.0
+          ],
+          "vel": [
+            2.0,
+            -0.5
+          ],
+          "facing": -0.245,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A05",
+          "pos": [
+            33.0,
+            6.0
+          ],
+          "vel": [
+            2.5,
+            -0.3
+          ],
+          "facing": -0.119,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A04",
+          "pos": [
+            32.5,
+            -3.0
+          ],
+          "vel": [
+            3.0,
+            0.0
+          ],
+          "facing": 0.0,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A03",
+          "pos": [
+            31.0,
+            -18.0
+          ],
+          "vel": [
+            2.0,
+            0.8
+          ],
+          "facing": 0.381,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A06",
+          "pos": [
+            26.0,
+            2.0
+          ],
+          "vel": [
+            3.5,
+            0.0
+          ],
+          "facing": 0.0,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A08",
+          "pos": [
+            22.0,
+            10.0
+          ],
+          "vel": [
+            4.0,
+            -1.0
+          ],
+          "facing": -0.245,
+          "z": 0.0,
+          "anim": "run",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A10",
+          "pos": [
+            20.0,
+            -6.0
+          ],
+          "vel": [
+            -1.5,
+            2.5
+          ],
+          "facing": 2.111,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A07",
+          "pos": [
+            10.0,
+            24.0
+          ],
+          "vel": [
+            5.5,
+            0.0
+          ],
+          "facing": 0.0,
+          "z": 0.0,
+          "anim": "run",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A11",
+          "pos": [
+            12.0,
+            -22.0
+          ],
+          "vel": [
+            5.0,
+            0.0
+          ],
+          "facing": 0.0,
+          "z": 0.0,
+          "anim": "run",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        },
+        {
+          "id": "A09",
+          "pos": [
+            2.0,
+            0.0
+          ],
+          "vel": [
+            3.0,
+            0.0
+          ],
+          "facing": 0.0,
+          "z": 0.0,
+          "anim": "jog",
+          "anim_t": 0.6,
+          "anim_mirror": false,
+          "anim_variant": 0,
+          "stamina": 0.86,
+          "on_pitch": true
+        }
+      ],
+      "referee": {
+        "pos": [
+          10.0,
+          12.0
+        ],
+        "vel": [
+          3.0,
+          0.0
+        ],
+        "facing": 0.0
+      },
+      "possession": {
+        "team": "home",
+        "player": "H10",
+        "possession_id": 214
+      },
+      "phase": "counter_attack",
+      "restart": null,
+      "score": {
+        "home": 1,
+        "away": 1
+      },
+      "attacking_positive_x": "home",
+      "keyframe": true,
+      "snapshot_ref": "snap:demo-0001:58310"
+    }
+  },
+  "client": {
+    "type": "seek",
+    "t": 2330.0
+  }
+}

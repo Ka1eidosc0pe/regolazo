@@ -70,6 +70,10 @@ class PlayerState(Contract):
     anim: PlayerAnim = "idle"
     anim_t: Annotated[float, Field(ge=0)] = 0.0
     """Seconds since ``anim`` started, so one-shot clips stay in sync with the sim."""
+    anim_mirror: bool = False
+    """Play the clip mirrored (left-footed actions from right-footed clips)."""
+    anim_variant: Annotated[int, Field(ge=0)] = 0
+    """Which clip of a state with several (e.g. celebrations); the renderer takes it modulo its clip count."""
     stamina: Annotated[float, Field(ge=0, le=1)] = 1.0
     on_pitch: bool = True
 
@@ -84,8 +88,9 @@ class Possession(Contract):
     team: TeamSide | None
     player: PlayerId | None
     """Player in control of the ball; None while the ball is in flight or loose."""
-    sequence_id: Annotated[int, Field(ge=0)]
-    """Increments every time possession changes team."""
+    possession_id: Annotated[int, Field(ge=0)]
+    """Possession sequence number (docs/event_taxonomy.md section 4.7): increments when the other team gains
+    control and on every restart, even for the same team. Same value as ``MatchEvent.possession_id``."""
 
 
 class Score(Contract):

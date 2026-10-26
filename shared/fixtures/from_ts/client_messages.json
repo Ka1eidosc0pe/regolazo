@@ -1,0 +1,90 @@
+{
+  "ActionIntent": [
+    {
+      "kind": "shot",
+      "player": "H09",
+      "target_player": null,
+      "target": [
+        52.5,
+        -3.1,
+        1.9
+      ],
+      "path": [],
+      "curve": 0.4,
+      "power": 0.85,
+      "pass_technique_override": null,
+      "shot_technique_override": "finesse",
+      "source": "fan"
+    },
+    {
+      "kind": "pass_space",
+      "player": "H10",
+      "target_player": null,
+      "target": [
+        38,
+        -4,
+        0
+      ],
+      "path": [
+        [
+          18.4,
+          6.1
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          38,
+          -4
+        ]
+      ],
+      "curve": 0.35,
+      "power": 0.6,
+      "pass_technique_override": "curled",
+      "shot_technique_override": null,
+      "source": "fan"
+    }
+  ],
+  "ViewerProfile": [
+    {
+      "schema_version": "1.0.0",
+      "session_id": "sess_test",
+      "mode": "casual",
+      "favorite_club": "away",
+      "language": "es",
+      "voice_enabled": true,
+      "voice": null,
+      "show_numbers_first": false
+    }
+  ],
+  "ClientMessage": [
+    {
+      "type": "play"
+    },
+    {
+      "type": "pause"
+    },
+    {
+      "type": "seek",
+      "t": 2330
+    },
+    {
+      "type": "speed",
+      "speed": 2
+    },
+    {
+      "type": "profile",
+      "profile": {
+        "schema_version": "1.0.0",
+        "session_id": "sess_test",
+        "mode": "casual",
+        "favorite_club": "away",
+        "language": "es",
+        "voice_enabled": true,
+        "voice": null,
+        "show_numbers_first": false
+      }
+    }
+  ]
+}

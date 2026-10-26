@@ -17,9 +17,14 @@ export interface Contracts {
   RolloutRequest: RolloutRequest;
   RolloutResult: RolloutResult;
   RolloutDistribution: RolloutDistribution;
+  Verdict: Verdict;
   OverlayCue: OverlayCue;
   Narrative: Narrative;
   ViewerProfile: ViewerProfile;
+  FrameLabels: FrameLabels;
+  StreamProtocol: StreamProtocol;
+  StatsSnapshot: StatsSnapshot;
+  Recap: Recap;
 }
 /**
  * This interface was referenced by `Contracts`'s JSON-Schema
@@ -306,6 +311,8 @@ export interface PlayerState {
     | "celebrate"
     | "disappointed";
   anim_t: number;
+  anim_mirror: boolean;
+  anim_variant: number;
   stamina: number;
   on_pitch: boolean;
 }
@@ -333,7 +340,7 @@ export interface RefereeState {
 export interface Possession {
   team: ("home" | "away") | null;
   player: string | null;
-  sequence_id: number;
+  possession_id: number;
 }
 /**
  * This interface was referenced by `Contracts`'s JSON-Schema
@@ -389,6 +396,9 @@ export interface MatchEvent {
   duration_s: number;
   team: ("home" | "away") | null;
   player: string | null;
+  track_id: number | null;
+  secondary_track_id: number | null;
+  rollout_id: string | null;
   location: [number, number, number] | null;
   end_location: [number, number, number] | null;
   possession_id: number | null;
@@ -453,21 +463,24 @@ export interface PassQ {
   kind: "pass";
   recipient: string | null;
   outcome: "complete" | "incomplete" | "intercepted" | "out_of_play" | "offside";
-  height: "ground" | "low" | "high";
+  height: ("ground" | "low" | "high") | null;
   length_class: "short" | "medium" | "long";
   body_part:
-    | "right_foot"
-    | "left_foot"
-    | "head"
-    | "chest"
-    | "other"
-    | "hands"
-    | "no_touch"
-    | "left_hand"
-    | "right_hand"
-    | "both_hands";
-  technique: "standard" | "driven" | "lofted" | "chipped" | "curled" | "outside_of_boot" | "backheel";
-  pass_type: "standard" | "cross" | "cutback" | "through_ball" | "layoff" | "flick_on" | "back_pass";
+    | (
+        | "right_foot"
+        | "left_foot"
+        | "head"
+        | "chest"
+        | "other"
+        | "hands"
+        | "no_touch"
+        | "left_hand"
+        | "right_hand"
+        | "both_hands"
+      )
+    | null;
+  technique: ("standard" | "driven" | "lofted" | "chipped" | "curled" | "outside_of_boot" | "backheel") | null;
+  pass_type: ("standard" | "cross" | "cutback" | "through_ball" | "layoff" | "flick_on" | "back_pass") | null;
   restart:
     | (
         | "kick_off"
@@ -508,8 +521,8 @@ export interface ReceiptQ {
   kind: "ball_receipt";
   passer: string | null;
   outcome: "complete" | "incomplete";
-  touch_quality: "clean" | "loose" | "miscontrol";
-  body_orientation: "open" | "half_turn" | "back_to_goal";
+  touch_quality: ("clean" | "loose" | "miscontrol") | null;
+  body_orientation: ("open" | "half_turn" | "back_to_goal") | null;
   first_touch_body_part:
     | (
         | "right_foot"
@@ -561,37 +574,46 @@ export interface ShotQ {
   keeper: string | null;
   outcome: "goal" | "saved" | "saved_to_post" | "off_target" | "blocked" | "woodwork" | "wayward";
   body_part:
-    | "right_foot"
-    | "left_foot"
-    | "head"
-    | "chest"
-    | "other"
-    | "hands"
-    | "no_touch"
-    | "left_hand"
-    | "right_hand"
-    | "both_hands";
+    | (
+        | "right_foot"
+        | "left_foot"
+        | "head"
+        | "chest"
+        | "other"
+        | "hands"
+        | "no_touch"
+        | "left_hand"
+        | "right_hand"
+        | "both_hands"
+      )
+    | null;
   technique:
-    | "driven"
-    | "placed"
-    | "finesse"
-    | "chip"
-    | "volley"
-    | "half_volley"
-    | "header"
-    | "diving_header"
-    | "toe_poke"
-    | "backheel"
-    | "overhead_kick";
+    | (
+        | "driven"
+        | "placed"
+        | "finesse"
+        | "chip"
+        | "volley"
+        | "half_volley"
+        | "header"
+        | "diving_header"
+        | "toe_poke"
+        | "backheel"
+        | "overhead_kick"
+      )
+    | null;
   situation:
-    | "open_play"
-    | "counter_attack"
-    | "corner_phase"
-    | "free_kick_phase"
-    | "throw_in_phase"
-    | "direct_free_kick"
-    | "penalty"
-    | "kick_off";
+    | (
+        | "open_play"
+        | "counter_attack"
+        | "corner_phase"
+        | "free_kick_phase"
+        | "throw_in_phase"
+        | "direct_free_kick"
+        | "penalty"
+        | "kick_off"
+      )
+    | null;
   ball_speed_mps: number;
   distance_to_goal_m: number;
   angle_rad: number;
@@ -651,16 +673,19 @@ export interface BlockQ {
 export interface ClearanceQ {
   kind: "clearance";
   body_part:
-    | "right_foot"
-    | "left_foot"
-    | "head"
-    | "chest"
-    | "other"
-    | "hands"
-    | "no_touch"
-    | "left_hand"
-    | "right_hand"
-    | "both_hands";
+    | (
+        | "right_foot"
+        | "left_foot"
+        | "head"
+        | "chest"
+        | "other"
+        | "hands"
+        | "no_touch"
+        | "left_hand"
+        | "right_hand"
+        | "both_hands"
+      )
+    | null;
   outcome: "out_of_play" | "in_play_safe" | "in_play_danger";
   aerial_won: boolean;
 }
@@ -802,7 +827,7 @@ export interface OffsideQ {
  */
 export interface PressureQ {
   kind: "pressure";
-  pressed_player: string;
+  pressed_player: string | null;
   pressed_role: "carrier" | "receiver" | "releaser";
   min_distance_m: number;
   closing_speed_mps: number;
@@ -888,7 +913,8 @@ export interface ModelOutputs {
 /**
  * Probability that ``team`` controls each cell. Row-major: ``values[iy * nx + ix]``.
  *
- * Cell (ix, iy) is centred at ``(x0 + ix * cell_m, y0 + iy * cell_m)`` in world coordinates.
+ * Cell (ix, iy) is centred at ``(x0 + ix * dx, y0 + iy * dy)`` in world coordinates. To tile the pitch exactly,
+ * use ``dx = 105 / nx``, ``dy = 68 / ny``, ``x0 = -52.5 + dx / 2``, ``y0 = -34 + dy / 2``.
  *
  * This interface was referenced by `Contracts`'s JSON-Schema
  * via the `definition` "PitchControlGrid".
@@ -899,7 +925,8 @@ export interface PitchControlGrid {
   ny: number;
   x0: number;
   y0: number;
-  cell_m: number;
+  dx: number;
+  dy: number;
   values: number[];
 }
 /**
@@ -913,6 +940,10 @@ export interface OptionEvaluation {
   intent: ActionIntent;
   resolved: ResolvedAction | null;
   label: string;
+  label_key: string;
+  label_args: {
+    [k: string]: string;
+  };
   p_success: number;
   p_success_baseline: number | null;
   value_if_success: number;
@@ -1004,6 +1035,23 @@ export interface ResolvedAction {
   override_rejected: boolean;
   weak_foot: boolean;
   execution_quality: number;
+  available_pass_techniques: (
+    "standard" | "driven" | "lofted" | "chipped" | "curled" | "outside_of_boot" | "backheel"
+  )[];
+  available_shot_techniques: (
+    | "driven"
+    | "placed"
+    | "finesse"
+    | "chip"
+    | "volley"
+    | "half_volley"
+    | "header"
+    | "diving_header"
+    | "toe_poke"
+    | "backheel"
+    | "overhead_kick"
+  )[];
+  max_curve: number;
 }
 /**
  * This interface was referenced by `Contracts`'s JSON-Schema
@@ -1026,6 +1074,7 @@ export interface BallLaunch {
  * via the `definition` "ExecutionEllipse".
  */
 export interface ExecutionEllipse {
+  plane: "pitch" | "goal_mouth";
   /**
    * @minItems 3
    * @maxItems 3
@@ -1112,6 +1161,7 @@ export interface RolloutResult {
   snapshot_ref: string;
   seed: number;
   resolved: ResolvedAction;
+  evaluation: OptionEvaluation;
   frames: SimState[];
   events: MatchEvent[];
   outcome: RolloutOutcome;
@@ -1150,9 +1200,7 @@ export interface RolloutDistribution {
   resolved: ResolvedAction;
   n: number;
   seed: number;
-  outcome_counts: {
-    [k: string]: number;
-  };
+  outcome_counts: OutcomeCount[];
   p_primary_success: number;
   p_primary_success_ci95: Interval;
   p_goal: number;
@@ -1161,6 +1209,26 @@ export interface RolloutDistribution {
   mean_xt_delta: number;
   model_p_success: number;
   elapsed_ms: number;
+  samples: RolloutSample[];
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "OutcomeCount".
+ */
+export interface OutcomeCount {
+  label:
+    | "goal"
+    | "shot_saved"
+    | "shot_off_target"
+    | "shot_blocked"
+    | "woodwork"
+    | "chance_created"
+    | "possession_retained"
+    | "turnover"
+    | "out_of_play"
+    | "foul_won"
+    | "offside";
+  count: number;
 }
 /**
  * This interface was referenced by `Contracts`'s JSON-Schema
@@ -1169,6 +1237,63 @@ export interface RolloutDistribution {
 export interface Interval {
   lo: number;
   hi: number;
+}
+/**
+ * One reality, compact enough to plot hundreds of them.
+ *
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "RolloutSample".
+ */
+export interface RolloutSample {
+  label:
+    | "goal"
+    | "shot_saved"
+    | "shot_off_target"
+    | "shot_blocked"
+    | "woodwork"
+    | "chance_created"
+    | "possession_retained"
+    | "turnover"
+    | "out_of_play"
+    | "foul_won"
+    | "offside";
+  primary_success: boolean;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  end_xy: [number, number];
+  xg: number;
+}
+/**
+ * Shown after a Rewind: the fan's call vs the real one (PLAN.md section 2.1 step 6).
+ *
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "Verdict".
+ */
+export interface Verdict {
+  schema_version: string;
+  moment_id: string;
+  user_option: OptionEvaluation;
+  real_option: OptionEvaluation;
+  rollout_id: string;
+  user_outcome: RolloutOutcome;
+  real_outcome_label:
+    | "goal"
+    | "shot_saved"
+    | "shot_off_target"
+    | "shot_blocked"
+    | "woodwork"
+    | "chance_created"
+    | "possession_retained"
+    | "turnover"
+    | "out_of_play"
+    | "foul_won"
+    | "offside";
+  framing: "beat_the_odds" | "unlucky" | "as_expected" | "bold_and_paid_off" | "same_call_as_reality";
+  value_gap: number;
+  distribution: RolloutDistribution | null;
+  narrative_id: string | null;
 }
 /**
  * This interface was referenced by `Contracts`'s JSON-Schema
@@ -1312,43 +1437,52 @@ export interface AccuracyPanelPayload {
   window: "live_window" | "match_so_far";
 }
 /**
+ * One Spotter metric: detection P/R/F1 for an event type (optionally one qualifier value), or a MAE.
+ *
  * This interface was referenced by `Contracts`'s JSON-Schema
  * via the `definition` "AccuracyRow".
  */
 export interface AccuracyRow {
   event_type:
-    | "pass"
-    | "ball_receipt"
-    | "carry"
-    | "take_on"
-    | "shot"
-    | "duel"
-    | "interception"
-    | "block"
-    | "clearance"
-    | "ball_recovery"
-    | "dispossessed"
-    | "miscontrol"
-    | "deflection"
-    | "foul_committed"
-    | "foul_won"
-    | "gk_action"
-    | "restart"
-    | "ball_out_of_play"
-    | "offside"
-    | "own_goal"
-    | "period_start"
-    | "period_end"
-    | "pressure"
-    | "pressing_sequence"
-    | "off_ball_run"
-    | "sprint"
-    | "high_intensity_run"
-    | "acceleration"
-    | "line_step_up";
-  precision: number;
-  recall: number;
-  f1: number;
+    | (
+        | "pass"
+        | "ball_receipt"
+        | "carry"
+        | "take_on"
+        | "shot"
+        | "duel"
+        | "interception"
+        | "block"
+        | "clearance"
+        | "ball_recovery"
+        | "dispossessed"
+        | "miscontrol"
+        | "deflection"
+        | "foul_committed"
+        | "foul_won"
+        | "gk_action"
+        | "restart"
+        | "ball_out_of_play"
+        | "offside"
+        | "own_goal"
+        | "period_start"
+        | "period_end"
+        | "pressure"
+        | "pressing_sequence"
+        | "off_ball_run"
+        | "sprint"
+        | "high_intensity_run"
+        | "acceleration"
+        | "line_step_up"
+      )
+    | null;
+  qualifier: string | null;
+  metric: "detection" | "mae";
+  precision: number | null;
+  recall: number | null;
+  f1: number | null;
+  mae: number | null;
+  unit: string | null;
   support: number;
 }
 /**
@@ -1442,6 +1576,302 @@ export interface ViewerProfile {
   voice_enabled: boolean;
   voice: string | null;
   show_numbers_first: boolean;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "FrameLabels".
+ */
+export interface FrameLabels {
+  schema_version: string;
+  match_id: string;
+  frame: number;
+  t: number;
+  tick: number;
+  image: string;
+  width: number;
+  height: number;
+  camera_mode: "broadcast" | "tactical" | "replay";
+  camera: CameraCalibration;
+  objects: ObjectLabel[];
+  ball_shadow_px: [number, number] | null;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "CameraCalibration".
+ */
+export interface CameraCalibration {
+  /**
+   * @minItems 9
+   * @maxItems 9
+   */
+  intrinsics: [number, number, number, number, number, number, number, number, number];
+  /**
+   * @minItems 12
+   * @maxItems 12
+   */
+  extrinsics: [number, number, number, number, number, number, number, number, number, number, number, number];
+  fov_y_deg: number;
+  /**
+   * @minItems 3
+   * @maxItems 3
+   */
+  position: [number, number, number];
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "ObjectLabel".
+ */
+export interface ObjectLabel {
+  cls: "player_home" | "player_away" | "goalkeeper_home" | "goalkeeper_away" | "referee" | "ball";
+  track_id: string;
+  team: ("home" | "away") | null;
+  player: string | null;
+  /**
+   * @minItems 4
+   * @maxItems 4
+   */
+  box: [number, number, number, number];
+  visible_fraction: number;
+  /**
+   * @minItems 3
+   * @maxItems 3
+   */
+  world: [number, number, number];
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  center_px: [number, number];
+}
+/**
+ * Container so the protocol unions get a JSON Schema and TS types. Not sent on the wire.
+ *
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "StreamProtocol".
+ */
+export interface StreamProtocol {
+  server: HelloMsg | FrameMsg | EventsMsg | ClockMsg | CueMsg | NarrativeMsg | MomentMsg | ErrorMsg;
+  client: PlayCmd | PauseCmd | SeekCmd | SpeedCmd | ProfileCmd;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "HelloMsg".
+ */
+export interface HelloMsg {
+  type: "hello";
+  schema_version: string;
+  session_id: string;
+  meta: MatchMeta;
+  profile: ViewerProfile;
+  clock: ClockStatus;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "ClockStatus".
+ */
+export interface ClockStatus {
+  t: number;
+  tick: number;
+  playing: boolean;
+  speed: number;
+  duration_s: number;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "FrameMsg".
+ */
+export interface FrameMsg {
+  type: "frame";
+  state: SimState;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "EventsMsg".
+ */
+export interface EventsMsg {
+  type: "events";
+  events: MatchEvent[];
+}
+/**
+ * Sent on every play / pause / seek / speed change, and after a seek before the next frame.
+ *
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "ClockMsg".
+ */
+export interface ClockMsg {
+  type: "clock";
+  clock: ClockStatus;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "CueMsg".
+ */
+export interface CueMsg {
+  type: "cues";
+  cues: OverlayCue[];
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "NarrativeMsg".
+ */
+export interface NarrativeMsg {
+  type: "narrative";
+  narrative: Narrative;
+}
+/**
+ * A rewind opportunity (Scout-flagged) became available.
+ *
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "MomentMsg".
+ */
+export interface MomentMsg {
+  type: "moment";
+  moment: DecisionMoment;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "ErrorMsg".
+ */
+export interface ErrorMsg {
+  type: "error";
+  code: string;
+  message: string;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "PlayCmd".
+ */
+export interface PlayCmd {
+  type: "play";
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "PauseCmd".
+ */
+export interface PauseCmd {
+  type: "pause";
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "SeekCmd".
+ */
+export interface SeekCmd {
+  type: "seek";
+  t: number;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "SpeedCmd".
+ */
+export interface SpeedCmd {
+  type: "speed";
+  speed: number;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "ProfileCmd".
+ */
+export interface ProfileCmd {
+  type: "profile";
+  profile: ViewerProfile;
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "StatsSnapshot".
+ */
+export interface StatsSnapshot {
+  schema_version: string;
+  t: number;
+  teams: {
+    [k: string]: TeamStats;
+  };
+  players: {
+    [k: string]: PlayerStats;
+  };
+  control_chaos: number;
+  momentum: number;
+  milestones: string[];
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "TeamStats".
+ */
+export interface TeamStats {
+  goals: number;
+  shots: number;
+  shots_on_target: number;
+  xg: number;
+  passes: number;
+  passes_completed: number;
+  pass_accuracy: number;
+  possession: number;
+  progressive_passes: number;
+  final_third_entries: number;
+  pressures: number;
+  ppda: number | null;
+  field_tilt: number;
+  xt_generated: number;
+  distance_km: number;
+  sprints: number;
+  corners: number;
+  fouls: number;
+}
+/**
+ * This interface was referenced by `undefined`'s JSON-Schema definition
+ * via the `patternProperty` "^[HA]\d{2}$".
+ *
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "PlayerStats".
+ */
+export interface PlayerStats {
+  team: "home" | "away";
+  touches: number;
+  passes: number;
+  passes_completed: number;
+  key_passes: number;
+  progressive_passes: number;
+  progressive_carries: number;
+  shots: number;
+  goals: number;
+  assists: number;
+  xg: number;
+  xt_generated: number;
+  take_ons_won: number;
+  tackles_won: number;
+  interceptions: number;
+  pressures: number;
+  distance_m: number;
+  top_speed_kmh: number;
+  sprints: number;
+  high_intensity_runs: number;
+  longest_pass_m: number;
+  fastest_shot_kmh: number;
+}
+/**
+ * Full-time recap (PLAN.md Step 10). Text lives in Narratives; this holds structure and references.
+ *
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "Recap".
+ */
+export interface Recap {
+  schema_version: string;
+  match_id: string;
+  final_stats: StatsSnapshot;
+  key_moment_ids: string[];
+  what_ifs: WhatIf[];
+  player_of_the_match: string;
+  narrative_ids: string[];
+}
+/**
+ * This interface was referenced by `Contracts`'s JSON-Schema
+ * via the `definition` "WhatIf".
+ */
+export interface WhatIf {
+  moment_id: string;
+  verdict_framing: string | null;
+  p_goal_alternative: number;
+  p_goal_real: number;
+  narrative_id: string | null;
 }
 /**
  * This interface was referenced by `Contracts`'s JSON-Schema

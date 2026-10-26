@@ -3,13 +3,16 @@
 from shared.schemas.actions import ActionIntent, BallLaunch, ExecutionEllipse, ResolvedAction
 from shared.schemas.common import SCHEMA_VERSION
 from shared.schemas.events import MatchEvent
+from shared.schemas.labels import FrameLabels
 from shared.schemas.meta import MatchMeta, PlayerAttributes, PlayerMeta, TeamMeta
 from shared.schemas.models import ModelOutputs, OptionEvaluation, PitchControlGrid
 from shared.schemas.moments import DecisionMoment, RewindScores
 from shared.schemas.narrative import Narrative, ViewerProfile
 from shared.schemas.overlay import OverlayCue
-from shared.schemas.rollout import RolloutDistribution, RolloutRequest, RolloutResult
+from shared.schemas.rollout import RolloutDistribution, RolloutRequest, RolloutResult, Verdict
 from shared.schemas.state import SimState
+from shared.schemas.stats import Recap, StatsSnapshot
+from shared.schemas.stream import ClientMessage, ServerMessage, StreamProtocol
 
 ROOT_MODELS = (
     MatchMeta,
@@ -20,9 +23,14 @@ ROOT_MODELS = (
     RolloutRequest,
     RolloutResult,
     RolloutDistribution,
+    Verdict,
     OverlayCue,
     Narrative,
     ViewerProfile,
+    FrameLabels,
+    StreamProtocol,
+    StatsSnapshot,
+    Recap,
 )
 """Top-level contracts: each gets a JSON Schema file, a TS type and an example fixture."""
 
@@ -31,8 +39,10 @@ __all__ = [
     "SCHEMA_VERSION",
     "ActionIntent",
     "BallLaunch",
+    "ClientMessage",
     "DecisionMoment",
     "ExecutionEllipse",
+    "FrameLabels",
     "MatchEvent",
     "MatchMeta",
     "ModelOutputs",
@@ -42,12 +52,17 @@ __all__ = [
     "PitchControlGrid",
     "PlayerAttributes",
     "PlayerMeta",
+    "Recap",
     "ResolvedAction",
     "RewindScores",
     "RolloutDistribution",
     "RolloutRequest",
     "RolloutResult",
+    "ServerMessage",
     "SimState",
+    "StatsSnapshot",
+    "StreamProtocol",
     "TeamMeta",
+    "Verdict",
     "ViewerProfile",
 ]

@@ -23,14 +23,17 @@ from shared.schemas import (
     actions,
     common,
     enums,
+    labels,
     meta,
     moments,
     narrative,
     overlay,
     rollout,
     state,
+    stats,
+    stream,
 )
-from shared.schemas.fixtures import FIXTURES
+from shared.schemas.fixtures import EXAMPLES, FIXTURES
 
 ROOT = Path(__file__).resolve().parents[2]
 JSON_DIR = ROOT / "shared" / "schemas" / "json"
@@ -48,6 +51,9 @@ ENUM_MODULES: tuple[ModuleType, ...] = (
     rollout,
     overlay,
     narrative,
+    labels,
+    stream,
+    stats,
 )
 DRAFT = "http://json-schema.org/draft-07/schema#"
 """Exported schemas are draft-07: tuples use array-form ``items``, which every TS/JS tool understands."""
@@ -109,7 +115,10 @@ def model_schemas() -> dict[str, str]:
 
 
 def fixture_files() -> dict[str, str]:
-    return {f"{name}.json": _dump(model.model_dump(mode="json")) for name, model in FIXTURES.items()}
+    files = {f"{name}.json": _dump(model.model_dump(mode="json")) for name, model in FIXTURES.items()}
+    for name, items in EXAMPLES.items():
+        files[f"examples/{name}.json"] = _dump([m.model_dump(mode="json") for m in items])
+    return files
 
 
 def _upper_snake(name: str) -> str:
@@ -144,6 +153,9 @@ def fixtures_ts() -> str:
     for name in names:
         body = json.dumps(FIXTURES[name].model_dump(mode="json"), indent=2, ensure_ascii=False)
         lines.append(f"export const {name[0].lower() + name[1:]}Fixture: {name} = {body};\n")
+    for name, items in sorted(EXAMPLES.items()):
+        body = json.dumps([m.model_dump(mode="json") for m in items], indent=2, ensure_ascii=False)
+        lines.append(f"export const {name[0].lower() + name[1:]}Examples: {name}[] = {body};\n")
     return "\n".join(lines)
 
 

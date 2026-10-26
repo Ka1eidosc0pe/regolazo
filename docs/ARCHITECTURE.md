@@ -55,10 +55,14 @@ All contracts live in `shared/schemas/` as Pydantic v2 models. They are **frozen
 | `ModelOutputs` | `models.py` | xT at the ball, shot xG now, `PitchControlGrid`, scored `OptionEvaluation`s (player-adjusted and baseline) |
 | `DecisionMoment` | `moments.py` | Rewindable moment: snapshot ref, real `ResolvedAction`, options, real consequence, judgement-free `RewindScores`, neutral hook |
 | `ActionIntent` / `ResolvedAction` | `actions.py` | Gesture → intent → technique: what the fan or AI asked for, and what the resolver made of it (technique, launch, curve cap, uncertainty ellipse, preview arc) |
-| `RolloutRequest` / `RolloutResult` / `RolloutDistribution` | `rollout.py` | Fork + single rollout (frames, events, outcome) and the 1,000-realities distribution with 95 % CIs and the displayed model probability for the consistency test |
+| `RolloutRequest` / `RolloutResult` / `RolloutDistribution` | `rollout.py` | Fork + single rollout (frames, namespaced events, outcome, the model's evaluation of the fan's action) and the 1,000-realities distribution with 95 % CIs, plottable samples and the displayed model probability for the consistency test |
+| `Verdict` | `rollout.py` | The fan's call vs the real one after a Rewind: both options, outcome, framing (`beat_the_odds`, `unlucky`, …), value gap (post-commit only) |
 | `OverlayCue` | `overlay.py` | Machine-readable timed overlay: window, priority, anchor (player / screen region / pitch point), typed payload, allowed modes, evidence |
 | `Narrative` | `narrative.py` | Text in one language and mode, with evidence and fact-check result, optional TTS audio |
 | `ViewerProfile` | `narrative.py` | Per-session personalization: mode, favorite club, language, voice, "show numbers first" |
+| `StatsSnapshot` / `Recap` | `stats.py` | Analyst output (team and player stats, Control-vs-Chaos, momentum, milestones) and the full-time recap. `Evidence(kind="stat")` refs are dotted paths into a snapshot (`players.H07.top_speed_kmh`), resolved by `stat_value` |
+| `FrameLabels` | `labels.py` | Recording-mode ground truth per rendered frame: camera intrinsics/extrinsics, per-object pixel boxes, visibility, world position, ball shadow pixel (renderer → Spotter) |
+| `ServerMessage` / `ClientMessage` | `stream.py` | WebSocket protocol (`hello`, `frame`, `events`, `clock`, `cues`, `narrative`, `moment`, `error` / `play`, `pause`, `seek`, `speed`, `profile`); wrapped in `StreamProtocol` for codegen |
 
 Vocabulary (event types, techniques, outcomes, phases) is in `shared/schemas/enums.py` as string `Literal`s, so the same strings appear in Python, JSON and TypeScript. Definitions and thresholds are in [event_taxonomy.md](event_taxonomy.md).
 
@@ -68,7 +72,9 @@ Vocabulary (event types, techniques, outcomes, phases) is in `shared/schemas/enu
 - **Time.** `t` is continuous match seconds since the first kickoff; `period` disambiguates. `tick = round(t × sim_hz)` for simulator output.
 - **Ids.** Players are `H07` / `A10` (team letter + shirt number); events are `ev_…` (detected events `ev_d_…`).
 - **Three.js mapping.** The renderer maps world (x, y, z) to Three.js (x, z, −y) (y-up).
-- **Wire format.** JSON in serialization mode: fields with defaults are always present, so TS types have no optional-vs-undefined ambiguity. Step 4 may add a quantized delta encoding for `SimState` frames on the WebSocket, decoded back to the same `SimState` shape on the client.
+- **Wire format.** JSON in serialization mode: fields with defaults are always present, so TS types have no optional-vs-undefined ambiguity. WebSocket frames are full `SimState` JSON (about 150 KB/s at 25 Hz, no delta encoding). Fork, preview and rollouts are REST.
+- **Detected events.** The Spotter may leave qualifiers it can't see as null (ground truth may not; see `GROUND_TRUTH_REQUIRED`) and identifies actors by `track_id` when it has no player id.
+- **Possession.** `possession_id` follows taxonomy §4.7 (new id on a change of team *and* on every restart) and is the same number in `SimState` and `MatchEvent`.
 
 ### 3.2 Generation pipeline
 
@@ -82,7 +88,20 @@ shared/schemas/json/contracts.schema.json ──(npm run gen:types)──▶ web
 
 Exported schemas are draft-07: Pydantic's `prefixItems` tuples are rewritten to array-form `items`, so TypeScript gets typed tuples such as `[number, number, number]`. CI fails if any generated file is stale.
 
-**Round-trip evidence (Step 1 gate):** Python fixtures round-trip through JSON unchanged. The JSON fixtures validate against the exported schemas in Python (`jsonschema`) and in TS (Ajv). The typed TS fixtures compile under strict `tsc`, so the Python output conforms to the generated TS types. TS-built client messages (`ActionIntent`, `ViewerProfile`) validate against the Python-exported schema. Negative tests confirm the schemas reject bad data (wrong id pattern, wrong tuple length, mismatched qualifiers, bad grid size, bad cue window).
+**Round-trip evidence (Step 1 gate):**
+- Python → JSON: every root fixture, plus one example per event-qualifier kind (21) and per cue payload type (11), round-trips through JSON unchanged.
+- JSON ↔ schema: all of them validate against the exported schemas in Python (`jsonschema`) and in TS (Ajv).
+- JSON → TS: the typed TS fixtures and examples compile under strict `tsc`, so the Python output conforms to the generated TS types (an injected bad enum value fails `tsc`).
+- TS → JSON → Python: Vitest builds client messages from the generated TS types and writes them to `shared/fixtures/from_ts/`; pytest parses them with Pydantic. CI fails if that file is stale.
+- Negative tests: the JSON Schemas reject structural errors (id patterns, tuple lengths, enums, unknown fields). **Cross-field rules are enforced only by Pydantic**: event type ↔ qualifier kind, ground-truth-required qualifiers, shot outcome ↔ `on_target`, cue `t_end ≥ t_start`, anchor targets, grid size, intent targets. The Python server validates everything it receives, so it is the authority.
+
+### 3.3 Cross-team interfaces (Python)
+
+| Module | Between | Purpose |
+|---|---|---|
+| `shared/model_api.py` | analytics → sim, agents | `AnalyticsModels` protocol (vectorized `xg`, `psxg`, `xpass`, `xt`, `pitch_control`, plus Spearman params and physical priors), feature dataclasses in the attacking frame, and `StubModels`. `load_models()` returns the trained models once `analytics/artifacts/manifest.json` exists. |
+| `shared/engine_api.py` | sim → server, agents | `RolloutEngine` protocol: `preview`, `options`, `rollout`, `distribution`, with latency targets |
+| `shared/recording.py` | sim → server, vision, tooling | Recorded match directory (`manifest.json`, `meta.json`, columnar `frames.npz`, `events.jsonl`, `moments.jsonl`, `snapshots/`). `Recording.state_at(i)` rebuilds one `SimState` without loading a whole match as objects. Snapshot refs are `snap:<match_id>:<tick>`. |
 
 ## 4. Components and ownership
 

@@ -1,6 +1,6 @@
 # ReGolazo Event Taxonomy (frozen with schema v1.0.0)
 
-> Implemented in `shared/schemas/events.py` and `shared/schemas/enums.py`. Where this document and the schema differ, the schema wins. Pydantic field names: `PassQ.length_class`, `ShotQ.situation`, `ball_speed_mps` for speeds. The common envelope `id` is an `ev_…` string, not a uuid.
+> Implemented in `shared/schemas/events.py` and `shared/schemas/enums.py`. Where this document and the schema differ, the schema wins. Pydantic field names: `PassQ.length_class`, `ShotQ.situation`, `ball_speed_mps` for speeds. The common envelope `id` is an `ev_…` string, not a uuid. Directions: convert a world-frame `angle_rad` with `shared.geometry.angle_to_attacking_frame` before applying the back-pass / switch rules.
 
 Ground truth is emitted by the simulator; the Spotter reproduces Tier A (video) and Tier B (tracking) as `source=detected`; the Analyst derives Tier C.
 
@@ -44,8 +44,10 @@ z_m = z_sb * 0.9144                  # shot end_location z is in yards-like unit
 | `period`, `t`, `tick?` | int, float, int | see §1 |
 | `type` | `EventType` | §7 |
 | `team` | team_id | acting team |
-| `player` | player_id | primary actor (null for team-level events) |
-| `location` | `[x,y]` or `[x,y,z]` | actor/ball start position (acting-team frame); ball z if known |
+| `player` | player_id | primary actor (null for team-level events, or when the Spotter only has a track) |
+| `track_id`, `secondary_track_id` | int? | Spotter track ids of the primary / second actor (detected events only) |
+| `rollout_id` | str? | set on events generated inside a Rewind rollout; ids `ev_r_<rollout>_<n>` |
+| `location` | `[x,y,z]` | actor/ball start position, **world frame** (see §1); ball z if known |
 | `end_location` | `[x,y,z]?` | pass/carry/shot end; shot = 3D |
 | `duration` | float s? | |
 | `possession_id` | int | §4.7 [SB] |
@@ -57,6 +59,10 @@ z_m = z_sb * 0.9144                  # shot end_location z is in yards-like unit
 | `confidence` | float? | detected only |
 | `outcome` | per-type enum | below |
 | `qualifiers` | per-type model (`PassQ`, `ShotQ`...) | discriminated union on `type` |
+
+**Coverage gates.** `shared.schemas.enums.OPTIONAL_FOR_COVERAGE` lists the rare values (e.g. `wayward`, `overhead_kick`, `six_seconds`) that the Step 3 event-coverage gate and the Step 6 per-qualifier gate need not hit; every other value is core.
+
+**Detected events.** Fields the Spotter may not see are nullable in the schema (`PassQ.height/body_part/technique/pass_type`, `ReceiptQ.touch_quality/body_orientation`, `ShotQ.body_part/technique/situation`, `ClearanceQ.body_part`, `PressureQ.pressed_player`) and required for ground truth (`events.GROUND_TRUTH_REQUIRED`).
 
 Defaults: `qualifiers` fields are `Optional` unless marked **req**. "req" = must be set on every ground-truth event of that type; the Spotter may leave non-visual ones null with lower confidence.
 

@@ -214,6 +214,13 @@
       "additionalProperties": false,
       "description": "1-sigma execution uncertainty at the intended end point, sized by the player's skill and pressure.",
       "properties": {
+        "plane": {
+          "enum": [
+            "pitch",
+            "goal_mouth"
+          ],
+          "type": "string"
+        },
         "center": {
           "maxItems": 3,
           "minItems": 3,
@@ -244,6 +251,7 @@
         }
       },
       "required": [
+        "plane",
         "center",
         "semi_major_m",
         "semi_minor_m",
@@ -271,6 +279,37 @@
         "hi"
       ],
       "title": "Interval",
+      "type": "object"
+    },
+    "OutcomeCount": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "enum": [
+            "goal",
+            "shot_saved",
+            "shot_off_target",
+            "shot_blocked",
+            "woodwork",
+            "chance_created",
+            "possession_retained",
+            "turnover",
+            "out_of_play",
+            "foul_won",
+            "offside"
+          ],
+          "type": "string"
+        },
+        "count": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "label",
+        "count"
+      ],
+      "title": "OutcomeCount",
       "type": "object"
     },
     "ResolvedAction": {
@@ -471,6 +510,48 @@
           "maximum": 1.0,
           "minimum": 0.0,
           "type": "number"
+        },
+        "available_pass_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "standard",
+              "driven",
+              "lofted",
+              "chipped",
+              "curled",
+              "outside_of_boot",
+              "backheel"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "available_shot_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "driven",
+              "placed",
+              "finesse",
+              "chip",
+              "volley",
+              "half_volley",
+              "header",
+              "diving_header",
+              "toe_poke",
+              "backheel",
+              "overhead_kick"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "max_curve": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
         }
       },
       "required": [
@@ -488,9 +569,63 @@
         "preview_arc",
         "override_rejected",
         "weak_foot",
-        "execution_quality"
+        "execution_quality",
+        "available_pass_techniques",
+        "available_shot_techniques",
+        "max_curve"
       ],
       "title": "ResolvedAction",
+      "type": "object"
+    },
+    "RolloutSample": {
+      "additionalProperties": false,
+      "description": "One reality, compact enough to plot hundreds of them.",
+      "properties": {
+        "label": {
+          "enum": [
+            "goal",
+            "shot_saved",
+            "shot_off_target",
+            "shot_blocked",
+            "woodwork",
+            "chance_created",
+            "possession_retained",
+            "turnover",
+            "out_of_play",
+            "foul_won",
+            "offside"
+          ],
+          "type": "string"
+        },
+        "primary_success": {
+          "type": "boolean"
+        },
+        "end_xy": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "xg": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "label",
+        "primary_success",
+        "end_xy",
+        "xg"
+      ],
+      "title": "RolloutSample",
       "type": "object"
     }
   },
@@ -517,26 +652,10 @@
       "type": "integer"
     },
     "outcome_counts": {
-      "additionalProperties": {
-        "minimum": 0,
-        "type": "integer"
+      "items": {
+        "$ref": "#/$defs/OutcomeCount"
       },
-      "propertyNames": {
-        "enum": [
-          "goal",
-          "shot_saved",
-          "shot_off_target",
-          "shot_blocked",
-          "woodwork",
-          "chance_created",
-          "possession_retained",
-          "turnover",
-          "out_of_play",
-          "foul_won",
-          "offside"
-        ]
-      },
-      "type": "object"
+      "type": "array"
     },
     "p_primary_success": {
       "maximum": 1.0,
@@ -569,6 +688,13 @@
     "elapsed_ms": {
       "minimum": 0,
       "type": "number"
+    },
+    "samples": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RolloutSample"
+      },
+      "type": "array"
     }
   },
   "required": [
@@ -586,7 +712,8 @@
     "mean_xg",
     "mean_xt_delta",
     "model_p_success",
-    "elapsed_ms"
+    "elapsed_ms",
+    "samples"
   ],
   "title": "RolloutDistribution",
   "type": "object"

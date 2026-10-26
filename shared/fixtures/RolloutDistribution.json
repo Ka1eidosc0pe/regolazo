@@ -82,7 +82,7 @@
     "launch": {
       "speed_mps": 17.5,
       "elevation_rad": 0.03,
-      "azimuth_rad": -0.52,
+      "azimuth_rad": -0.4,
       "spin": [
         0.0,
         0.0,
@@ -91,6 +91,7 @@
     },
     "curve_applied": 0.3,
     "ellipse": {
+      "plane": "pitch",
       "center": [
         38.0,
         -4.0,
@@ -98,7 +99,7 @@
       ],
       "semi_major_m": 1.8,
       "semi_minor_m": 0.9,
-      "angle_rad": -0.52
+      "angle_rad": -0.476
     },
     "preview_arc": [
       [
@@ -107,13 +108,18 @@
         0.11
       ],
       [
-        25.9,
-        3.4,
+        24.6,
+        4.0,
         0.11
       ],
       [
-        32.4,
-        -0.6,
+        30.8,
+        1.0,
+        0.11
+      ],
+      [
+        35.0,
+        -1.8,
         0.11
       ],
       [
@@ -124,17 +130,42 @@
     ],
     "override_rejected": false,
     "weak_foot": false,
-    "execution_quality": 0.84
+    "execution_quality": 0.84,
+    "available_pass_techniques": [
+      "standard",
+      "driven",
+      "lofted",
+      "chipped",
+      "curled",
+      "outside_of_boot"
+    ],
+    "available_shot_techniques": [],
+    "max_curve": 0.85
   },
   "n": 1000,
   "seed": 7,
-  "outcome_counts": {
-    "goal": 182,
-    "shot_saved": 151,
-    "shot_off_target": 96,
-    "turnover": 418,
-    "possession_retained": 153
-  },
+  "outcome_counts": [
+    {
+      "label": "goal",
+      "count": 182
+    },
+    {
+      "label": "shot_saved",
+      "count": 151
+    },
+    {
+      "label": "shot_off_target",
+      "count": 96
+    },
+    {
+      "label": "turnover",
+      "count": 418
+    },
+    {
+      "label": "possession_retained",
+      "count": 153
+    }
+  ],
   "p_primary_success": 0.574,
   "p_primary_success_ci95": {
     "lo": 0.543,
@@ -148,5 +179,25 @@
   "mean_xg": 0.19,
   "mean_xt_delta": 0.11,
   "model_p_success": 0.58,
-  "elapsed_ms": 2140.0
+  "elapsed_ms": 2140.0,
+  "samples": [
+    {
+      "label": "goal",
+      "primary_success": true,
+      "end_xy": [
+        38.4,
+        -3.9
+      ],
+      "xg": 0.33
+    },
+    {
+      "label": "turnover",
+      "primary_success": false,
+      "end_xy": [
+        35.2,
+        -1.7
+      ],
+      "xg": 0.0
+    }
+  ]
 }

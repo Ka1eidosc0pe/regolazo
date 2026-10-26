@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0.0",
+  "match_id": "demo-0001",
+  "final_stats": {
+    "schema_version": "1.0.0",
+    "t": 2334.9,
+    "teams": {
+      "home": {
+        "goals": 1,
+        "shots": 7,
+        "shots_on_target": 3,
+        "xg": 1.12,
+        "passes": 241,
+        "passes_completed": 203,
+        "pass_accuracy": 0.842,
+        "possession": 0.54,
+        "progressive_passes": 0,
+        "final_third_entries": 0,
+        "pressures": 61,
+        "ppda": 9.8,
+        "field_tilt": 0.58,
+        "xt_generated": 0.0,
+        "distance_km": 0.0,
+        "sprints": 0,
+        "corners": 0,
+        "fouls": 0
+      },
+      "away": {
+        "goals": 1,
+        "shots": 5,
+        "shots_on_target": 2,
+        "xg": 0.71,
+        "passes": 199,
+        "passes_completed": 158,
+        "pass_accuracy": 0.794,
+        "possession": 0.46,
+        "progressive_passes": 0,
+        "final_third_entries": 0,
+        "pressures": 70,
+        "ppda": 11.2,
+        "field_tilt": 0.42,
+        "xt_generated": 0.0,
+        "distance_km": 0.0,
+        "sprints": 0,
+        "corners": 0,
+        "fouls": 0
+      }
+    },
+    "players": {
+      "H09": {
+        "team": "home",
+        "touches": 19,
+        "passes": 0,
+        "passes_completed": 0,
+        "key_passes": 0,
+        "progressive_passes": 0,
+        "progressive_carries": 0,
+        "shots": 3,
+        "goals": 1,
+        "assists": 0,
+        "xg": 0.62,
+        "xt_generated": 0.0,
+        "take_ons_won": 0,
+        "tackles_won": 0,
+        "interceptions": 0,
+        "pressures": 0,
+        "distance_m": 4210.0,
+        "top_speed_kmh": 32.8,
+        "sprints": 14,
+        "high_intensity_runs": 0,
+        "longest_pass_m": 0.0,
+        "fastest_shot_kmh": 0.0
+      },
+      "H10": {
+        "team": "home",
+        "touches": 48,
+        "passes": 41,
+        "passes_completed": 36,
+        "key_passes": 3,
+        "progressive_passes": 7,
+        "progressive_carries": 0,
+        "shots": 0,
+        "goals": 0,
+        "assists": 0,
+        "xg": 0.0,
+        "xt_generated": 0.0,
+        "take_ons_won": 0,
+        "tackles_won": 0,
+        "interceptions": 0,
+        "pressures": 0,
+        "distance_m": 4580.0,
+        "top_speed_kmh": 29.1,
+        "sprints": 0,
+        "high_intensity_runs": 0,
+        "longest_pass_m": 48.2,
+        "fastest_shot_kmh": 0.0
+      }
+    },
+    "control_chaos": 0.42,
+    "momentum": 0.35,
+    "milestones": [
+      "first_shot_on_target:home",
+      "first_shot_on_target:away"
+    ]
+  },
+  "key_moment_ids": [
+    "mom_003",
+    "mom_017"
+  ],
+  "what_ifs": [
+    {
+      "moment_id": "mom_017",
+      "verdict_framing": "as_expected",
+      "p_goal_alternative": 0.09,
+      "p_goal_real": 0.18,
+      "narrative_id": null
+    }
+  ],
+  "player_of_the_match": "H10",
+  "narrative_ids": [
+    "nar_recap_en_casual"
+  ]
+}

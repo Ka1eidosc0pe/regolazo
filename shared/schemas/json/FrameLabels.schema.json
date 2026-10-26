@@ -1,0 +1,263 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/FrameLabels.json",
+  "$defs": {
+    "CameraCalibration": {
+      "additionalProperties": false,
+      "properties": {
+        "intrinsics": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 9,
+          "minItems": 9,
+          "type": "array"
+        },
+        "extrinsics": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 12,
+          "minItems": 12,
+          "type": "array"
+        },
+        "fov_y_deg": {
+          "exclusiveMaximum": 180,
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "position": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        }
+      },
+      "required": [
+        "intrinsics",
+        "extrinsics",
+        "fov_y_deg",
+        "position"
+      ],
+      "title": "CameraCalibration",
+      "type": "object"
+    },
+    "ObjectLabel": {
+      "additionalProperties": false,
+      "properties": {
+        "cls": {
+          "enum": [
+            "player_home",
+            "player_away",
+            "goalkeeper_home",
+            "goalkeeper_away",
+            "referee",
+            "ball"
+          ],
+          "type": "string"
+        },
+        "track_id": {
+          "type": "string"
+        },
+        "team": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "box": {
+          "maxItems": 4,
+          "minItems": 4,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "visible_fraction": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "world": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "center_px": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        }
+      },
+      "required": [
+        "cls",
+        "track_id",
+        "team",
+        "player",
+        "box",
+        "visible_fraction",
+        "world",
+        "center_px"
+      ],
+      "title": "ObjectLabel",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "type": "string"
+    },
+    "match_id": {
+      "type": "string"
+    },
+    "frame": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "t": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "tick": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "image": {
+      "type": "string"
+    },
+    "width": {
+      "exclusiveMinimum": 0,
+      "type": "integer"
+    },
+    "height": {
+      "exclusiveMinimum": 0,
+      "type": "integer"
+    },
+    "camera_mode": {
+      "enum": [
+        "broadcast",
+        "tactical",
+        "replay"
+      ],
+      "type": "string"
+    },
+    "camera": {
+      "$ref": "#/$defs/CameraCalibration"
+    },
+    "objects": {
+      "items": {
+        "$ref": "#/$defs/ObjectLabel"
+      },
+      "type": "array"
+    },
+    "ball_shadow_px": {
+      "anyOf": [
+        {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "schema_version",
+    "match_id",
+    "frame",
+    "t",
+    "tick",
+    "image",
+    "width",
+    "height",
+    "camera_mode",
+    "camera",
+    "objects",
+    "ball_shadow_px"
+  ],
+  "title": "FrameLabels",
+  "type": "object"
+}

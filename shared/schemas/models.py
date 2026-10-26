@@ -11,7 +11,8 @@ from shared.schemas.common import SCHEMA_VERSION, Contract, PlayerId, Probabilit
 class PitchControlGrid(Contract):
     """Probability that ``team`` controls each cell. Row-major: ``values[iy * nx + ix]``.
 
-    Cell (ix, iy) is centred at ``(x0 + ix * cell_m, y0 + iy * cell_m)`` in world coordinates.
+    Cell (ix, iy) is centred at ``(x0 + ix * dx, y0 + iy * dy)`` in world coordinates. To tile the pitch exactly,
+    use ``dx = 105 / nx``, ``dy = 68 / ny``, ``x0 = -52.5 + dx / 2``, ``y0 = -34 + dy / 2``.
     """
 
     team: TeamSide
@@ -19,7 +20,8 @@ class PitchControlGrid(Contract):
     ny: Annotated[int, Field(gt=0)]
     x0: float
     y0: float
-    cell_m: Annotated[float, Field(gt=0)]
+    dx: Annotated[float, Field(gt=0)]
+    dy: Annotated[float, Field(gt=0)]
     values: list[Probability]
 
     @model_validator(mode="after")
@@ -36,7 +38,11 @@ class OptionEvaluation(Contract):
     intent: ActionIntent
     resolved: ResolvedAction | None = None
     label: str
-    """Short human label, e.g. "Through ball to Okafor"."""
+    """Short English label, e.g. "Through ball to Okafor" (logs, analyst tooling)."""
+    label_key: str
+    """UI string-table key, e.g. "option.through_ball", localized client-side with ``label_args``."""
+    label_args: dict[str, str] = {}
+    """e.g. {"player": "H09"}; player ids are rendered as display names by the UI."""
     p_success: Probability
     """Player-adjusted completion probability (pass) or xG (shot) or retention probability (carry)."""
     p_success_baseline: Probability | None = None

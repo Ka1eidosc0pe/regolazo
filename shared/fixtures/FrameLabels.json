@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0.0",
+  "match_id": "demo-0001",
+  "frame": 1234,
+  "t": 2332.4,
+  "tick": 58310,
+  "image": "frames/001234.jpg",
+  "width": 1920,
+  "height": 1080,
+  "camera_mode": "broadcast",
+  "camera": {
+    "intrinsics": [
+      1630.0,
+      0.0,
+      960.0,
+      0.0,
+      1630.0,
+      540.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "extrinsics": [
+      1.0,
+      0.0,
+      0.0,
+      -18.0,
+      0.0,
+      -0.34,
+      -0.94,
+      16.0,
+      0.0,
+      0.94,
+      -0.34,
+      58.0
+    ],
+    "fov_y_deg": 36.6,
+    "position": [
+      18.0,
+      -55.0,
+      18.0
+    ]
+  },
+  "objects": [
+    {
+      "cls": "player_home",
+      "track_id": "H10",
+      "team": "home",
+      "player": "H10",
+      "box": [
+        1002.0,
+        488.0,
+        1031.0,
+        571.0
+      ],
+      "visible_fraction": 1.0,
+      "world": [
+        18.4,
+        6.1,
+        0.0
+      ],
+      "center_px": [
+        1016.5,
+        571.0
+      ]
+    },
+    {
+      "cls": "ball",
+      "track_id": "ball",
+      "team": null,
+      "player": null,
+      "box": [
+        1040.0,
+        562.0,
+        1047.0,
+        569.0
+      ],
+      "visible_fraction": 0.9,
+      "world": [
+        19.0,
+        6.199999999999999,
+        0.11
+      ],
+      "center_px": [
+        1043.5,
+        565.5
+      ]
+    }
+  ],
+  "ball_shadow_px": [
+    1043.6,
+    567.2
+  ]
+}

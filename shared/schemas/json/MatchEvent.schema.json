@@ -105,19 +105,26 @@
           "type": "string"
         },
         "body_part": {
-          "enum": [
-            "right_foot",
-            "left_foot",
-            "head",
-            "chest",
-            "other",
-            "hands",
-            "no_touch",
-            "left_hand",
-            "right_hand",
-            "both_hands"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "outcome": {
           "enum": [
@@ -637,12 +644,19 @@
           "type": "string"
         },
         "height": {
-          "enum": [
-            "ground",
-            "low",
-            "high"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "ground",
+                "low",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "length_class": {
           "enum": [
@@ -653,43 +667,64 @@
           "type": "string"
         },
         "body_part": {
-          "enum": [
-            "right_foot",
-            "left_foot",
-            "head",
-            "chest",
-            "other",
-            "hands",
-            "no_touch",
-            "left_hand",
-            "right_hand",
-            "both_hands"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "technique": {
-          "enum": [
-            "standard",
-            "driven",
-            "lofted",
-            "chipped",
-            "curled",
-            "outside_of_boot",
-            "backheel"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "pass_type": {
-          "enum": [
-            "standard",
-            "cross",
-            "cutback",
-            "through_ball",
-            "layoff",
-            "flick_on",
-            "back_pass"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "cross",
+                "cutback",
+                "through_ball",
+                "layoff",
+                "flick_on",
+                "back_pass"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "restart": {
           "anyOf": [
@@ -1031,12 +1066,19 @@
           "type": "string"
         },
         "pressed_player": {
-          "examples": [
-            "H07",
-            "A10"
-          ],
-          "pattern": "^[HA]\\d{2}$",
-          "type": "string"
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "pressed_role": {
           "enum": [
@@ -1111,20 +1153,34 @@
           "type": "string"
         },
         "touch_quality": {
-          "enum": [
-            "clean",
-            "loose",
-            "miscontrol"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "clean",
+                "loose",
+                "miscontrol"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "body_orientation": {
-          "enum": [
-            "open",
-            "half_turn",
-            "back_to_goal"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "open",
+                "half_turn",
+                "back_to_goal"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "first_touch_body_part": {
           "anyOf": [
@@ -1442,48 +1498,69 @@
           "type": "string"
         },
         "body_part": {
-          "enum": [
-            "right_foot",
-            "left_foot",
-            "head",
-            "chest",
-            "other",
-            "hands",
-            "no_touch",
-            "left_hand",
-            "right_hand",
-            "both_hands"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "technique": {
-          "enum": [
-            "driven",
-            "placed",
-            "finesse",
-            "chip",
-            "volley",
-            "half_volley",
-            "header",
-            "diving_header",
-            "toe_poke",
-            "backheel",
-            "overhead_kick"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "situation": {
-          "enum": [
-            "open_play",
-            "counter_attack",
-            "corner_phase",
-            "free_kick_phase",
-            "throw_in_phase",
-            "direct_free_kick",
-            "penalty",
-            "kick_off"
-          ],
-          "type": "string"
+          "anyOf": [
+            {
+              "enum": [
+                "open_play",
+                "counter_attack",
+                "corner_phase",
+                "free_kick_phase",
+                "throw_in_phase",
+                "direct_free_kick",
+                "penalty",
+                "kick_off"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "ball_speed_mps": {
           "minimum": 0,
@@ -1959,6 +2036,41 @@
         }
       ]
     },
+    "track_id": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "secondary_track_id": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "rollout_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "location": {
       "anyOf": [
         {
@@ -2206,6 +2318,9 @@
     "duration_s",
     "team",
     "player",
+    "track_id",
+    "secondary_track_id",
+    "rollout_id",
     "location",
     "end_location",
     "possession_id",

@@ -214,6 +214,13 @@
       "additionalProperties": false,
       "description": "1-sigma execution uncertainty at the intended end point, sized by the player's skill and pressure.",
       "properties": {
+        "plane": {
+          "enum": [
+            "pitch",
+            "goal_mouth"
+          ],
+          "type": "string"
+        },
         "center": {
           "maxItems": 3,
           "minItems": 3,
@@ -244,6 +251,7 @@
         }
       },
       "required": [
+        "plane",
         "center",
         "semi_major_m",
         "semi_minor_m",
@@ -275,6 +283,16 @@
         },
         "label": {
           "type": "string"
+        },
+        "label_key": {
+          "type": "string"
+        },
+        "label_args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "type": "object"
         },
         "p_success": {
           "maximum": 1.0,
@@ -338,6 +356,8 @@
         "intent",
         "resolved",
         "label",
+        "label_key",
+        "label_args",
         "p_success",
         "p_success_baseline",
         "value_if_success",
@@ -352,7 +372,7 @@
     },
     "PitchControlGrid": {
       "additionalProperties": false,
-      "description": "Probability that ``team`` controls each cell. Row-major: ``values[iy * nx + ix]``.\n\nCell (ix, iy) is centred at ``(x0 + ix * cell_m, y0 + iy * cell_m)`` in world coordinates.",
+      "description": "Probability that ``team`` controls each cell. Row-major: ``values[iy * nx + ix]``.\n\nCell (ix, iy) is centred at ``(x0 + ix * dx, y0 + iy * dy)`` in world coordinates. To tile the pitch exactly,\nuse ``dx = 105 / nx``, ``dy = 68 / ny``, ``x0 = -52.5 + dx / 2``, ``y0 = -34 + dy / 2``.",
       "properties": {
         "team": {
           "enum": [
@@ -375,7 +395,11 @@
         "y0": {
           "type": "number"
         },
-        "cell_m": {
+        "dx": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "dy": {
           "exclusiveMinimum": 0,
           "type": "number"
         },
@@ -394,7 +418,8 @@
         "ny",
         "x0",
         "y0",
-        "cell_m",
+        "dx",
+        "dy",
         "values"
       ],
       "title": "PitchControlGrid",
@@ -598,6 +623,48 @@
           "maximum": 1.0,
           "minimum": 0.0,
           "type": "number"
+        },
+        "available_pass_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "standard",
+              "driven",
+              "lofted",
+              "chipped",
+              "curled",
+              "outside_of_boot",
+              "backheel"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "available_shot_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "driven",
+              "placed",
+              "finesse",
+              "chip",
+              "volley",
+              "half_volley",
+              "header",
+              "diving_header",
+              "toe_poke",
+              "backheel",
+              "overhead_kick"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "max_curve": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
         }
       },
       "required": [
@@ -615,7 +682,10 @@
         "preview_arc",
         "override_rejected",
         "weak_foot",
-        "execution_quality"
+        "execution_quality",
+        "available_pass_techniques",
+        "available_shot_techniques",
+        "max_curve"
       ],
       "title": "ResolvedAction",
       "type": "object"

@@ -1,0 +1,5862 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/StreamProtocol.json",
+  "$defs": {
+    "AccuracyPanelPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "accuracy_panel",
+          "default": "accuracy_panel",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/AccuracyRow"
+          },
+          "type": "array"
+        },
+        "window": {
+          "default": "match_so_far",
+          "enum": [
+            "live_window",
+            "match_so_far"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "rows",
+        "window"
+      ],
+      "title": "AccuracyPanelPayload",
+      "type": "object"
+    },
+    "AccuracyRow": {
+      "additionalProperties": false,
+      "description": "One Spotter metric: detection P/R/F1 for an event type (optionally one qualifier value), or a MAE.",
+      "properties": {
+        "event_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "pass",
+                "ball_receipt",
+                "carry",
+                "take_on",
+                "shot",
+                "duel",
+                "interception",
+                "block",
+                "clearance",
+                "ball_recovery",
+                "dispossessed",
+                "miscontrol",
+                "deflection",
+                "foul_committed",
+                "foul_won",
+                "gk_action",
+                "restart",
+                "ball_out_of_play",
+                "offside",
+                "own_goal",
+                "period_start",
+                "period_end",
+                "pressure",
+                "pressing_sequence",
+                "off_ball_run",
+                "sprint",
+                "high_intensity_run",
+                "acceleration",
+                "line_step_up"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "qualifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metric": {
+          "default": "detection",
+          "enum": [
+            "detection",
+            "mae"
+          ],
+          "type": "string"
+        },
+        "precision": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "recall": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "f1": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mae": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "support": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "event_type",
+        "qualifier",
+        "metric",
+        "precision",
+        "recall",
+        "f1",
+        "mae",
+        "unit",
+        "support"
+      ],
+      "title": "AccuracyRow",
+      "type": "object"
+    },
+    "ActionIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "pass_player",
+            "pass_space",
+            "shot",
+            "carry",
+            "clearance"
+          ],
+          "type": "string"
+        },
+        "player": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "target_player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "target": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "path": {
+          "default": [],
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "items": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "additionalItems": false,
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "curve": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "power": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "pass_technique_override": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shot_technique_override": {
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source": {
+          "default": "ai",
+          "enum": [
+            "ai",
+            "fan"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "player",
+        "target_player",
+        "target",
+        "path",
+        "curve",
+        "power",
+        "pass_technique_override",
+        "shot_technique_override",
+        "source"
+      ],
+      "title": "ActionIntent",
+      "type": "object"
+    },
+    "BallLaunch": {
+      "additionalProperties": false,
+      "properties": {
+        "speed_mps": {
+          "maximum": 45,
+          "minimum": 0,
+          "type": "number"
+        },
+        "elevation_rad": {
+          "maximum": 1.5,
+          "minimum": -0.5,
+          "type": "number"
+        },
+        "azimuth_rad": {
+          "type": "number"
+        },
+        "spin": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        }
+      },
+      "required": [
+        "speed_mps",
+        "elevation_rad",
+        "azimuth_rad",
+        "spin"
+      ],
+      "title": "BallLaunch",
+      "type": "object"
+    },
+    "BallState": {
+      "additionalProperties": false,
+      "properties": {
+        "pos": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "vel": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "spin": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "in_play": {
+          "default": true,
+          "type": "boolean"
+        },
+        "last_touch": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "pos",
+        "vel",
+        "spin",
+        "in_play",
+        "last_touch"
+      ],
+      "title": "BallState",
+      "type": "object"
+    },
+    "BlockQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "block",
+          "default": "block",
+          "type": "string"
+        },
+        "block_type": {
+          "enum": [
+            "shot_block",
+            "pass_block",
+            "cross_block"
+          ],
+          "type": "string"
+        },
+        "deflection": {
+          "default": false,
+          "type": "boolean"
+        },
+        "save_block": {
+          "default": false,
+          "type": "boolean"
+        },
+        "blocked_event_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "block_type",
+        "deflection",
+        "save_block",
+        "blocked_event_id"
+      ],
+      "title": "BlockQ",
+      "type": "object"
+    },
+    "CaptionPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "caption",
+          "default": "caption",
+          "type": "string"
+        },
+        "narrative_id": {
+          "type": "string"
+        },
+        "speak": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "narrative_id",
+        "speak"
+      ],
+      "title": "CaptionPayload",
+      "type": "object"
+    },
+    "CarryQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "carry",
+          "default": "carry",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "retained",
+            "lost",
+            "end_of_period"
+          ],
+          "type": "string"
+        },
+        "distance_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "path_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "max_speed_mps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "is_progressive": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "outcome",
+        "distance_m",
+        "path_m",
+        "max_speed_mps",
+        "is_progressive"
+      ],
+      "title": "CarryQ",
+      "type": "object"
+    },
+    "ClearanceQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "clearance",
+          "default": "clearance",
+          "type": "string"
+        },
+        "body_part": {
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "out_of_play",
+            "in_play_safe",
+            "in_play_danger"
+          ],
+          "type": "string"
+        },
+        "aerial_won": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "body_part",
+        "outcome",
+        "aerial_won"
+      ],
+      "title": "ClearanceQ",
+      "type": "object"
+    },
+    "ClockMsg": {
+      "additionalProperties": false,
+      "description": "Sent on every play / pause / seek / speed change, and after a seek before the next frame.",
+      "properties": {
+        "type": {
+          "const": "clock",
+          "default": "clock",
+          "type": "string"
+        },
+        "clock": {
+          "$ref": "#/$defs/ClockStatus"
+        }
+      },
+      "required": [
+        "type",
+        "clock"
+      ],
+      "title": "ClockMsg",
+      "type": "object"
+    },
+    "ClockStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "t": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "tick": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "playing": {
+          "type": "boolean"
+        },
+        "speed": {
+          "exclusiveMinimum": 0,
+          "maximum": 16,
+          "type": "number"
+        },
+        "duration_s": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "t",
+        "tick",
+        "playing",
+        "speed",
+        "duration_s"
+      ],
+      "title": "ClockStatus",
+      "type": "object"
+    },
+    "Consequence": {
+      "additionalProperties": false,
+      "description": "What happened in the ~10 s after the moment in the real match.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "goal",
+            "shot",
+            "big_chance",
+            "turnover_to_chance_against",
+            "possession_value_swing",
+            "none"
+          ],
+          "type": "string"
+        },
+        "xt_swing": {
+          "type": "number"
+        },
+        "horizon_s": {
+          "default": 10.0,
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "event_ids": {
+          "default": [],
+          "items": {
+            "examples": [
+              "ev_000123"
+            ],
+            "pattern": "^ev_[0-9a-z_]+$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "xt_swing",
+        "horizon_s",
+        "event_ids"
+      ],
+      "title": "Consequence",
+      "type": "object"
+    },
+    "ControlChaosPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "control_chaos",
+          "default": "control_chaos",
+          "type": "string"
+        },
+        "index": {
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "series": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SeriesPoint"
+          },
+          "type": "array"
+        },
+        "drivers": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "default": {},
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "index",
+        "series",
+        "drivers"
+      ],
+      "title": "ControlChaosPayload",
+      "type": "object"
+    },
+    "CrestSpec": {
+      "additionalProperties": false,
+      "description": "Parameters for the generated (original) crest.",
+      "properties": {
+        "shape": {
+          "enum": [
+            "shield",
+            "circle",
+            "roundel",
+            "diamond",
+            "hexagon"
+          ],
+          "type": "string"
+        },
+        "monogram": {
+          "maxLength": 3,
+          "minLength": 1,
+          "type": "string"
+        },
+        "primary": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "secondary": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "emblem": {
+          "enum": [
+            "star",
+            "wave",
+            "bird",
+            "lion",
+            "tower",
+            "bolt",
+            "anchor",
+            "oak"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "shape",
+        "monogram",
+        "primary",
+        "secondary",
+        "emblem"
+      ],
+      "title": "CrestSpec",
+      "type": "object"
+    },
+    "CueAnchor": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "player",
+            "screen",
+            "pitch"
+          ],
+          "type": "string"
+        },
+        "player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "region": {
+          "anyOf": [
+            {
+              "enum": [
+                "top_left",
+                "top_right",
+                "top_center",
+                "bottom_left",
+                "bottom_right",
+                "lower_third",
+                "center"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pitch_xy": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "player",
+        "region",
+        "pitch_xy"
+      ],
+      "title": "CueAnchor",
+      "type": "object"
+    },
+    "CueMsg": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "cues",
+          "default": "cues",
+          "type": "string"
+        },
+        "cues": {
+          "items": {
+            "$ref": "#/$defs/OverlayCue"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "cues"
+      ],
+      "title": "CueMsg",
+      "type": "object"
+    },
+    "DecisionMoment": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "1.0.0",
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "tick": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "t": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "period": {
+          "enum": [
+            1,
+            2
+          ],
+          "type": "integer"
+        },
+        "snapshot_ref": {
+          "type": "string"
+        },
+        "team": {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "ball_carrier": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "moment_type": {
+          "enum": [
+            "final_pass",
+            "shot",
+            "one_v_one",
+            "counter_attack",
+            "decisive_turnover",
+            "set_piece",
+            "build_up",
+            "other"
+          ],
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "scout",
+            "fan"
+          ],
+          "type": "string"
+        },
+        "real_action": {
+          "$ref": "#/$defs/ResolvedAction"
+        },
+        "real_event_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "consequence": {
+          "$ref": "#/$defs/Consequence"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/OptionEvaluation"
+          },
+          "type": "array"
+        },
+        "scores": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RewindScores"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "flagged": {
+          "default": false,
+          "type": "boolean"
+        },
+        "hook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "tick",
+        "t",
+        "period",
+        "snapshot_ref",
+        "team",
+        "ball_carrier",
+        "moment_type",
+        "origin",
+        "real_action",
+        "real_event_id",
+        "consequence",
+        "options",
+        "scores",
+        "flagged",
+        "hook"
+      ],
+      "title": "DecisionMoment",
+      "type": "object"
+    },
+    "DuelQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "duel",
+          "default": "duel",
+          "type": "string"
+        },
+        "opponent": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "duel_type": {
+          "enum": [
+            "tackle",
+            "aerial",
+            "fifty_fifty"
+          ],
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "won",
+            "lost"
+          ],
+          "type": "string"
+        },
+        "possession_after": {
+          "anyOf": [
+            {
+              "enum": [
+                "tackler",
+                "teammate",
+                "opponent",
+                "out_of_play",
+                "loose"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "opponent",
+        "duel_type",
+        "outcome",
+        "possession_after"
+      ],
+      "title": "DuelQ",
+      "type": "object"
+    },
+    "ErrorMsg": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "error",
+          "default": "error",
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "code",
+        "message"
+      ],
+      "title": "ErrorMsg",
+      "type": "object"
+    },
+    "EventsMsg": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "events",
+          "default": "events",
+          "type": "string"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/MatchEvent"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "events"
+      ],
+      "title": "EventsMsg",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "description": "A tool output that backs a claim. Every number in a narrative must trace to one of these.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "event",
+            "model_output",
+            "stat",
+            "rollout",
+            "moment"
+          ],
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "ref",
+        "field",
+        "value"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "ExecutionEllipse": {
+      "additionalProperties": false,
+      "description": "1-sigma execution uncertainty at the intended end point, sized by the player's skill and pressure.",
+      "properties": {
+        "plane": {
+          "enum": [
+            "pitch",
+            "goal_mouth"
+          ],
+          "type": "string"
+        },
+        "center": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "semi_major_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "semi_minor_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "angle_rad": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "plane",
+        "center",
+        "semi_major_m",
+        "semi_minor_m",
+        "angle_rad"
+      ],
+      "title": "ExecutionEllipse",
+      "type": "object"
+    },
+    "FactCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "verified": {
+          "type": "boolean"
+        },
+        "attempts": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "verified",
+        "attempts",
+        "issues"
+      ],
+      "title": "FactCheck",
+      "type": "object"
+    },
+    "FoulQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "foul",
+          "default": "foul",
+          "type": "string"
+        },
+        "opponent": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "foul_type": {
+          "default": "foul",
+          "enum": [
+            "foul",
+            "handball",
+            "dangerous_play",
+            "dive",
+            "six_seconds",
+            "backpass_pickup"
+          ],
+          "type": "string"
+        },
+        "card": {
+          "default": "none",
+          "enum": [
+            "none",
+            "yellow",
+            "second_yellow",
+            "red"
+          ],
+          "type": "string"
+        },
+        "advantage": {
+          "default": false,
+          "type": "boolean"
+        },
+        "penalty": {
+          "default": false,
+          "type": "boolean"
+        },
+        "offensive": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "opponent",
+        "foul_type",
+        "card",
+        "advantage",
+        "penalty",
+        "offensive"
+      ],
+      "title": "FoulQ",
+      "type": "object"
+    },
+    "FrameMsg": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "frame",
+          "default": "frame",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/SimState"
+        }
+      },
+      "required": [
+        "type",
+        "state"
+      ],
+      "title": "FrameMsg",
+      "type": "object"
+    },
+    "GkQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "gk_action",
+          "default": "gk_action",
+          "type": "string"
+        },
+        "action": {
+          "enum": [
+            "save",
+            "claim",
+            "punch",
+            "sweeper",
+            "rush_out",
+            "pick_up",
+            "goal_conceded"
+          ],
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "catch",
+            "parry_safe",
+            "parry_danger",
+            "parry_out",
+            "to_post",
+            "success",
+            "fail",
+            "collected_twice",
+            "claim",
+            "clear",
+            "won",
+            "lost_in_play",
+            "lost_out",
+            "in_play_safe",
+            "in_play_danger",
+            "out_of_play",
+            "no_touch",
+            "touched_in"
+          ],
+          "type": "string"
+        },
+        "technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "standing",
+                "diving"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "body_part": {
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "position_before": {
+          "anyOf": [
+            {
+              "enum": [
+                "set",
+                "moving",
+                "prone"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "dive_distance_m": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "action",
+        "outcome",
+        "technique",
+        "body_part",
+        "shot_id",
+        "position_before",
+        "dive_distance_m"
+      ],
+      "title": "GkQ",
+      "type": "object"
+    },
+    "HelloMsg": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "hello",
+          "default": "hello",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "1.0.0",
+          "type": "string"
+        },
+        "session_id": {
+          "type": "string"
+        },
+        "meta": {
+          "$ref": "#/$defs/MatchMeta"
+        },
+        "profile": {
+          "$ref": "#/$defs/ViewerProfile"
+        },
+        "clock": {
+          "$ref": "#/$defs/ClockStatus"
+        }
+      },
+      "required": [
+        "type",
+        "schema_version",
+        "session_id",
+        "meta",
+        "profile",
+        "clock"
+      ],
+      "title": "HelloMsg",
+      "type": "object"
+    },
+    "HighlightPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "highlight",
+          "default": "highlight",
+          "type": "string"
+        },
+        "players": {
+          "items": {
+            "examples": [
+              "H07",
+              "A10"
+            ],
+            "pattern": "^[HA]\\d{2}$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "style": {
+          "default": "ring",
+          "enum": [
+            "ring",
+            "spotlight",
+            "trail",
+            "arrow"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "players",
+        "style"
+      ],
+      "title": "HighlightPayload",
+      "type": "object"
+    },
+    "InterceptionQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "interception",
+          "default": "interception",
+          "type": "string"
+        },
+        "passer": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "won",
+            "success_in_play",
+            "success_out",
+            "lost"
+          ],
+          "type": "string"
+        },
+        "pass_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "passer",
+        "outcome",
+        "pass_id"
+      ],
+      "title": "InterceptionQ",
+      "type": "object"
+    },
+    "KitColors": {
+      "additionalProperties": false,
+      "properties": {
+        "primary": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "secondary": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "accent": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "number": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "pattern": {
+          "default": "plain",
+          "enum": [
+            "plain",
+            "stripes",
+            "hoops",
+            "sash",
+            "halves",
+            "chevron"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "primary",
+        "secondary",
+        "accent",
+        "number",
+        "pattern"
+      ],
+      "title": "KitColors",
+      "type": "object"
+    },
+    "MatchEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "1.0.0",
+          "type": "string"
+        },
+        "id": {
+          "examples": [
+            "ev_000123"
+          ],
+          "pattern": "^ev_[0-9a-z_]+$",
+          "type": "string"
+        },
+        "index": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "source": {
+          "enum": [
+            "ground_truth",
+            "detected"
+          ],
+          "type": "string"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "type": {
+          "enum": [
+            "pass",
+            "ball_receipt",
+            "carry",
+            "take_on",
+            "shot",
+            "duel",
+            "interception",
+            "block",
+            "clearance",
+            "ball_recovery",
+            "dispossessed",
+            "miscontrol",
+            "deflection",
+            "foul_committed",
+            "foul_won",
+            "gk_action",
+            "restart",
+            "ball_out_of_play",
+            "offside",
+            "own_goal",
+            "period_start",
+            "period_end",
+            "pressure",
+            "pressing_sequence",
+            "off_ball_run",
+            "sprint",
+            "high_intensity_run",
+            "acceleration",
+            "line_step_up"
+          ],
+          "type": "string"
+        },
+        "period": {
+          "enum": [
+            1,
+            2
+          ],
+          "type": "integer"
+        },
+        "t": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "duration_s": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "team": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "track_id": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "secondary_track_id": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rollout_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "location": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end_location": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "possession_id": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "possession_team": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "play_pattern": {
+          "default": "regular_play",
+          "enum": [
+            "regular_play",
+            "from_corner",
+            "from_free_kick",
+            "from_throw_in",
+            "from_goal_kick",
+            "from_keeper",
+            "from_kick_off",
+            "from_counter",
+            "other"
+          ],
+          "type": "string"
+        },
+        "phase_of_play": {
+          "anyOf": [
+            {
+              "enum": [
+                "build_up",
+                "progression",
+                "final_third",
+                "attacking_transition",
+                "defensive_transition",
+                "counter_attack",
+                "set_piece",
+                "out_of_possession",
+                "dead_ball"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "under_pressure": {
+          "default": false,
+          "type": "boolean"
+        },
+        "counterpress": {
+          "default": false,
+          "type": "boolean"
+        },
+        "related_events": {
+          "default": [],
+          "items": {
+            "examples": [
+              "ev_000123"
+            ],
+            "pattern": "^ev_[0-9a-z_]+$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "qualifiers": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "ball_out_of_play": "#/$defs/OutOfPlayQ",
+                  "ball_receipt": "#/$defs/ReceiptQ",
+                  "ball_recovery": "#/$defs/RecoveryQ",
+                  "block": "#/$defs/BlockQ",
+                  "carry": "#/$defs/CarryQ",
+                  "clearance": "#/$defs/ClearanceQ",
+                  "duel": "#/$defs/DuelQ",
+                  "foul": "#/$defs/FoulQ",
+                  "gk_action": "#/$defs/GkQ",
+                  "interception": "#/$defs/InterceptionQ",
+                  "line_step_up": "#/$defs/StepUpQ",
+                  "off_ball_run": "#/$defs/RunQ",
+                  "offside": "#/$defs/OffsideQ",
+                  "pass": "#/$defs/PassQ",
+                  "physical": "#/$defs/PhysicalQ",
+                  "pressing_sequence": "#/$defs/PressingSequenceQ",
+                  "pressure": "#/$defs/PressureQ",
+                  "restart": "#/$defs/RestartQ",
+                  "shot": "#/$defs/ShotQ",
+                  "take_on": "#/$defs/TakeOnQ",
+                  "touch_loss": "#/$defs/TouchLossQ"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/PassQ"
+                },
+                {
+                  "$ref": "#/$defs/ReceiptQ"
+                },
+                {
+                  "$ref": "#/$defs/CarryQ"
+                },
+                {
+                  "$ref": "#/$defs/TakeOnQ"
+                },
+                {
+                  "$ref": "#/$defs/ShotQ"
+                },
+                {
+                  "$ref": "#/$defs/DuelQ"
+                },
+                {
+                  "$ref": "#/$defs/InterceptionQ"
+                },
+                {
+                  "$ref": "#/$defs/BlockQ"
+                },
+                {
+                  "$ref": "#/$defs/ClearanceQ"
+                },
+                {
+                  "$ref": "#/$defs/RecoveryQ"
+                },
+                {
+                  "$ref": "#/$defs/TouchLossQ"
+                },
+                {
+                  "$ref": "#/$defs/FoulQ"
+                },
+                {
+                  "$ref": "#/$defs/GkQ"
+                },
+                {
+                  "$ref": "#/$defs/RestartQ"
+                },
+                {
+                  "$ref": "#/$defs/OutOfPlayQ"
+                },
+                {
+                  "$ref": "#/$defs/OffsideQ"
+                },
+                {
+                  "$ref": "#/$defs/PressureQ"
+                },
+                {
+                  "$ref": "#/$defs/PressingSequenceQ"
+                },
+                {
+                  "$ref": "#/$defs/RunQ"
+                },
+                {
+                  "$ref": "#/$defs/PhysicalQ"
+                },
+                {
+                  "$ref": "#/$defs/StepUpQ"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "index",
+        "source",
+        "confidence",
+        "type",
+        "period",
+        "t",
+        "tick",
+        "duration_s",
+        "team",
+        "player",
+        "track_id",
+        "secondary_track_id",
+        "rollout_id",
+        "location",
+        "end_location",
+        "possession_id",
+        "possession_team",
+        "play_pattern",
+        "phase_of_play",
+        "under_pressure",
+        "counterpress",
+        "related_events",
+        "qualifiers"
+      ],
+      "title": "MatchEvent",
+      "type": "object"
+    },
+    "MatchMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "1.0.0",
+          "type": "string"
+        },
+        "match_id": {
+          "type": "string"
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "sim_hz": {
+          "default": 25,
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "period_duration_s": {
+          "default": 2700.0,
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "pitch": {
+          "$ref": "#/$defs/PitchSpec",
+          "default": {
+            "length_m": 105.0,
+            "width_m": 68.0,
+            "goal_width_m": 7.32,
+            "goal_height_m": 2.44
+          }
+        },
+        "home": {
+          "$ref": "#/$defs/TeamMeta"
+        },
+        "away": {
+          "$ref": "#/$defs/TeamMeta"
+        },
+        "home_attacks_positive_x_first_half": {
+          "default": true,
+          "type": "boolean"
+        },
+        "kickoff_team": {
+          "default": "home",
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "venue": {
+          "type": "string"
+        },
+        "weather": {
+          "default": "clear_night",
+          "enum": [
+            "clear_night",
+            "light_rain_night",
+            "misty_night"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "match_id",
+        "seed",
+        "sim_hz",
+        "period_duration_s",
+        "pitch",
+        "home",
+        "away",
+        "home_attacks_positive_x_first_half",
+        "kickoff_team",
+        "venue",
+        "weather"
+      ],
+      "title": "MatchMeta",
+      "type": "object"
+    },
+    "MilestonePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "milestone",
+          "default": "milestone",
+          "type": "string"
+        },
+        "narrative_id": {
+          "type": "string"
+        },
+        "milestone": {
+          "type": "string"
+        },
+        "team": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "type",
+        "narrative_id",
+        "milestone",
+        "team",
+        "player"
+      ],
+      "title": "MilestonePayload",
+      "type": "object"
+    },
+    "MomentMsg": {
+      "additionalProperties": false,
+      "description": "A rewind opportunity (Scout-flagged) became available.",
+      "properties": {
+        "type": {
+          "const": "moment",
+          "default": "moment",
+          "type": "string"
+        },
+        "moment": {
+          "$ref": "#/$defs/DecisionMoment"
+        }
+      },
+      "required": [
+        "type",
+        "moment"
+      ],
+      "title": "MomentMsg",
+      "type": "object"
+    },
+    "MomentumChartPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "momentum_chart",
+          "default": "momentum_chart",
+          "type": "string"
+        },
+        "home": {
+          "items": {
+            "$ref": "#/$defs/SeriesPoint"
+          },
+          "type": "array"
+        },
+        "away": {
+          "items": {
+            "$ref": "#/$defs/SeriesPoint"
+          },
+          "type": "array"
+        },
+        "window_s": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "home",
+        "away",
+        "window_s"
+      ],
+      "title": "MomentumChartPayload",
+      "type": "object"
+    },
+    "NameTagPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "name_tag",
+          "default": "name_tag",
+          "type": "string"
+        },
+        "player": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "emphasis": {
+          "default": "normal",
+          "enum": [
+            "normal",
+            "highlight"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "player",
+        "emphasis"
+      ],
+      "title": "NameTagPayload",
+      "type": "object"
+    },
+    "Narrative": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "1.0.0",
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "live_commentary",
+            "why_it_matters",
+            "milestone",
+            "rewind_hook",
+            "verdict",
+            "recap"
+          ],
+          "type": "string"
+        },
+        "t": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "language": {
+          "examples": [
+            "en",
+            "es",
+            "fr"
+          ],
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "analyst",
+            "casual"
+          ],
+          "type": "string"
+        },
+        "club_perspective": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "text": {
+          "type": "string"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "type": "array"
+        },
+        "fact_check": {
+          "$ref": "#/$defs/FactCheck"
+        },
+        "source_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "audio_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "voice": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "kind",
+        "t",
+        "language",
+        "mode",
+        "club_perspective",
+        "text",
+        "evidence",
+        "fact_check",
+        "source_id",
+        "audio_url",
+        "voice"
+      ],
+      "title": "Narrative",
+      "type": "object"
+    },
+    "NarrativeMsg": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "narrative",
+          "default": "narrative",
+          "type": "string"
+        },
+        "narrative": {
+          "$ref": "#/$defs/Narrative"
+        }
+      },
+      "required": [
+        "type",
+        "narrative"
+      ],
+      "title": "NarrativeMsg",
+      "type": "object"
+    },
+    "OffsideQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "offside",
+          "default": "offside",
+          "type": "string"
+        },
+        "passer": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "offside_line_x": {
+          "type": "number"
+        },
+        "margin_m": {
+          "type": "number"
+        },
+        "pass_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "passer",
+        "offside_line_x",
+        "margin_m",
+        "pass_id"
+      ],
+      "title": "OffsideQ",
+      "type": "object"
+    },
+    "OptionEvaluation": {
+      "additionalProperties": false,
+      "description": "One option available to the ball carrier, scored by the analytics models.",
+      "properties": {
+        "option_id": {
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/ActionIntent"
+        },
+        "resolved": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResolvedAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "label": {
+          "type": "string"
+        },
+        "label_key": {
+          "type": "string"
+        },
+        "label_args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "type": "object"
+        },
+        "p_success": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "p_success_baseline": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value_if_success": {
+          "type": "number"
+        },
+        "xg": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "xt_gain": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "decision_value": {
+          "type": "number"
+        },
+        "viable": {
+          "default": true,
+          "type": "boolean"
+        },
+        "is_real": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "option_id",
+        "intent",
+        "resolved",
+        "label",
+        "label_key",
+        "label_args",
+        "p_success",
+        "p_success_baseline",
+        "value_if_success",
+        "xg",
+        "xt_gain",
+        "decision_value",
+        "viable",
+        "is_real"
+      ],
+      "title": "OptionEvaluation",
+      "type": "object"
+    },
+    "OutOfPlayQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ball_out_of_play",
+          "default": "ball_out_of_play",
+          "type": "string"
+        },
+        "line": {
+          "enum": [
+            "touchline",
+            "goal_line"
+          ],
+          "type": "string"
+        },
+        "last_touch_team": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_touch_player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_restart_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "kick_off",
+                "throw_in",
+                "goal_kick",
+                "corner",
+                "free_kick_direct",
+                "free_kick_indirect",
+                "penalty",
+                "drop_ball"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "line",
+        "last_touch_team",
+        "last_touch_player",
+        "result_restart_type"
+      ],
+      "title": "OutOfPlayQ",
+      "type": "object"
+    },
+    "OverlayCue": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "1.0.0",
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "t_start": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "t_end": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "priority": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "anchor": {
+          "$ref": "#/$defs/CueAnchor"
+        },
+        "payload": {
+          "discriminator": {
+            "mapping": {
+              "accuracy_panel": "#/$defs/AccuracyPanelPayload",
+              "caption": "#/$defs/CaptionPayload",
+              "control_chaos": "#/$defs/ControlChaosPayload",
+              "highlight": "#/$defs/HighlightPayload",
+              "milestone": "#/$defs/MilestonePayload",
+              "momentum_chart": "#/$defs/MomentumChartPayload",
+              "name_tag": "#/$defs/NameTagPayload",
+              "pass_card": "#/$defs/PassCardPayload",
+              "rewind_prompt": "#/$defs/RewindPromptPayload",
+              "shot_card": "#/$defs/ShotCardPayload",
+              "threshold_badge": "#/$defs/ThresholdBadgePayload"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NameTagPayload"
+            },
+            {
+              "$ref": "#/$defs/ThresholdBadgePayload"
+            },
+            {
+              "$ref": "#/$defs/PassCardPayload"
+            },
+            {
+              "$ref": "#/$defs/ShotCardPayload"
+            },
+            {
+              "$ref": "#/$defs/MomentumChartPayload"
+            },
+            {
+              "$ref": "#/$defs/ControlChaosPayload"
+            },
+            {
+              "$ref": "#/$defs/AccuracyPanelPayload"
+            },
+            {
+              "$ref": "#/$defs/RewindPromptPayload"
+            },
+            {
+              "$ref": "#/$defs/CaptionPayload"
+            },
+            {
+              "$ref": "#/$defs/MilestonePayload"
+            },
+            {
+              "$ref": "#/$defs/HighlightPayload"
+            }
+          ]
+        },
+        "modes": {
+          "default": [
+            "analyst",
+            "casual"
+          ],
+          "items": {
+            "enum": [
+              "analyst",
+              "casual"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "team_focus": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "examples": [
+              "ev_000123"
+            ],
+            "pattern": "^ev_[0-9a-z_]+$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "t_start",
+        "t_end",
+        "priority",
+        "anchor",
+        "payload",
+        "modes",
+        "team_focus",
+        "evidence"
+      ],
+      "title": "OverlayCue",
+      "type": "object"
+    },
+    "PassCardPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "pass_card",
+          "default": "pass_card",
+          "type": "string"
+        },
+        "event_id": {
+          "examples": [
+            "ev_000123"
+          ],
+          "pattern": "^ev_[0-9a-z_]+$",
+          "type": "string"
+        },
+        "passer": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "recipient": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "length_m": {
+          "type": "number"
+        },
+        "ball_speed_kmh": {
+          "type": "number"
+        },
+        "xpass": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "difficulty": {
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "technique": {
+          "enum": [
+            "standard",
+            "driven",
+            "lofted",
+            "chipped",
+            "curled",
+            "outside_of_boot",
+            "backheel"
+          ],
+          "type": "string"
+        },
+        "pass_type": {
+          "enum": [
+            "standard",
+            "cross",
+            "cutback",
+            "through_ball",
+            "layoff",
+            "flick_on",
+            "back_pass"
+          ],
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "intercepted",
+            "out_of_play",
+            "offside"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "event_id",
+        "passer",
+        "recipient",
+        "length_m",
+        "ball_speed_kmh",
+        "xpass",
+        "difficulty",
+        "technique",
+        "pass_type",
+        "outcome"
+      ],
+      "title": "PassCardPayload",
+      "type": "object"
+    },
+    "PassQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "pass",
+          "default": "pass",
+          "type": "string"
+        },
+        "recipient": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "intercepted",
+            "out_of_play",
+            "offside"
+          ],
+          "type": "string"
+        },
+        "height": {
+          "anyOf": [
+            {
+              "enum": [
+                "ground",
+                "low",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "length_class": {
+          "enum": [
+            "short",
+            "medium",
+            "long"
+          ],
+          "type": "string"
+        },
+        "body_part": {
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pass_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "cross",
+                "cutback",
+                "through_ball",
+                "layoff",
+                "flick_on",
+                "back_pass"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "restart": {
+          "anyOf": [
+            {
+              "enum": [
+                "kick_off",
+                "throw_in",
+                "goal_kick",
+                "corner",
+                "free_kick_direct",
+                "free_kick_indirect",
+                "penalty",
+                "drop_ball"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "corner_delivery": {
+          "anyOf": [
+            {
+              "enum": [
+                "inswinging",
+                "outswinging",
+                "straight"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "gk_distribution": {
+          "anyOf": [
+            {
+              "enum": [
+                "throw",
+                "punt",
+                "drop_kick",
+                "goal_kick",
+                "pass"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "length_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "angle_rad": {
+          "type": "number"
+        },
+        "ball_speed_mps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "peak_height_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "duration_s": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "is_switch": {
+          "default": false,
+          "type": "boolean"
+        },
+        "is_progressive": {
+          "default": false,
+          "type": "boolean"
+        },
+        "is_line_breaking": {
+          "default": false,
+          "type": "boolean"
+        },
+        "lines_broken": {
+          "default": 0,
+          "maximum": 3,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "is_key_pass": {
+          "default": false,
+          "type": "boolean"
+        },
+        "is_assist": {
+          "default": false,
+          "type": "boolean"
+        },
+        "first_time": {
+          "default": false,
+          "type": "boolean"
+        },
+        "deflected": {
+          "default": false,
+          "type": "boolean"
+        },
+        "recipient_offside": {
+          "default": false,
+          "type": "boolean"
+        },
+        "assisted_shot_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "receipt_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "xpass": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "recipient",
+        "outcome",
+        "height",
+        "length_class",
+        "body_part",
+        "technique",
+        "pass_type",
+        "restart",
+        "corner_delivery",
+        "gk_distribution",
+        "length_m",
+        "angle_rad",
+        "ball_speed_mps",
+        "peak_height_m",
+        "duration_s",
+        "is_switch",
+        "is_progressive",
+        "is_line_breaking",
+        "lines_broken",
+        "is_key_pass",
+        "is_assist",
+        "first_time",
+        "deflected",
+        "recipient_offside",
+        "assisted_shot_id",
+        "receipt_id",
+        "xpass"
+      ],
+      "title": "PassQ",
+      "type": "object"
+    },
+    "PauseCmd": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "pause",
+          "default": "pause",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "PauseCmd",
+      "type": "object"
+    },
+    "PhysicalParams": {
+      "additionalProperties": false,
+      "description": "Kinematic limits used by the simulator, derived from attributes and real tracking distributions.",
+      "properties": {
+        "max_speed_mps": {
+          "exclusiveMinimum": 0,
+          "maximum": 12.5,
+          "type": "number"
+        },
+        "max_accel_mps2": {
+          "exclusiveMinimum": 0,
+          "maximum": 10.0,
+          "type": "number"
+        },
+        "max_decel_mps2": {
+          "exclusiveMinimum": 0,
+          "maximum": 12.0,
+          "type": "number"
+        },
+        "reaction_time_s": {
+          "maximum": 1.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "jump_reach_m": {
+          "default": 2.6,
+          "exclusiveMinimum": 0,
+          "maximum": 3.6,
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_speed_mps",
+        "max_accel_mps2",
+        "max_decel_mps2",
+        "reaction_time_s",
+        "jump_reach_m"
+      ],
+      "title": "PhysicalParams",
+      "type": "object"
+    },
+    "PhysicalQ": {
+      "additionalProperties": false,
+      "description": "Sprint, high-intensity run or acceleration.",
+      "properties": {
+        "kind": {
+          "const": "physical",
+          "default": "physical",
+          "type": "string"
+        },
+        "distance_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "peak_speed_mps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "accel_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "acceleration",
+                "deceleration"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "peak_accel_mps2": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "speed_start_mps": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "speed_end_mps": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "distance_m",
+        "peak_speed_mps",
+        "accel_type",
+        "peak_accel_mps2",
+        "speed_start_mps",
+        "speed_end_mps"
+      ],
+      "title": "PhysicalQ",
+      "type": "object"
+    },
+    "PitchSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "length_m": {
+          "default": 105.0,
+          "type": "number"
+        },
+        "width_m": {
+          "default": 68.0,
+          "type": "number"
+        },
+        "goal_width_m": {
+          "default": 7.32,
+          "type": "number"
+        },
+        "goal_height_m": {
+          "default": 2.44,
+          "type": "number"
+        }
+      },
+      "required": [
+        "length_m",
+        "width_m",
+        "goal_width_m",
+        "goal_height_m"
+      ],
+      "title": "PitchSpec",
+      "type": "object"
+    },
+    "PlayCmd": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "play",
+          "default": "play",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "PlayCmd",
+      "type": "object"
+    },
+    "PlayerAttributes": {
+      "additionalProperties": false,
+      "description": "Synthetic 1-99 ratings (PLAN.md section 2.6). Goalkeeping ratings are present for every player.",
+      "properties": {
+        "pace": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "acceleration": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "stamina": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "strength": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "jumping": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "short_passing": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "long_passing": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "vision": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "crossing": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "curve": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "technique": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "dribbling": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "finishing": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "shot_power": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "long_shots": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "volleys": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "heading": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "composure": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "tackling": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "interceptions": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "marking": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "positioning": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_reflexes": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_diving": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_handling": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_positioning": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_distribution": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pace",
+        "acceleration",
+        "stamina",
+        "strength",
+        "jumping",
+        "short_passing",
+        "long_passing",
+        "vision",
+        "crossing",
+        "curve",
+        "technique",
+        "dribbling",
+        "finishing",
+        "shot_power",
+        "long_shots",
+        "volleys",
+        "heading",
+        "composure",
+        "tackling",
+        "interceptions",
+        "marking",
+        "positioning",
+        "gk_reflexes",
+        "gk_diving",
+        "gk_handling",
+        "gk_positioning",
+        "gk_distribution"
+      ],
+      "title": "PlayerAttributes",
+      "type": "object"
+    },
+    "PlayerMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "team": {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "shirt_number": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "position": {
+          "enum": [
+            "GK",
+            "RB",
+            "RCB",
+            "CB",
+            "LCB",
+            "LB",
+            "RWB",
+            "LWB",
+            "DM",
+            "CM",
+            "RCM",
+            "LCM",
+            "AM",
+            "RM",
+            "LM",
+            "RW",
+            "LW",
+            "CF",
+            "ST"
+          ],
+          "type": "string"
+        },
+        "archetype": {
+          "enum": [
+            "advanced_playmaker",
+            "deep_lying_playmaker",
+            "box_to_box",
+            "ball_winning_midfielder",
+            "poacher",
+            "target_forward",
+            "inside_forward",
+            "touchline_winger",
+            "overlapping_fullback",
+            "inverted_fullback",
+            "ball_playing_centre_back",
+            "stopper",
+            "sweeper_keeper",
+            "shot_stopper"
+          ],
+          "type": "string"
+        },
+        "preferred_foot": {
+          "enum": [
+            "left",
+            "right"
+          ],
+          "type": "string"
+        },
+        "weak_foot": {
+          "maximum": 5,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "height_cm": {
+          "maximum": 210,
+          "minimum": 150,
+          "type": "integer"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/PlayerAttributes"
+        },
+        "physical": {
+          "$ref": "#/$defs/PhysicalParams"
+        },
+        "starter": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "team",
+        "first_name",
+        "last_name",
+        "display_name",
+        "shirt_number",
+        "position",
+        "archetype",
+        "preferred_foot",
+        "weak_foot",
+        "height_cm",
+        "nationality",
+        "attributes",
+        "physical",
+        "starter"
+      ],
+      "title": "PlayerMeta",
+      "type": "object"
+    },
+    "PlayerState": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "pos": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "vel": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "facing": {
+          "type": "number"
+        },
+        "z": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "anim": {
+          "default": "idle",
+          "enum": [
+            "idle",
+            "jog",
+            "run",
+            "sprint",
+            "jog_back",
+            "strafe_left",
+            "strafe_right",
+            "turn",
+            "receive_ground",
+            "receive_aerial",
+            "dribble",
+            "pass_short",
+            "pass_long",
+            "cross",
+            "shoot",
+            "chip",
+            "volley",
+            "header_standing",
+            "header_jumping",
+            "tackle",
+            "slide_tackle",
+            "fall",
+            "get_up",
+            "throw_in",
+            "gk_idle",
+            "gk_dive_left",
+            "gk_dive_right",
+            "gk_block_left",
+            "gk_block_right",
+            "gk_catch_high",
+            "gk_catch_low",
+            "gk_scoop",
+            "gk_throw",
+            "gk_drop_kick",
+            "celebrate",
+            "disappointed"
+          ],
+          "type": "string"
+        },
+        "anim_t": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "anim_mirror": {
+          "default": false,
+          "type": "boolean"
+        },
+        "anim_variant": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "stamina": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "on_pitch": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "pos",
+        "vel",
+        "facing",
+        "z",
+        "anim",
+        "anim_t",
+        "anim_mirror",
+        "anim_variant",
+        "stamina",
+        "on_pitch"
+      ],
+      "title": "PlayerState",
+      "type": "object"
+    },
+    "Possession": {
+      "additionalProperties": false,
+      "properties": {
+        "team": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "possession_id": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "team",
+        "player",
+        "possession_id"
+      ],
+      "title": "Possession",
+      "type": "object"
+    },
+    "PressingSequenceQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "pressing_sequence",
+          "default": "pressing_sequence",
+          "type": "string"
+        },
+        "n_pressures": {
+          "minimum": 2,
+          "type": "integer"
+        },
+        "pressing_players": {
+          "items": {
+            "examples": [
+              "H07",
+              "A10"
+            ],
+            "pattern": "^[HA]\\d{2}$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "outcome": {
+          "enum": [
+            "success",
+            "broken",
+            "out",
+            "whistle"
+          ],
+          "type": "string"
+        },
+        "pressure_ids": {
+          "default": [],
+          "items": {
+            "examples": [
+              "ev_000123"
+            ],
+            "pattern": "^ev_[0-9a-z_]+$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "n_pressures",
+        "pressing_players",
+        "outcome",
+        "pressure_ids"
+      ],
+      "title": "PressingSequenceQ",
+      "type": "object"
+    },
+    "PressureQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "pressure",
+          "default": "pressure",
+          "type": "string"
+        },
+        "pressed_player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pressed_role": {
+          "enum": [
+            "carrier",
+            "receiver",
+            "releaser"
+          ],
+          "type": "string"
+        },
+        "min_distance_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "closing_speed_mps": {
+          "type": "number"
+        },
+        "n_pressers": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "outcome": {
+          "default": "none",
+          "enum": [
+            "forced_turnover",
+            "forced_hurried_action",
+            "none"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "pressed_player",
+        "pressed_role",
+        "min_distance_m",
+        "closing_speed_mps",
+        "n_pressers",
+        "outcome"
+      ],
+      "title": "PressureQ",
+      "type": "object"
+    },
+    "ProfileCmd": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "profile",
+          "default": "profile",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/ViewerProfile"
+        }
+      },
+      "required": [
+        "type",
+        "profile"
+      ],
+      "title": "ProfileCmd",
+      "type": "object"
+    },
+    "ReceiptQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ball_receipt",
+          "default": "ball_receipt",
+          "type": "string"
+        },
+        "passer": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "complete",
+            "incomplete"
+          ],
+          "type": "string"
+        },
+        "touch_quality": {
+          "anyOf": [
+            {
+              "enum": [
+                "clean",
+                "loose",
+                "miscontrol"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "body_orientation": {
+          "anyOf": [
+            {
+              "enum": [
+                "open",
+                "half_turn",
+                "back_to_goal"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "first_touch_body_part": {
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pressure_distance_m": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "aerial": {
+          "default": false,
+          "type": "boolean"
+        },
+        "pass_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "passer",
+        "outcome",
+        "touch_quality",
+        "body_orientation",
+        "first_touch_body_part",
+        "pressure_distance_m",
+        "aerial",
+        "pass_id"
+      ],
+      "title": "ReceiptQ",
+      "type": "object"
+    },
+    "RecoveryQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ball_recovery",
+          "default": "ball_recovery",
+          "type": "string"
+        },
+        "offensive": {
+          "default": false,
+          "type": "boolean"
+        },
+        "recovery_failure": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "offensive",
+        "recovery_failure"
+      ],
+      "title": "RecoveryQ",
+      "type": "object"
+    },
+    "RefereeState": {
+      "additionalProperties": false,
+      "properties": {
+        "pos": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "vel": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "facing": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "pos",
+        "vel",
+        "facing"
+      ],
+      "title": "RefereeState",
+      "type": "object"
+    },
+    "ResolvedAction": {
+      "additionalProperties": false,
+      "properties": {
+        "intent": {
+          "$ref": "#/$defs/ActionIntent"
+        },
+        "action_type": {
+          "enum": [
+            "pass",
+            "shot",
+            "carry",
+            "dribble",
+            "clearance"
+          ],
+          "type": "string"
+        },
+        "body_part": {
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pass_technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pass_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "cross",
+                "cutback",
+                "through_ball",
+                "layoff",
+                "flick_on",
+                "back_pass"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pass_height": {
+          "anyOf": [
+            {
+              "enum": [
+                "ground",
+                "low",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shot_technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "intended_end": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "launch": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BallLaunch"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "curve_applied": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "ellipse": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionEllipse"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "preview_arc": {
+          "default": [],
+          "items": {
+            "maxItems": 3,
+            "minItems": 3,
+            "items": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "additionalItems": false,
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "override_rejected": {
+          "default": false,
+          "type": "boolean"
+        },
+        "weak_foot": {
+          "default": false,
+          "type": "boolean"
+        },
+        "execution_quality": {
+          "default": 1.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "available_pass_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "standard",
+              "driven",
+              "lofted",
+              "chipped",
+              "curled",
+              "outside_of_boot",
+              "backheel"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "available_shot_techniques": {
+          "default": [],
+          "items": {
+            "enum": [
+              "driven",
+              "placed",
+              "finesse",
+              "chip",
+              "volley",
+              "half_volley",
+              "header",
+              "diving_header",
+              "toe_poke",
+              "backheel",
+              "overhead_kick"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "max_curve": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "intent",
+        "action_type",
+        "body_part",
+        "pass_technique",
+        "pass_type",
+        "pass_height",
+        "shot_technique",
+        "intended_end",
+        "launch",
+        "curve_applied",
+        "ellipse",
+        "preview_arc",
+        "override_rejected",
+        "weak_foot",
+        "execution_quality",
+        "available_pass_techniques",
+        "available_shot_techniques",
+        "max_curve"
+      ],
+      "title": "ResolvedAction",
+      "type": "object"
+    },
+    "RestartQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "restart",
+          "default": "restart",
+          "type": "string"
+        },
+        "restart_type": {
+          "enum": [
+            "kick_off",
+            "throw_in",
+            "goal_kick",
+            "corner",
+            "free_kick_direct",
+            "free_kick_indirect",
+            "penalty",
+            "drop_ball"
+          ],
+          "type": "string"
+        },
+        "awarded_to": {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "cause_event_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "wall_size": {
+          "anyOf": [
+            {
+              "maximum": 11,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "corner_delivery": {
+          "anyOf": [
+            {
+              "enum": [
+                "inswinging",
+                "outswinging",
+                "straight"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "restart_type",
+        "awarded_to",
+        "cause_event_id",
+        "wall_size",
+        "corner_delivery"
+      ],
+      "title": "RestartQ",
+      "type": "object"
+    },
+    "RewindPromptPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "rewind_prompt",
+          "default": "rewind_prompt",
+          "type": "string"
+        },
+        "moment_id": {
+          "type": "string"
+        },
+        "narrative_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "type",
+        "moment_id",
+        "narrative_id"
+      ],
+      "title": "RewindPromptPayload",
+      "type": "object"
+    },
+    "RewindScores": {
+      "additionalProperties": false,
+      "description": "Judgement-free selection signals, each normalised to 0..1.\n\nThe value gap between the real choice and the alternatives is deliberately NOT a selection signal;\nit is used only in the verdict after the fan commits.",
+      "properties": {
+        "richness": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "stakes": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "consequence": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "salience": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "total": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "viable_options": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "option_entropy": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "richness",
+        "stakes",
+        "consequence",
+        "salience",
+        "total",
+        "viable_options",
+        "option_entropy"
+      ],
+      "title": "RewindScores",
+      "type": "object"
+    },
+    "RunQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "off_ball_run",
+          "default": "off_ball_run",
+          "type": "string"
+        },
+        "run_type": {
+          "enum": [
+            "run_in_behind",
+            "overlap",
+            "underlap",
+            "checking_run",
+            "decoy",
+            "support"
+          ],
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "targeted_received",
+            "targeted_missed",
+            "not_targeted"
+          ],
+          "type": "string"
+        },
+        "max_speed_mps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "distance_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "carrier": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "targeted": {
+          "default": false,
+          "type": "boolean"
+        },
+        "offside_at_release": {
+          "default": false,
+          "type": "boolean"
+        },
+        "dragged_defender": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "lateral_gap_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "run_type",
+        "outcome",
+        "max_speed_mps",
+        "distance_m",
+        "carrier",
+        "targeted",
+        "offside_at_release",
+        "dragged_defender",
+        "lateral_gap_m"
+      ],
+      "title": "RunQ",
+      "type": "object"
+    },
+    "Score": {
+      "additionalProperties": false,
+      "properties": {
+        "home": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "away": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "home",
+        "away"
+      ],
+      "title": "Score",
+      "type": "object"
+    },
+    "SeekCmd": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "seek",
+          "default": "seek",
+          "type": "string"
+        },
+        "t": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "t"
+      ],
+      "title": "SeekCmd",
+      "type": "object"
+    },
+    "SeriesPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "t": {
+          "type": "number"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "t",
+        "value"
+      ],
+      "title": "SeriesPoint",
+      "type": "object"
+    },
+    "ShotCardPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "shot_card",
+          "default": "shot_card",
+          "type": "string"
+        },
+        "event_id": {
+          "examples": [
+            "ev_000123"
+          ],
+          "pattern": "^ev_[0-9a-z_]+$",
+          "type": "string"
+        },
+        "shooter": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "xg": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "psxg": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ball_speed_kmh": {
+          "type": "number"
+        },
+        "distance_m": {
+          "type": "number"
+        },
+        "technique": {
+          "enum": [
+            "driven",
+            "placed",
+            "finesse",
+            "chip",
+            "volley",
+            "half_volley",
+            "header",
+            "diving_header",
+            "toe_poke",
+            "backheel",
+            "overhead_kick"
+          ],
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "goal",
+            "saved",
+            "saved_to_post",
+            "off_target",
+            "blocked",
+            "woodwork",
+            "wayward"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "event_id",
+        "shooter",
+        "xg",
+        "psxg",
+        "ball_speed_kmh",
+        "distance_m",
+        "technique",
+        "outcome"
+      ],
+      "title": "ShotCardPayload",
+      "type": "object"
+    },
+    "ShotQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "shot",
+          "default": "shot",
+          "type": "string"
+        },
+        "keeper": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "goal",
+            "saved",
+            "saved_to_post",
+            "off_target",
+            "blocked",
+            "woodwork",
+            "wayward"
+          ],
+          "type": "string"
+        },
+        "body_part": {
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "situation": {
+          "anyOf": [
+            {
+              "enum": [
+                "open_play",
+                "counter_attack",
+                "corner_phase",
+                "free_kick_phase",
+                "throw_in_phase",
+                "direct_free_kick",
+                "penalty",
+                "kick_off"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ball_speed_mps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "distance_to_goal_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "angle_rad": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "peak_height_m": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "on_target": {
+          "type": "boolean"
+        },
+        "xg": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "psxg": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "first_time": {
+          "default": false,
+          "type": "boolean"
+        },
+        "one_on_one": {
+          "default": false,
+          "type": "boolean"
+        },
+        "open_goal": {
+          "default": false,
+          "type": "boolean"
+        },
+        "follows_dribble": {
+          "default": false,
+          "type": "boolean"
+        },
+        "aerial_won": {
+          "default": false,
+          "type": "boolean"
+        },
+        "deflected": {
+          "default": false,
+          "type": "boolean"
+        },
+        "n_defenders_in_cone": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "gk_position": {
+          "anyOf": [
+            {
+              "enum": [
+                "set",
+                "moving",
+                "prone"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "key_pass_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "block_event_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "gk_event_id": {
+          "anyOf": [
+            {
+              "examples": [
+                "ev_000123"
+              ],
+              "pattern": "^ev_[0-9a-z_]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "freeze_frame_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "keeper",
+        "outcome",
+        "body_part",
+        "technique",
+        "situation",
+        "ball_speed_mps",
+        "distance_to_goal_m",
+        "angle_rad",
+        "peak_height_m",
+        "on_target",
+        "xg",
+        "psxg",
+        "first_time",
+        "one_on_one",
+        "open_goal",
+        "follows_dribble",
+        "aerial_won",
+        "deflected",
+        "n_defenders_in_cone",
+        "gk_position",
+        "key_pass_id",
+        "block_event_id",
+        "gk_event_id",
+        "freeze_frame_ref"
+      ],
+      "title": "ShotQ",
+      "type": "object"
+    },
+    "SimState": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "1.0.0",
+          "type": "string"
+        },
+        "tick": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "t": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "period": {
+          "enum": [
+            1,
+            2
+          ],
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "pre_match",
+            "first_half",
+            "half_time",
+            "second_half",
+            "full_time"
+          ],
+          "type": "string"
+        },
+        "ball": {
+          "$ref": "#/$defs/BallState"
+        },
+        "players": {
+          "items": {
+            "$ref": "#/$defs/PlayerState"
+          },
+          "type": "array"
+        },
+        "referee": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RefereeState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "possession": {
+          "$ref": "#/$defs/Possession"
+        },
+        "phase": {
+          "enum": [
+            "build_up",
+            "progression",
+            "final_third",
+            "attacking_transition",
+            "defensive_transition",
+            "counter_attack",
+            "set_piece",
+            "out_of_possession",
+            "dead_ball"
+          ],
+          "type": "string"
+        },
+        "restart": {
+          "anyOf": [
+            {
+              "enum": [
+                "kick_off",
+                "throw_in",
+                "goal_kick",
+                "corner",
+                "free_kick_direct",
+                "free_kick_indirect",
+                "penalty",
+                "drop_ball"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "score": {
+          "$ref": "#/$defs/Score"
+        },
+        "attacking_positive_x": {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "keyframe": {
+          "default": false,
+          "type": "boolean"
+        },
+        "snapshot_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "schema_version",
+        "tick",
+        "t",
+        "period",
+        "status",
+        "ball",
+        "players",
+        "referee",
+        "possession",
+        "phase",
+        "restart",
+        "score",
+        "attacking_positive_x",
+        "keyframe",
+        "snapshot_ref"
+      ],
+      "title": "SimState",
+      "type": "object"
+    },
+    "SpeedCmd": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "speed",
+          "default": "speed",
+          "type": "string"
+        },
+        "speed": {
+          "exclusiveMinimum": 0,
+          "maximum": 16,
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "speed"
+      ],
+      "title": "SpeedCmd",
+      "type": "object"
+    },
+    "StepUpQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "line_step_up",
+          "default": "line_step_up",
+          "type": "string"
+        },
+        "line_players": {
+          "items": {
+            "examples": [
+              "H07",
+              "A10"
+            ],
+            "pattern": "^[HA]\\d{2}$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "line_height_before": {
+          "type": "number"
+        },
+        "line_height_after": {
+          "type": "number"
+        },
+        "outcome": {
+          "enum": [
+            "trap_success",
+            "trap_beaten",
+            "reset"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "line_players",
+        "line_height_before",
+        "line_height_after",
+        "outcome"
+      ],
+      "title": "StepUpQ",
+      "type": "object"
+    },
+    "TakeOnQ": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "take_on",
+          "default": "take_on",
+          "type": "string"
+        },
+        "opponent": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "success",
+            "fail"
+          ],
+          "type": "string"
+        },
+        "nutmeg": {
+          "default": false,
+          "type": "boolean"
+        },
+        "overrun": {
+          "default": false,
+          "type": "boolean"
+        },
+        "no_touch": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "opponent",
+        "outcome",
+        "nutmeg",
+        "overrun",
+        "no_touch"
+      ],
+      "title": "TakeOnQ",
+      "type": "object"
+    },
+    "TeamMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "side": {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "short_name": {
+          "maxLength": 3,
+          "minLength": 3,
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "formation": {
+          "examples": [
+            "4-3-3"
+          ],
+          "pattern": "^\\d(-\\d){2,4}$",
+          "type": "string"
+        },
+        "kit": {
+          "$ref": "#/$defs/KitColors"
+        },
+        "gk_kit": {
+          "$ref": "#/$defs/KitColors"
+        },
+        "crest": {
+          "$ref": "#/$defs/CrestSpec"
+        },
+        "players": {
+          "items": {
+            "$ref": "#/$defs/PlayerMeta"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "side",
+        "name",
+        "short_name",
+        "city",
+        "formation",
+        "kit",
+        "gk_kit",
+        "crest",
+        "players"
+      ],
+      "title": "TeamMeta",
+      "type": "object"
+    },
+    "ThresholdBadgePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "threshold_badge",
+          "default": "threshold_badge",
+          "type": "string"
+        },
+        "player": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "top_speed",
+            "sprint_speed",
+            "distance_covered",
+            "sprint_count",
+            "shot_speed",
+            "pass_distance"
+          ],
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "km/h",
+            "m/s",
+            "m",
+            "km",
+            "count"
+          ],
+          "type": "string"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "record": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "player",
+        "metric",
+        "value",
+        "unit",
+        "threshold",
+        "record"
+      ],
+      "title": "ThresholdBadgePayload",
+      "type": "object"
+    },
+    "TouchLossQ": {
+      "additionalProperties": false,
+      "description": "Dispossessed, miscontrol or deflection.",
+      "properties": {
+        "kind": {
+          "const": "touch_loss",
+          "default": "touch_loss",
+          "type": "string"
+        },
+        "opponent": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "aerial_won": {
+          "default": false,
+          "type": "boolean"
+        },
+        "deflection_target": {
+          "anyOf": [
+            {
+              "enum": [
+                "shot",
+                "pass",
+                "cross"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "opponent",
+        "aerial_won",
+        "deflection_target"
+      ],
+      "title": "TouchLossQ",
+      "type": "object"
+    },
+    "ViewerProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "1.0.0",
+          "type": "string"
+        },
+        "session_id": {
+          "type": "string"
+        },
+        "mode": {
+          "default": "casual",
+          "enum": [
+            "analyst",
+            "casual"
+          ],
+          "type": "string"
+        },
+        "favorite_club": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "language": {
+          "default": "en",
+          "examples": [
+            "en",
+            "es",
+            "fr"
+          ],
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+          "type": "string"
+        },
+        "voice_enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "voice": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "show_numbers_first": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema_version",
+        "session_id",
+        "mode",
+        "favorite_club",
+        "language",
+        "voice_enabled",
+        "voice",
+        "show_numbers_first"
+      ],
+      "title": "ViewerProfile",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Container so the protocol unions get a JSON Schema and TS types. Not sent on the wire.",
+  "properties": {
+    "server": {
+      "discriminator": {
+        "mapping": {
+          "clock": "#/$defs/ClockMsg",
+          "cues": "#/$defs/CueMsg",
+          "error": "#/$defs/ErrorMsg",
+          "events": "#/$defs/EventsMsg",
+          "frame": "#/$defs/FrameMsg",
+          "hello": "#/$defs/HelloMsg",
+          "moment": "#/$defs/MomentMsg",
+          "narrative": "#/$defs/NarrativeMsg"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/HelloMsg"
+        },
+        {
+          "$ref": "#/$defs/FrameMsg"
+        },
+        {
+          "$ref": "#/$defs/EventsMsg"
+        },
+        {
+          "$ref": "#/$defs/ClockMsg"
+        },
+        {
+          "$ref": "#/$defs/CueMsg"
+        },
+        {
+          "$ref": "#/$defs/NarrativeMsg"
+        },
+        {
+          "$ref": "#/$defs/MomentMsg"
+        },
+        {
+          "$ref": "#/$defs/ErrorMsg"
+        }
+      ]
+    },
+    "client": {
+      "discriminator": {
+        "mapping": {
+          "pause": "#/$defs/PauseCmd",
+          "play": "#/$defs/PlayCmd",
+          "profile": "#/$defs/ProfileCmd",
+          "seek": "#/$defs/SeekCmd",
+          "speed": "#/$defs/SpeedCmd"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/PlayCmd"
+        },
+        {
+          "$ref": "#/$defs/PauseCmd"
+        },
+        {
+          "$ref": "#/$defs/SeekCmd"
+        },
+        {
+          "$ref": "#/$defs/SpeedCmd"
+        },
+        {
+          "$ref": "#/$defs/ProfileCmd"
+        }
+      ]
+    }
+  },
+  "required": [
+    "server",
+    "client"
+  ],
+  "title": "StreamProtocol",
+  "type": "object"
+}

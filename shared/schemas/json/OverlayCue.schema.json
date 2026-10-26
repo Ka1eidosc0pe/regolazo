@@ -35,55 +35,129 @@
     },
     "AccuracyRow": {
       "additionalProperties": false,
+      "description": "One Spotter metric: detection P/R/F1 for an event type (optionally one qualifier value), or a MAE.",
       "properties": {
         "event_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "pass",
+                "ball_receipt",
+                "carry",
+                "take_on",
+                "shot",
+                "duel",
+                "interception",
+                "block",
+                "clearance",
+                "ball_recovery",
+                "dispossessed",
+                "miscontrol",
+                "deflection",
+                "foul_committed",
+                "foul_won",
+                "gk_action",
+                "restart",
+                "ball_out_of_play",
+                "offside",
+                "own_goal",
+                "period_start",
+                "period_end",
+                "pressure",
+                "pressing_sequence",
+                "off_ball_run",
+                "sprint",
+                "high_intensity_run",
+                "acceleration",
+                "line_step_up"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "qualifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metric": {
+          "default": "detection",
           "enum": [
-            "pass",
-            "ball_receipt",
-            "carry",
-            "take_on",
-            "shot",
-            "duel",
-            "interception",
-            "block",
-            "clearance",
-            "ball_recovery",
-            "dispossessed",
-            "miscontrol",
-            "deflection",
-            "foul_committed",
-            "foul_won",
-            "gk_action",
-            "restart",
-            "ball_out_of_play",
-            "offside",
-            "own_goal",
-            "period_start",
-            "period_end",
-            "pressure",
-            "pressing_sequence",
-            "off_ball_run",
-            "sprint",
-            "high_intensity_run",
-            "acceleration",
-            "line_step_up"
+            "detection",
+            "mae"
           ],
           "type": "string"
         },
         "precision": {
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "type": "number"
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "recall": {
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "type": "number"
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "f1": {
-          "maximum": 1.0,
-          "minimum": 0.0,
-          "type": "number"
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mae": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "support": {
           "minimum": 0,
@@ -92,9 +166,13 @@
       },
       "required": [
         "event_type",
+        "qualifier",
+        "metric",
         "precision",
         "recall",
         "f1",
+        "mae",
+        "unit",
         "support"
       ],
       "title": "AccuracyRow",

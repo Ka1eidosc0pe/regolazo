@@ -20,6 +20,23 @@ from shared.schemas.common import (
 )
 from shared.schemas.enums import EventType, PassOutcome, PassTechnique, PassType, ShotOutcome, ShotTechnique
 
+BadgeMetric = Literal["top_speed", "sprint_speed", "distance_covered", "sprint_count", "shot_speed", "pass_distance"]
+BadgeUnit = Literal["km/h", "m/s", "m", "km", "count"]
+HighlightStyle = Literal["ring", "spotlight", "trail", "arrow"]
+CueType = Literal[
+    "name_tag",
+    "threshold_badge",
+    "pass_card",
+    "shot_card",
+    "momentum_chart",
+    "control_chaos",
+    "accuracy_panel",
+    "rewind_prompt",
+    "caption",
+    "milestone",
+    "highlight",
+]
+
 ScreenRegion = Literal["top_left", "top_right", "top_center", "bottom_left", "bottom_right", "lower_third", "center"]
 
 
@@ -46,9 +63,9 @@ class NameTagPayload(Contract):
 class ThresholdBadgePayload(Contract):
     type: Literal["threshold_badge"] = "threshold_badge"
     player: PlayerId
-    metric: Literal["top_speed", "sprint_speed", "distance_covered", "sprint_count", "shot_speed", "pass_distance"]
+    metric: BadgeMetric
     value: float
-    unit: Literal["km/h", "m/s", "m", "km", "count"]
+    unit: BadgeUnit
     threshold: float
     record: bool = False
     """True when this beats the match record for the metric."""
@@ -103,10 +120,19 @@ class ControlChaosPayload(Contract):
 
 
 class AccuracyRow(Contract):
-    event_type: EventType
-    precision: Probability
-    recall: Probability
-    f1: Probability
+    """One Spotter metric: detection P/R/F1 for an event type (optionally one qualifier value), or a MAE."""
+
+    event_type: EventType | None
+    """None for non-event metrics (ball speed, player speed, ball height)."""
+    qualifier: str | None = None
+    """e.g. "pass.height=high"; None for the event type as a whole."""
+    metric: Literal["detection", "mae"] = "detection"
+    precision: Probability | None = None
+    recall: Probability | None = None
+    f1: Probability | None = None
+    mae: Annotated[float, Field(ge=0)] | None = None
+    unit: str | None = None
+    """For MAE rows, e.g. "km/h" or "m"."""
     support: Annotated[int, Field(ge=0)]
 
 
@@ -141,7 +167,7 @@ class MilestonePayload(Contract):
 class HighlightPayload(Contract):
     type: Literal["highlight"] = "highlight"
     players: list[PlayerId]
-    style: Literal["ring", "spotlight", "trail", "arrow"] = "ring"
+    style: HighlightStyle = "ring"
 
 
 CuePayload = Annotated[
