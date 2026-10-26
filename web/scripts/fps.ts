@@ -13,9 +13,13 @@ const quality = qIdx >= 0 ? args[qIdx + 1] : "high";
 const dIdx = args.indexOf("--debug");
 const debug = dIdx >= 0 ? (JSON.parse(args[dIdx + 1]!) as { hide?: string[]; shadows?: boolean; bloom?: boolean }) : null;
 
-const h = await startHarness({ headed });
+const unthrottled = args.includes("--unthrottled");
+const h = await startHarness({ headed, unthrottled });
 try {
-  const page = await h.open(`w=1920&h=1080&quality=${quality}`, { width: 1920, height: 1080 });
+  const eIdx = args.indexOf("--extra");
+  const extra = eIdx >= 0 ? `&${args[eIdx + 1]}` : "";
+  // live view: the canvas fills the 1920 x 1080 viewport (no fixed render size)
+  const page = await h.open(`quality=${quality}${extra}`, { width: 1920, height: 1080 });
   if (debug) await page.evaluate((d) => window.regolazo!.debug(d), debug);
   await page.waitForTimeout(3000); // warm-up: shader compile, texture upload
   const result = await page.evaluate(async (secs: number) => {
@@ -44,7 +48,7 @@ try {
       renderer: info.renderer,
     };
   }, seconds);
-  console.log(JSON.stringify({ headed, quality, debug, ...result }));
+  console.log(JSON.stringify({ headed, unthrottled, quality, debug, ...result }));
 } finally {
   await h.close();
 }

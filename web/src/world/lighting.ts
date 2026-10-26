@@ -11,7 +11,7 @@ export interface Lighting {
   focus(center: THREE.Vector3, halfExtent: number): void;
 }
 
-export function createLighting(scene: THREE.Scene, quality: "high" | "low"): Lighting {
+export function createLighting(scene: THREE.Scene, mapSize: number): Lighting {
   const group = new THREE.Group();
   group.name = "lighting";
   const hemi = new THREE.HemisphereLight(new THREE.Color("#4a5a7a"), new THREE.Color("#18301a"), 0.22);
@@ -23,7 +23,6 @@ export function createLighting(scene: THREE.Scene, quality: "high" | "low"): Lig
     [-62, 46, -48],
     [62, 46, -48],
   ];
-  const mapSize = quality === "high" ? 2048 : 1024;
   corners.forEach((c, i) => {
     const l = new THREE.DirectionalLight(new THREE.Color("#eef3ff"), i < 2 ? 1.05 : 0.85);
     l.position.set(...c);

@@ -20,6 +20,9 @@ export interface AppOptions {
   width?: number;
   height?: number;
   quality?: "high" | "low";
+  /** Overrides: MSAA samples of the HDR target and shadow map size. */
+  msaa?: number;
+  shadowMap?: number;
   record?: boolean;
   assetBase?: string;
 }
@@ -81,7 +84,9 @@ export class App {
     this.renderer.domElement.id = "stage";
     container.appendChild(this.renderer.domElement);
     this.director = new CameraDirector(this.width / this.height);
-    this.post = new Post(this.renderer, this.scene, this.director.camera, this.width, this.height, opts.quality === "low" ? 0 : 4);
+    // live view: 2x MSAA keeps 1080p above 60 fps on the M3 Pro; fixed-size renders (recording, screenshots) use 4x
+    const msaa = opts.msaa ?? (opts.quality === "low" ? 0 : this.fixedSize || opts.record ? 4 : 2);
+    this.post = new Post(this.renderer, this.scene, this.director.camera, this.width, this.height, msaa);
     if (!this.fixedSize) {
       window.addEventListener("resize", () => this.resize(container.clientWidth, container.clientHeight));
     }
@@ -108,7 +113,7 @@ export class App {
     scene.environment = buildEnvironment(this.renderer);
     scene.environmentIntensity = 1.0;
     scene.add(createSky());
-    this.lighting = createLighting(scene, this.opts.quality ?? "high");
+    this.lighting = createLighting(scene, this.opts.shadowMap ?? (this.opts.quality === "low" ? 1024 : 2048));
     scene.add(createPitch());
     this.stadium = createStadium();
     scene.add(this.stadium.group);

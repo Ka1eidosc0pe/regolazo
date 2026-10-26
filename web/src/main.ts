@@ -28,6 +28,8 @@ const app = new App(stageRoot, source, {
   width: w ? Number(w) : undefined,
   height: h ? Number(h) : undefined,
   quality: params.get("quality") === "low" ? "low" : "high",
+  msaa: params.get("msaa") ? Number(params.get("msaa")) : undefined,
+  shadowMap: params.get("shadow") ? Number(params.get("shadow")) : undefined,
   record: params.get("record") === "1",
 });
 
@@ -37,7 +39,10 @@ const ready = app.init().then(() => {
   const t = params.get("t");
   if (t) source.seek(Number(t));
   if (params.get("paused") === "1") source.pause();
-  if (params.get("record") !== "1") app.start();
+  if (params.get("record") !== "1") {
+    app.start();
+    installKeys();
+  }
   document.body.dataset.ready = "1";
 });
 installAutomation(app, ready, THREE);
@@ -45,3 +50,35 @@ ready.catch((err: unknown) => {
   console.error(err);
   root.insertAdjacentHTML("beforeend", `<pre class="fatal">${String(err)}</pre>`);
 });
+
+/** Live-view keys: 1 broadcast, 2 tactical, 3 replay (follows the ball carrier), space play/pause, arrows seek. */
+function installKeys(): void {
+  window.addEventListener("keydown", (e) => {
+    const c = source.clock();
+    switch (e.key) {
+      case "1":
+        app.setCamera("broadcast");
+        break;
+      case "2":
+        app.setCamera("tactical");
+        break;
+      case "3":
+        app.director.replayTarget = app.state?.base.possession.player ?? app.state?.base.ball.last_touch ?? null;
+        app.setCamera("replay");
+        break;
+      case " ":
+        if (c.playing) source.pause();
+        else source.play();
+        e.preventDefault();
+        break;
+      case "ArrowLeft":
+        source.seek(c.t - 5);
+        break;
+      case "ArrowRight":
+        source.seek(c.t + 5);
+        break;
+      default:
+        break;
+    }
+  });
+}
