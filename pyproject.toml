@@ -31,7 +31,7 @@ packages = ["shared", "sim", "analytics", "vision", "agents", "server"]
 [tool.ruff]
 line-length = 120
 target-version = "py312"
-extend-exclude = ["web", "data", "assets", "runs"]
+extend-exclude = ["web", "data", "assets", "runs", "docs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
