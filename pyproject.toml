@@ -1,0 +1,50 @@
+[project]
+name = "regolazo"
+version = "0.1.0"
+description = "ReGolazo: an AI broadcast crew for synthetic football matches"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "httpx>=0.27",
+    "numpy>=2.1",
+    "openai>=1.60",
+    "pydantic>=2.9",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["shared", "sim", "analytics", "vision", "agents", "server"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["web", "data", "assets", "runs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+exclude = ["^web/", "^data/", "^assets/", "^runs/"]
+
+[[tool.mypy.overrides]]
+module = ["*.tests.*"]
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["shared", "sim", "analytics", "vision", "agents", "server", "scripts"]
+addopts = "--import-mode=importlib -ra"
+markers = ["live: calls real Azure services (deselect with -m 'not live')"]

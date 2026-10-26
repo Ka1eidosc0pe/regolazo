@@ -57,7 +57,7 @@ Mixamo's exact clip names vary; search the term and pick the best-looking match.
 When done, put everything in `assets/third_party/mixamo/` in this project.
 
 ## Inventory (downloaded and verified 2026-10-26)
-37 FBX files in `assets/third_party/mixamo/`. Verified by parsing each with Three.js `FBXLoader` (r170): all load, all clips are 30 fps, animation files contain no meshes, and every animated bone name (`mixamorig*`) exists in the character rig (65 bones), so clips apply to the character directly with no retargeting.
+36 FBX files in `assets/third_party/mixamo/`. Verified by parsing each with Three.js `FBXLoader` (r170): all load, all clips are 30 fps, animation files contain no meshes, and every animated bone name (`mixamorig*`) exists in the character rig (65 bones), so clips apply to the character directly with no retargeting.
 
 | Group | Files |
 |---|---|

@@ -38,10 +38,7 @@ def check_chat(client: AzureOpenAI, deployment: str) -> None:
 def check_tts(lang: str) -> None:
     locale, voice, text = VOICES[lang]
     region = os.environ["AZURE_SPEECH_REGION"]
-    ssml = (
-        f"<speak version='1.0' xml:lang='{locale}'>"
-        f"<voice name='{voice}'>{text}</voice></speak>"
-    )
+    ssml = f"<speak version='1.0' xml:lang='{locale}'><voice name='{voice}'>{text}</voice></speak>"
     r = httpx.post(
         f"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1",
         headers={

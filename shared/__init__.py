@@ -1,0 +1,1 @@
+"""ReGolazo shared package."""
