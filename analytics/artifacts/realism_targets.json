@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "description": "Real-football distributions for the simulator realism test (PLAN.md Step 3). Box-score stats come from StatsBomb Open Data men's matches (periods 1-4, shoot-outs excluded); passes exclude throw-ins, completion = pass without an outcome (StatsBomb convention). Distance covered comes from Metrica sample games 1-2 (outfield players with >= 85 minutes). 'band' is a suggested tolerance for the simulator's mean over many matches, not for a single match.",
+  "sources": {
+    "statsbomb_matches": 644,
+    "statsbomb_team_matches": 1288,
+    "metrica_players": 30
+  },
+  "goals_per_match": {
+    "unit": "goals (both teams)",
+    "mean": 2.700310559006211,
+    "std": 1.660613135042002,
+    "p10": 1.0,
+    "p50": 3.0,
+    "p90": 5.0,
+    "n": 644,
+    "band": [
+      2.2952639751552795,
+      3.1053571428571427
+    ],
+    "band_rule": "mean +/- 15% (for the mean over >= 200 simulated matches)"
+  },
+  "shots_per_team": {
+    "unit": "shots per team per match",
+    "mean": 12.819099378881987,
+    "std": 5.530508037890492,
+    "p10": 6.0,
+    "p50": 12.0,
+    "p90": 20.0,
+    "n": 1288,
+    "band": [
+      10.896234472049688,
+      14.741964285714285
+    ],
+    "band_rule": "mean +/- 15% (for the mean over >= 200 simulated matches)"
+  },
+  "pass_completion_pct": {
+    "unit": "% of passes completed",
+    "mean": 79.07468196622028,
+    "std": 7.391189819350474,
+    "p10": 67.47735904177623,
+    "p50": 78.18996591416467,
+    "p90": 86.49792879240732,
+    "n": 1288,
+    "band": [
+      75.12094786790927,
+      83.0284160645313
+    ],
+    "band_rule": "mean +/- 5% (for the mean over >= 200 simulated matches)"
+  },
+  "passes_per_team": {
+    "unit": "passes per team per match (excl. throw-ins)",
+    "mean": 482.02329192546586,
+    "std": 133.09657096921174,
+    "p10": 322.0,
+    "p50": 467.0,
+    "p90": 651.0,
+    "n": 1288,
+    "band": [
+      409.719798136646,
+      554.3267857142857
+    ],
+    "band_rule": "mean +/- 15% (for the mean over >= 200 simulated matches)"
+  },
+  "header_share_of_shots": {
+    "unit": "fraction of shots that are headers",
+    "mean": 0.16734298346556842,
+    "std": 0.134669312678344,
+    "p10": 0.0,
+    "p50": 0.15384615384615385,
+    "p90": 0.3333333333333333,
+    "n": 1287,
+    "band": [
+      0.1255072375991763,
+      0.20917872933196052
+    ],
+    "band_rule": "mean +/- 25% (for the mean over >= 200 simulated matches)"
+  },
+  "mean_shot_distance_m": {
+    "unit": "metres from goal centre",
+    "mean": 16.420061596046246,
+    "std": 2.562428847876685,
+    "p10": 13.457504886428664,
+    "p50": 16.40954072788483,
+    "p90": 19.558398634890867,
+    "n": 1287,
+    "band": [
+      14.77805543644162,
+      18.06206775565087
+    ],
+    "band_rule": "mean +/- 10% (for the mean over >= 200 simulated matches)"
+  },
+  "distance_per_outfield_player_m": {
+    "unit": "metres per outfield player per 90 min",
+    "mean": 10357.165968599804,
+    "std": 684.922946941879,
+    "p10": 9585.956903638591,
+    "p50": 10286.827311338959,
+    "p90": 11235.886062574778,
+    "n": 30,
+    "band": [
+      9321.449371739824,
+      11392.882565459784
+    ],
+    "band_rule": "mean +/- 10% (for the mean over >= 200 simulated matches)"
+  }
+}

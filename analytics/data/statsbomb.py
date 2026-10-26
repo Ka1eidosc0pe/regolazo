@@ -162,16 +162,19 @@ def goal_plane_end(start: tuple[float, float], end: list[float]) -> tuple[float,
     """Project a shot's SB end location onto the goal plane. Returns (end_y, end_z, end_x) in metres.
 
     Saved shots end where the keeper touched the ball (often 1-4 yd off the line); y is extrapolated along the shot
-    line to the goal line and z is scaled by the same ratio (ball rising from ground level), then clipped to the frame.
+    line to the goal line and z is scaled by the same ratio (ball rising from ground level). The projected values are
+    snapped back to StatsBomb's 0.1-yard lattice: otherwise every goal (recorded on the lattice) and every save
+    (projected off it) would be separable by quantisation alone, which a tree model learns (AUC 0.98 on placement).
     """
     ex, ey = to_m(end)
+    y_sb = float(end[1])
     z_sb = float(end[2]) if len(end) > 2 else float("nan")
-    gy, gz = statsbomb_goal_plane(float(end[1]), z_sb)
-    sx, sy = start
-    if ex < GOAL_X - 0.05 and ex > sx + 0.5:
-        ratio = (GOAL_X - sx) / (ex - sx)
-        gy = sy + (ey - sy) * ratio
-        gz = gz * min(ratio, 3.0)
+    sx_sb, sy_sb = float(start[0]) * 120.0 / 105.0 + 60.0, 40.0 - float(start[1]) * 80.0 / 68.0
+    if ex < GOAL_X - 0.05 and ex > start[0] + 0.5:
+        ratio = (120.0 - sx_sb) / (float(end[0]) - sx_sb)
+        y_sb = round(sy_sb + (y_sb - sy_sb) * ratio, 1)
+        z_sb = round(z_sb * min(ratio, 3.0), 1)
+    gy, gz = statsbomb_goal_plane(y_sb, z_sb)
     return gy, float(np.clip(gz, 0.0, 2.44)) if not math.isnan(gz) else float("nan"), ex
 
 

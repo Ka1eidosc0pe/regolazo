@@ -94,13 +94,15 @@ def test_shootout_shots_are_dropped() -> None:
     assert sb.extract_shots([_start(), _shot(period=5)]) == []
 
 
-def test_saved_shot_end_is_projected_to_goal_line() -> None:
-    gy, gz, gx = sb.goal_plane_end((10.0, 0.0), [114.0, 38.0, 1.0])
-    ex, ey = sb.to_m([114.0, 38.0])
-    ratio = (52.5 - 10.0) / (ex - 10.0)
-    assert gx == pytest.approx(ex)
-    assert gy == pytest.approx(ey * ratio)
-    assert gz == pytest.approx(1.0 * 2.44 / 2.67 * ratio)
+def test_saved_shot_end_is_projected_to_goal_line_on_the_sb_lattice() -> None:
+    start = sb.to_m([100.0, 40.0])
+    gy, gz, gx = sb.goal_plane_end(start, [110.0, 38.0, 1.0])
+    # From (100, 40) through (110, 38): the goal line (x = 120) is crossed at y = 36.0, z scaled 2x = 2.0 yd.
+    assert gx == pytest.approx(sb.to_m([110.0, 38.0])[0])
+    assert gy == pytest.approx(4.0 * 7.32 / 8)
+    assert gz == pytest.approx(2.0 * 2.44 / 2.67)
+    gy2, _, _ = sb.goal_plane_end(start, [110.0, 38.02, 1.0])
+    assert gy2 == pytest.approx(gy)  # snapped to the 0.1-yard lattice
 
 
 def _pass(pid: str, loc: list[float], end: list[float], **q: Any) -> dict[str, Any]:
