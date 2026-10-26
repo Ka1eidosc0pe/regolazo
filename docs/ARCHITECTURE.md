@@ -73,6 +73,7 @@ Vocabulary (event types, techniques, outcomes, phases) is in `shared/schemas/enu
 - **Ids.** Players are `H07` / `A10` (team letter + shirt number); events are `ev_…` (detected events `ev_d_…`).
 - **Three.js mapping.** The renderer maps world (x, y, z) to Three.js (x, z, −y) (y-up).
 - **Wire format.** JSON in serialization mode: fields with defaults are always present, so TS types have no optional-vs-undefined ambiguity. WebSocket frames are full `SimState` JSON (about 150 KB/s at 25 Hz, no delta encoding). Fork, preview and rollouts are REST.
+- **Event delivery on the stream.** `events` and `moment` messages are sent when a session's clock passes them during playback, on every pass: a backward seek followed by play delivers them again, so clients dedupe by `MatchEvent.id` / `DecisionMoment.id`. A forward seek skips the span; clients fetch history from `GET /api/events` and `GET /api/moments`.
 - **Detected events.** The Spotter may leave qualifiers it can't see as null (ground truth may not; see `GROUND_TRUTH_REQUIRED`) and identifies actors by `track_id` when it has no player id.
 - **Possession.** `possession_id` follows taxonomy §4.7 (new id on a change of team *and* on every restart) and is the same number in `SimState` and `MatchEvent`.
 
