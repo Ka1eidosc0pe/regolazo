@@ -1,11 +1,11 @@
 import json
+from dataclasses import fields
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pytest
 
-from analytics import design
 from analytics.models import TrainedModels, load_trained
 from analytics.paths import ARTIFACT_DIR
 from analytics.trees import TreeEnsemble, from_sklearn
@@ -28,18 +28,23 @@ def models() -> TrainedModels:
     return load_trained(ARTIFACT_DIR)
 
 
-def _golden(name: str) -> dict[str, Any]:
+def _golden(name: str, cls: type[Any]) -> tuple[Any, np.ndarray]:
+    """Golden inputs (the feature dataclass fields only) and the exported model's outputs at training time."""
     raw = json.loads((FIXTURES / f"golden_{name}.json").read_text())
-    return {k: np.asarray(v, dtype=np.float64) for k, v in raw.items()}
+    assert "StatsBomb" in raw["note"]
+    kwargs = {f.name: np.asarray(raw[f.name]) for f in fields(cls)}
+    return cls(**kwargs), np.asarray(raw["expected"])
 
 
-def test_golden_predictions_match_training_time_sklearn_outputs(models: TrainedModels) -> None:
-    g = _golden("xg")
-    np.testing.assert_allclose(models.xg(design.shot_features_from_table(g)), g["expected"], atol=1e-5)
-    g = _golden("psxg")
-    np.testing.assert_allclose(models.psxg(design.post_shot_features_from_table(g)), g["expected"], atol=1e-5)
-    g = _golden("xpass")
-    np.testing.assert_allclose(models.xpass(design.pass_features_from_table(g)), g["expected"], atol=1e-5)
+def test_golden_predictions_pin_the_numpy_evaluator(models: TrainedModels) -> None:
+    """The golden outputs were written by the same numpy evaluator at training time (where it was also checked
+    against scikit-learn on every training row); this pins the shipped artifacts and evaluator to them."""
+    f, expected = _golden("xg", ShotFeatures)
+    np.testing.assert_allclose(models.xg(f), expected, atol=1e-6)
+    f, expected = _golden("psxg", PostShotFeatures)
+    np.testing.assert_allclose(models.psxg(f), expected, atol=1e-6)
+    f, expected = _golden("xpass", PassFeatures)
+    np.testing.assert_allclose(models.xpass(f), expected, atol=1e-6)
 
 
 def test_tree_export_matches_sklearn(tmp_path: Path) -> None:
@@ -179,3 +184,45 @@ def test_outputs_are_probabilities_and_vectorized(models: TrainedModels) -> None
     passes = _passes(n, end_x=rng.uniform(-50, 50, n), end_y=rng.uniform(-33, 33, n), kind=rng.integers(0, 7, n))
     r = models.xpass(passes)
     assert r.shape == (n,) and np.all((r > 0) & (r < 1))
+
+
+# ----------------------------------------------------------------------------------------- edge cases (review)
+
+
+def test_psxg_height_sweep_is_non_decreasing_towards_the_corners(models: TrainedModels) -> None:
+    ys = [0.0, 1.0, 2.0, 3.0, 3.4]
+    for z in (0.2, 0.8, 1.4, 2.0, 2.3, 2.44):
+        p = models.psxg(_post(5, end_y=ys, end_z=[z] * 5))
+        assert np.all(np.diff(p) >= -1e-9), (z, p)
+        assert p[-1] > p[0] + 0.3, (z, p)
+
+
+def test_psxg_top_corner_is_not_a_certain_save(models: TrainedModels) -> None:
+    top_corner = models.psxg(_post(1, end_y=[3.2], end_z=[2.2]))[0]
+    central = models.psxg(_post(1, end_y=[0.0], end_z=[1.2]))[0]
+    assert top_corner > central + 0.3
+    assert top_corner > 0.4
+    # No cliff at the bar: just under it is about as hard to save as mid-height.
+    mid, high, bar = models.psxg(_post(3, end_y=[3.0] * 3, end_z=[1.2, 2.3, 2.44]))
+    assert high > 0.8 * mid and bar > 0.8 * high
+
+
+def test_xg_is_bounded_for_unmarked_shooters(models: TrainedModels) -> None:
+    nd = [10.0, 15.0, 20.0, 30.0]
+    p = models.xg(_shots(4, nearest_defender_m=nd, n_defenders_in_cone=[0] * 4))
+    np.testing.assert_allclose(p, p[0])  # clipped at ~p99 of training (10 m): no extrapolation
+    assert np.all(p < models.penalty_xg)
+    # Keeper distances are clipped as well: two keepers far behind a shooter 32.5 m out look the same.
+    far_keeper = models.xg(_shots(2, x=[20.0, 20.0], gk_x=[-15.0, -30.0], gk_y=[0.0, 0.0]))
+    assert far_keeper[0] == pytest.approx(far_keeper[1])
+
+
+def test_xpass_has_no_touchline_cliff(models: TrainedModels) -> None:
+    p = models.xpass(_passes(4, x=[10.0] * 4, y=[25.0] * 4, end_x=[22.0] * 4, end_y=[33.0, 33.5, 34.0, 35.0]))
+    assert np.max(p) - np.min(p) < 0.02
+
+
+def test_xpass_falls_with_lane_defenders(models: TrainedModels) -> None:
+    p = models.xpass(_passes(11, defenders_in_lane=list(range(11))))
+    assert np.all(np.diff(p[:4]) < 0), p  # strictly decreasing 0 -> 3
+    assert np.all(np.diff(p) <= 1e-12), p  # non-increasing after (capped at 3)

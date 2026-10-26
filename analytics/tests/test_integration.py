@@ -8,9 +8,17 @@ import pytest
 
 from analytics.models import TrainedModels
 from analytics.paths import ARTIFACT_DIR, REPO_ROOT
-from analytics.scene import Scene, pass_features, pitch_control_grid, scene_from_state, shot_features
+from analytics.scene import (
+    Scene,
+    goalkeeper_ids,
+    pass_features,
+    pitch_control_grid,
+    scene_from_state,
+    shot_features,
+)
 from analytics.xt import cell_index
-from shared.model_api import SHOT_BODY_PART, SHOT_TECHNIQUE, AnalyticsModels, load_models
+from shared.model_api import SHOT_BODY_PART, SHOT_TECHNIQUE, AnalyticsModels, PostShotFeatures, load_models
+from shared.schemas.meta import MatchMeta
 from shared.schemas.models import ModelOutputs
 from shared.schemas.state import SimState
 
@@ -129,3 +137,72 @@ def test_pitch_control_grid_contract_in_world_frame(models: AnalyticsModels) -> 
     assert np.mean(np.abs(h + a - 1.0)) < 0.1
     # values[0] is the cell nearest (-52.5, -34): home's defensive corner.
     assert home.values[0] > 0.5 > away.values[0]
+
+
+def _scene(def_pos: list[list[float]], gk_id: str | None, shooter: tuple[float, float]) -> Scene:
+    ids = [f"A{i + 1:02d}" for i in range(len(def_pos))]
+    return Scene(
+        team="home",
+        att_ids=["H09"],
+        att_pos=np.array([shooter]),
+        att_vel=np.zeros((1, 2)),
+        def_ids=ids,
+        def_pos=np.array(def_pos),
+        def_vel=np.zeros((len(def_pos), 2)),
+        ball=np.array([shooter[0], shooter[1], 0.0]),
+        def_gk_id=gk_id,
+    )
+
+
+def test_keepers_come_from_match_meta() -> None:
+    meta = MatchMeta.model_validate_json((FIXTURES / "MatchMeta.json").read_text())
+    state = SimState.model_validate_json((FIXTURES / "SimState.json").read_text())
+    gks = goalkeeper_ids(meta)
+    assert gks == {"H01", "A01"}
+    scene = scene_from_state(state, goalkeepers=gks)
+    assert scene.def_gk_id == "A01" and scene.def_ids[scene.def_gk or 0] == "A01"
+    away = scene_from_state(state, "away", goalkeepers=gks)
+    assert away.def_ids[away.def_gk or 0] == "H01"
+
+
+def test_keeper_far_off_his_line(models: AnalyticsModels) -> None:
+    """Empty net: the keeper (A01) has rushed 30 m out and is beaten; shot from 40 m."""
+    defenders = [[22.5, 5.0], [5.0, 10.0], [0.0, -10.0]]
+    with_id = _scene(defenders, "A01", (12.5, 0.0))
+    guessed = _scene(defenders, None, (12.5, 0.0))
+    assert with_id.def_gk == 0 and guessed.def_gk is None  # the heuristic finds no keeper within 25 m of goal
+    p_id = models.xg(shot_features(with_id, np.array([12.5, 0.0])))[0]
+    p_guess = models.xg(shot_features(guessed, np.array([12.5, 0.0])))[0]
+    assert p_id > 3 * p_guess and p_id > 0.04
+    # The save model (used to resolve shots) treats a keeper this far out as beaten.
+    post = PostShotFeatures(
+        end_y=np.array([0.0, 2.0]),
+        end_z=np.array([1.0, 1.0]),
+        speed_mps=np.array([22.0, 22.0]),
+        distance_m=np.array([40.0, 40.0]),
+        gk_x=np.array([22.5, 22.5]),
+        gk_y=np.array([5.0, 5.0]),
+        gk_dive=np.array([50.0, 50.0]),
+    )
+    assert np.all(models.psxg(post) > 0.8)
+
+
+def test_defender_covering_the_line_is_not_the_keeper(models: AnalyticsModels) -> None:
+    """Keeper rushing out to (45, 2) while a defender covers the line at (52, 0.5); shot from (40, 3)."""
+    defenders = [[45.0, 2.0], [52.0, 0.5], [30.0, -10.0]]
+    with_id = _scene(defenders, "A01", (40.0, 3.0))
+    guessed = _scene(defenders, None, (40.0, 3.0))
+    assert with_id.def_gk == 0 and guessed.def_gk == 1  # the heuristic picks the covering defender
+    p_id = models.xg(shot_features(with_id, np.array([40.0, 3.0])))[0]
+    p_guess = models.xg(shot_features(guessed, np.array([40.0, 3.0])))[0]
+    assert p_id > p_guess + 0.2
+    # Pitch control: the keeper bonus follows the real keeper.
+    assert isinstance(models, TrainedModels)
+    pts = np.array([[45.5, 2.0], [52.0, 0.5]])
+    a = models.pitch_control(
+        with_id.att_pos, with_id.att_vel, with_id.def_pos, with_id.def_vel, with_id.ball[:2], pts, def_gk=0
+    )
+    b = models.pitch_control(
+        with_id.att_pos, with_id.att_vel, with_id.def_pos, with_id.def_vel, with_id.ball[:2], pts, def_gk=1
+    )
+    assert a[0] < b[0] and a[1] > b[1]

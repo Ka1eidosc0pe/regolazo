@@ -1,4 +1,3 @@
-import math
 from typing import Any
 
 import numpy as np
@@ -96,13 +95,36 @@ def test_shootout_shots_are_dropped() -> None:
 
 def test_saved_shot_end_is_projected_to_goal_line_on_the_sb_lattice() -> None:
     start = sb.to_m([100.0, 40.0])
-    gy, gz, gx = sb.goal_plane_end(start, [110.0, 38.0, 1.0])
-    # From (100, 40) through (110, 38): the goal line (x = 120) is crossed at y = 36.0, z scaled 2x = 2.0 yd.
-    assert gx == pytest.approx(sb.to_m([110.0, 38.0])[0])
-    assert gy == pytest.approx(4.0 * 7.32 / 8)
-    assert gz == pytest.approx(2.0 * 2.44 / 2.67)
-    gy2, _, _ = sb.goal_plane_end(start, [110.0, 38.02, 1.0])
+    # From (100, 40) through (116, 38): ratio 20 / 16 = 1.25, goal line crossed at y = 37.5; z stays the touch height.
+    gy, gz, gx, ratio = sb.goal_plane_end(start, [116.0, 38.0, 1.0])
+    assert ratio == pytest.approx(1.25)
+    assert gx == pytest.approx(sb.to_m([116.0, 38.0])[0])
+    assert gy == pytest.approx(2.5 * 7.32 / 8)
+    assert gz == pytest.approx(1.0 * 2.44 / 2.67)
+    gy2, _, _, _ = sb.goal_plane_end(start, [116.0, 38.02, 1.0])
     assert gy2 == pytest.approx(gy)  # snapped to the 0.1-yard lattice
+    # A save far off the line (ratio 2) is extrapolated by at most MAX_PROJECTION_RATIO, and its z is never scaled.
+    gy3, gz3, _, ratio3 = sb.goal_plane_end(start, [110.0, 38.0, 2.4])
+    assert ratio3 == pytest.approx(2.0)
+    assert gy3 == pytest.approx((40.0 - (40.0 - 2.0 * sb.MAX_PROJECTION_RATIO)) * 7.32 / 8)
+    assert gz3 == pytest.approx(2.4 * 2.44 / 2.67)
+
+
+def test_keeper_y_uses_goal_plane_scale_for_post_shot_features() -> None:
+    (row,) = sb.extract_shots(
+        [
+            _start(),
+            _shot(
+                shot={
+                    "freeze_frame": [
+                        {"location": [119.0, 43.0], "teammate": False, "position": {"name": "Goalkeeper"}},
+                    ]
+                }
+            ),
+        ]
+    )
+    assert row["gk_y"] == pytest.approx(-3.0 * 68 / 80)
+    assert row["gk_y_goal_plane"] == pytest.approx(-3.0 * 7.32 / 8)
 
 
 def _pass(pid: str, loc: list[float], end: list[float], **q: Any) -> dict[str, Any]:
@@ -115,17 +137,26 @@ def _pass(pid: str, loc: list[float], end: list[float], **q: Any) -> dict[str, A
     }
 
 
+def _mate(x: float, y: float) -> dict[str, Any]:
+    return {"location": [x, y], "teammate": True}
+
+
 def test_extract_passes_kinds_outcomes_and_geometry() -> None:
     frames = {
         "p1": [
             {"location": [70.0, 41.0], "teammate": False},
             {"location": [81.0, 40.0], "teammate": False},
             {"location": [55.0, 40.0], "teammate": True, "actor": True},
+            _mate(79.0, 40.0),  # the receiver when the ball is struck (it arrives at 80, 40)
+            _mate(60.0, 70.0),
         ],
-        "p2": [{"location": [10.0, 10.0], "teammate": False}],
-        "p3": [],
-        "p4": [],
-        "p5": [],
+        # Failed cross intercepted at (110, 40): the target is the striker at (112, 38), not the interception point.
+        "p2": [{"location": [110.0, 40.0], "teammate": False}, _mate(112.0, 38.0), _mate(90.0, 20.0)],
+        "p3": [_mate(50.0, 40.0)],
+        "p4": [_mate(70.0, 40.0)],
+        "p5": [_mate(70.0, 40.0)],
+        "p7": [{"location": [70.0, 41.0], "teammate": False}],  # no visible teammate -> dropped
+        "p8": [_mate(70.0, 80.0)],  # target on the touchline -> dropped
     }
     events = [
         _pass("p1", [60.0, 40.0], [80.0, 40.0]),
@@ -134,14 +165,19 @@ def test_extract_passes_kinds_outcomes_and_geometry() -> None:
         _pass("p4", [60.0, 40.0], [70.0, 40.0], height="High Pass"),
         _pass("p5", [60.0, 40.0], [70.0, 40.0], type={"name": "Throw-in"}),
         _pass("p6", [60.0, 40.0], [70.0, 40.0]),  # no 360 frame
+        _pass("p7", [60.0, 40.0], [70.0, 40.0], outcome={"name": "Incomplete"}),
+        _pass("p8", [60.0, 40.0], [70.0, 81.0], outcome={"name": "Out"}),
     ]
     rows = sb.extract_passes(events, frames)
     assert len(rows) == 4
     p1, p2, p3, p4 = rows
     assert p1["kind"] == PASS_KIND["standard"] and p1["completed"] == 1.0
-    assert p1["defenders_in_lane"] == 2.0
-    assert p1["nearest_defender_to_receiver_m"] == pytest.approx(math.hypot(1.0, 0.0) * 105 / 120)
+    assert (p1["end_x"], p1["end_y"]) == pytest.approx(sb.to_m([79.0, 40.0]))
+    assert p1["target_proxy_m"] == pytest.approx(105 / 120)
+    assert p1["defenders_in_lane"] == 2.0  # (70, 41) on the lane, (81, 40) within 2 m of the target
+    assert p1["nearest_defender_to_receiver_m"] == pytest.approx(2 * 105 / 120)
     assert p2["kind"] == PASS_KIND["cross"] and p2["completed"] == 0.0 and p2["height"] == PASS_HEIGHT["high"]
+    assert (p2["end_x"], p2["end_y"]) == pytest.approx(sb.to_m([112.0, 38.0]))
     assert p3["kind"] == PASS_KIND["back_pass"]
     assert p4["kind"] == PASS_KIND["chipped"]
 

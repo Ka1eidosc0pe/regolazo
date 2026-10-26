@@ -77,8 +77,8 @@ def player_kinematics(g: GameKinematics) -> list[dict[str, float]]:
             if s.size < n_speed:
                 continue
             top = max(top, float(np.max(_rolling_mean(s, n_speed))))
-            # Peak acceleration: speed gain over 0.5 s of a 0.5 s-smoothed speed, 99.5th percentile (the raw maximum
-            # is dominated by tracking glitches).
+            # Peak acceleration: speed gain over 0.5 s of a 0.5 s-smoothed speed, at the ACCEL_PERCENTILE (99.9th)
+            # percentile (the raw maximum is dominated by tracking glitches).
             s_sm = _rolling_mean(s, n_acc)
             if s_sm.size > n_acc:
                 gain = (s_sm[n_acc:] - s_sm[:-n_acc]) / ACCEL_WINDOW_S

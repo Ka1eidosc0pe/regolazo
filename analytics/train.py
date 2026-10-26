@@ -8,6 +8,7 @@ docs/img/, and golden prediction vectors under analytics/tests/fixtures/ for the
 
 import json
 import time
+from dataclasses import dataclass, fields
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -27,9 +28,18 @@ from sklearn.preprocessing import StandardScaler  # type: ignore[import-untyped]
 from analytics import design, physical, xt
 from analytics.build_dataset import cache_dir, load_table
 from analytics.data import metrica
+from analytics.features import gk_geometry
+from analytics.models import LogisticModel, psxg_with_priors
 from analytics.paths import ARTIFACT_DIR, DOCS_IMG_DIR, REPO_ROOT
 from analytics.trees import TreeEnsemble, from_sklearn
-from shared.model_api import PASS_KIND, SHOT_BODY_PART, SHOT_SITUATION, PitchControlParams
+from shared.model_api import (
+    PASS_KIND,
+    SHOT_BODY_PART,
+    SHOT_SITUATION,
+    PitchControlParams,
+    PostShotFeatures,
+    ShotFeatures,
+)
 
 FloatArray = npt.NDArray[np.float64]
 Table = dict[str, npt.NDArray[Any]]
@@ -78,24 +88,70 @@ def calibration(y: FloatArray, p: FloatArray, bins: int = 10) -> list[list[float
     return [[float(a), float(b)] for a, b in zip(mean, frac, strict=True)]
 
 
-def fit_gbm(x: FloatArray, y: FloatArray, monotonic: list[int], **kw: Any) -> Any:
-    """Early-stopped fit to choose the number of trees, then a refit on all rows with that many trees."""
-    params: dict[str, Any] = {
-        "learning_rate": 0.05,
-        "max_leaf_nodes": 15,
-        "min_samples_leaf": 40,
-        "l2_regularization": 1.0,
-        "monotonic_cst": monotonic,
-        "random_state": SEED,
-    }
-    params.update(kw)
-    probe = HistGradientBoostingClassifier(
-        max_iter=1000, early_stopping=True, validation_fraction=0.15, n_iter_no_change=40, **params
+VAL_FRACTION = 0.2
+"""Share of the *training* matches carved out (grouped by match) to choose GBM settings, tree counts and blend
+weights. The held-out test matches are never used for any choice."""
+
+
+def inner_split(
+    match_ids: FloatArray, train: npt.NDArray[np.bool_], seed: int = SEED
+) -> tuple[npt.NDArray[np.bool_], npt.NDArray[np.bool_]]:
+    """Split the training rows into fit / validation by match."""
+    ids = np.unique(match_ids[train])
+    rng = np.random.default_rng(seed + 1000)
+    val_ids = rng.choice(ids, size=round(len(ids) * VAL_FRACTION), replace=False)
+    val = train & np.isin(match_ids, val_ids)
+    return train & ~val, val
+
+
+@dataclass(frozen=True)
+class GbmChoice:
+    params: dict[str, Any]
+    n_iter: int
+    val_log_loss: float
+    grid: list[dict[str, Any]]
+
+
+def _hgb(monotonic: list[int], n_iter: int, **params: Any) -> Any:
+    return HistGradientBoostingClassifier(
+        max_iter=n_iter, early_stopping=False, monotonic_cst=monotonic, random_state=SEED, **params
     )
-    probe.fit(x, y)
-    model = HistGradientBoostingClassifier(max_iter=int(probe.n_iter_), early_stopping=False, **params)
-    model.fit(x, y)
-    return model
+
+
+def select_gbm(
+    x: FloatArray,
+    y: FloatArray,
+    fit: npt.NDArray[np.bool_],
+    val: npt.NDArray[np.bool_],
+    monotonic: list[int],
+    grid: list[dict[str, Any]],
+    max_iter: int,
+) -> tuple[GbmChoice, Any]:
+    """Grid over GBM settings; tree count = the iteration with the lowest validation log-loss (early stopping on the
+    grouped validation matches). Returns the choice and the winning model fitted on ``fit`` (all ``max_iter`` trees)."""
+    best: tuple[float, int, dict[str, Any], Any] | None = None
+    table: list[dict[str, Any]] = []
+    for params in grid:
+        model = _hgb(monotonic, max_iter, **params).fit(x[fit], y[fit])
+        losses = [log_loss(y[val], np.clip(p[:, 1], 1e-9, 1 - 1e-9)) for p in model.staged_predict_proba(x[val])]
+        i = int(np.argmin(losses))
+        table.append({**params, "best_iter": i + 1, "val_log_loss": float(losses[i])})
+        if best is None or losses[i] < best[0]:
+            best = (float(losses[i]), i + 1, params, model)
+    assert best is not None
+    return GbmChoice(best[2], best[1], best[0], table), best[3]
+
+
+def staged_at(model: Any, x: FloatArray, n_iter: int) -> FloatArray:
+    """Predictions of the first ``n_iter`` trees of a model fitted with more."""
+    for i, p in enumerate(model.staged_predict_proba(x), start=1):
+        if i == n_iter:
+            return np.asarray(p[:, 1], dtype=np.float64)
+    raise ValueError(n_iter)
+
+
+def fit_gbm(x: FloatArray, y: FloatArray, monotonic: list[int], choice: GbmChoice) -> Any:
+    return _hgb(monotonic, choice.n_iter, **choice.params).fit(x, y)
 
 
 def fit_logit(x: FloatArray, y: FloatArray) -> tuple[Any, Any]:
@@ -115,15 +171,22 @@ def logit_json(scaler: Any, model: Any, names: list[str]) -> dict[str, Any]:
 
 
 def export_checked(model: Any, x: FloatArray, names: list[str]) -> TreeEnsemble:
+    """Flatten a fitted model and check the numpy evaluator against scikit-learn on every training row."""
     ens = from_sklearn(model, names)
     diff = np.max(np.abs(ens.predict_proba(x) - model.predict_proba(x)[:, 1]))
     assert diff < 1e-5, f"numpy evaluator disagrees with sklearn by {diff}"
     return ens
 
 
-def save_golden(name: str, table: Table, idx: npt.NDArray[np.int64], expected: FloatArray) -> None:
+def save_golden(name: str, features: Any, idx: npt.NDArray[np.int64], expected: FloatArray) -> None:
+    """Store only the model inputs (the shared feature dataclass fields) and the numpy evaluator's outputs."""
     GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
-    payload = {k: v[idx].tolist() for k, v in table.items()}
+    payload: dict[str, Any] = {
+        "note": "Model inputs derived from StatsBomb Open Data (https://github.com/statsbomb/open-data); "
+        "expected = outputs of the exported model at training time.",
+    }
+    for f in fields(features):
+        payload[f.name] = np.asarray(getattr(features, f.name))[idx].tolist()
     payload["expected"] = expected.tolist()
     (GOLDEN_DIR / f"golden_{name}.json").write_text(json.dumps(payload))
 
@@ -158,38 +221,87 @@ def plot_calibration(path: Path, title: str, curves: dict[str, list[list[float]]
 # ----------------------------------------------------------------------------------------------- models
 
 
-XG_GBM_PARAMS: dict[str, Any] = {"learning_rate": 0.02, "min_samples_leaf": 60, "l2_regularization": 3.0}
+XG_GRID: list[dict[str, Any]] = [
+    {"learning_rate": 0.05, "max_leaf_nodes": 15, "min_samples_leaf": 40, "l2_regularization": 1.0},
+    {"learning_rate": 0.02, "max_leaf_nodes": 15, "min_samples_leaf": 60, "l2_regularization": 3.0},
+    {"learning_rate": 0.03, "max_leaf_nodes": 8, "min_samples_leaf": 80, "l2_regularization": 1.0},
+]
+PSXG_GRID: list[dict[str, Any]] = [
+    {"learning_rate": 0.05, "max_leaf_nodes": 15, "min_samples_leaf": 30, "l2_regularization": 1.0},
+    {"learning_rate": 0.03, "max_leaf_nodes": 8, "min_samples_leaf": 50, "l2_regularization": 3.0},
+]
+XPASS_GRID: list[dict[str, Any]] = [
+    {"learning_rate": 0.1, "max_leaf_nodes": 31, "min_samples_leaf": 100, "l2_regularization": 1.0},
+    {"learning_rate": 0.1, "max_leaf_nodes": 63, "min_samples_leaf": 200, "l2_regularization": 1.0},
+]
+BLEND_WEIGHTS = np.round(np.linspace(0.0, 1.0, 11), 2)
 
 
-def _blend(p_gbm: FloatArray, p_lr: FloatArray) -> FloatArray:
-    z = (design.logit(p_gbm) + design.logit(p_lr)) / 2
+def _blend(p_gbm: FloatArray, p_lr: FloatArray, w: float) -> FloatArray:
+    """xG = sigmoid(w * logit(GBM) + (1 - w) * logit(logistic))."""
+    z = w * design.logit(p_gbm) + (1 - w) * design.logit(p_lr)
     return np.asarray(1.0 / (1.0 + np.exp(-z)), dtype=np.float64)
 
 
+@dataclass(frozen=True)
+class XgFit:
+    choice: GbmChoice
+    weight: float
+    val_log_loss_by_weight: dict[str, float]
+    gbm: Any
+    scaler: Any
+    lr: Any
+
+
+def fit_xg(x: FloatArray, xl: FloatArray, y: FloatArray, match_ids: FloatArray, train: npt.NDArray[np.bool_]) -> XgFit:
+    """All choices (GBM settings, tree count, blend weight) on grouped validation matches inside ``train``; then the
+    two models are refit on all of ``train``."""
+    mono = design.monotonic_vector(design.XG_FEATURES, design.XG_MONOTONIC)
+    fit, val = inner_split(match_ids, train)
+    choice, probe = select_gbm(x, y, fit, val, mono, XG_GRID, max_iter=1500)
+    pg = staged_at(probe, x[val], choice.n_iter)
+    sc, lr = fit_logit(xl[fit], y[fit])
+    pl = lr.predict_proba(sc.transform(xl[val]))[:, 1]
+    losses = {f"{w:.1f}": float(log_loss(y[val], _blend(pg, pl, float(w)))) for w in BLEND_WEIGHTS}
+    weight = float(min(losses, key=losses.__getitem__))
+    gbm = fit_gbm(x[train], y[train], mono, choice)
+    sc_t, lr_t = fit_logit(xl[train], y[train])
+    return XgFit(choice, weight, losses, gbm, sc_t, lr_t)
+
+
+def _xg_predict(f: XgFit, x: FloatArray, xl: FloatArray) -> tuple[FloatArray, FloatArray, FloatArray]:
+    pg = f.gbm.predict_proba(x)[:, 1]
+    pl = f.lr.predict_proba(f.scaler.transform(xl))[:, 1]
+    return _blend(pg, pl, f.weight), pg, pl
+
+
 def train_xg(shots: Table) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Shipped xG = mean of the logits of a gradient-boosted model and a logistic model (best on repeated splits)."""
+    """Shipped xG: logit blend of a gradient-boosted and a logistic model, weight chosen on validation matches."""
     pen = shots["situation"] == SHOT_SITUATION["penalty"]
     penalty_rate = float(shots["goal"][pen].mean())
     t = {k: v[~pen] for k, v in shots.items()}
-    x = design.xg_matrix(design.shot_features_from_table(t))
+    feats = design.shot_features_from_table(t)
+    x = design.xg_matrix(feats)
     xl = design.xg_logistic_matrix(x)
     y = t["goal"]
     tr, te = match_split(t["match_id"])
-    mono = design.monotonic_vector(design.XG_FEATURES, design.XG_MONOTONIC)
-
-    gbm = fit_gbm(x[tr], y[tr], mono, **XG_GBM_PARAMS)
-    p_gbm = gbm.predict_proba(x[te])[:, 1]
-    scaler, lr = fit_logit(xl[tr], y[tr])
-    p_lr = lr.predict_proba(scaler.transform(xl[te]))[:, 1]
-    p_blend = _blend(p_gbm, p_lr)
+    xf = fit_xg(x, xl, y, t["match_id"], tr)
+    p_blend, p_gbm, p_lr = _xg_predict(xf, x[te], xl[te])
     sb_ref = t["sb_xg"][te]
     head = t["body_part"][te] == SHOT_BODY_PART["head"]
     yt = y[te]
     m: dict[str, Any] = {
         "n_train": int(tr.sum()),
         "n_test": int(te.sum()),
-        "n_trees": int(gbm.n_iter_),
-        "repeated_split": _repeated_split(x, xl, y, t, mono),
+        "selection": {
+            "gbm_params": xf.choice.params,
+            "n_trees": xf.choice.n_iter,
+            "grid": xf.choice.grid,
+            "blend_weight_gbm": xf.weight,
+            "val_log_loss_by_weight": xf.val_log_loss_by_weight,
+        },
+        "feature_p99_non_penalty": _xg_p99(feats),
+        "repeated_split": _repeated_split(x, xl, y, t),
         "penalty_conversion": penalty_rate,
         "n_penalties": int(pen.sum()),
         "shipped_blend": scores(yt, p_blend),
@@ -216,25 +328,44 @@ def train_xg(shots: Table) -> tuple[dict[str, Any], dict[str, Any]]:
         },
         max_p=0.7,
     )
-    final = fit_gbm(x, y, mono, **XG_GBM_PARAMS)
+    # Final artifact: same settings, tree count and weight, refit on every non-penalty shot.
+    mono = design.monotonic_vector(design.XG_FEATURES, design.XG_MONOTONIC)
+    final = fit_gbm(x, y, mono, xf.choice)
     ens = export_checked(final, x, design.XG_FEATURES)
     s_final, lr_final = fit_logit(xl, y)
     logit = logit_json(s_final, lr_final, design.XG_LOGISTIC_FEATURES)
     idx = np.random.default_rng(1).choice(len(y), 64, replace=False)
-    expected = _blend(ens.predict_proba(x[idx]), lr_final.predict_proba(s_final.transform(xl[idx]))[:, 1])
-    save_golden("xg", t, idx, expected)
-    return {"ensemble": ens, "logit": logit, "penalty": penalty_rate, "n_trees_final": int(final.n_iter_)}, m
+    lr_model = LogisticModel.from_json(logit)
+    z = xf.weight * ens.raw(x[idx]) + (1 - xf.weight) * lr_model.raw(xl[idx])
+    save_golden("xg", feats, idx, 1.0 / (1.0 + np.exp(-z)))
+    return {
+        "ensemble": ens,
+        "logit": logit,
+        "penalty": penalty_rate,
+        "weight": xf.weight,
+        "n_trees_final": int(final.n_iter_),
+    }, m
 
 
-def _repeated_split(x: FloatArray, xl: FloatArray, y: FloatArray, t: Table, mono: list[int]) -> dict[str, Any]:
-    """Held-out AUC / log-loss over 5 more match splits (a single split has a point or two of noise)."""
+def _xg_p99(f: ShotFeatures) -> dict[str, float]:
+    off, to_shooter, lateral = gk_geometry(f.x, f.y, f.gk_x, f.gk_y)
+    return {
+        "nearest_defender_m": float(np.percentile(f.nearest_defender_m, 99)),
+        "gk_off_line": float(np.percentile(off, 99)),
+        "gk_to_shooter": float(np.percentile(to_shooter, 99)),
+        "gk_lateral": float(np.percentile(lateral, 99)),
+        "n_nearest_defender_ge_15m": int((f.nearest_defender_m >= 15).sum()),
+    }
+
+
+def _repeated_split(x: FloatArray, xl: FloatArray, y: FloatArray, t: Table) -> dict[str, Any]:
+    """Held-out AUC / log-loss over 5 more match splits, each with its own inner selection."""
     out: dict[str, list[tuple[float, float]]] = {"shipped_blend": [], "gbm": [], "logistic": [], "statsbomb": []}
     for seed in (11, 23, 31, 47, 59):
         tr, te = match_split(t["match_id"], seed=seed)
-        pg = fit_gbm(x[tr], y[tr], mono, **XG_GBM_PARAMS).predict_proba(x[te])[:, 1]
-        scaler, lr = fit_logit(xl[tr], y[tr])
-        pl = lr.predict_proba(scaler.transform(xl[te]))[:, 1]
-        for k, p in (("shipped_blend", _blend(pg, pl)), ("gbm", pg), ("logistic", pl), ("statsbomb", t["sb_xg"][te])):
+        xf = fit_xg(x, xl, y, t["match_id"], tr)
+        pb, pg, pl = _xg_predict(xf, x[te], xl[te])
+        for k, p in (("shipped_blend", pb), ("gbm", pg), ("logistic", pl), ("statsbomb", t["sb_xg"][te])):
             sc = scores(y[te], p)
             out[k].append((sc["auc"], sc["log_loss"]))
     return {
@@ -251,22 +382,32 @@ def _repeated_split(x: FloatArray, xl: FloatArray, y: FloatArray, t: Table, mono
 def train_psxg(shots: Table) -> tuple[dict[str, Any], dict[str, Any]]:
     ot = (shots["on_target"] == 1) & np.isfinite(shots["end_y"]) & np.isfinite(shots["end_z"])
     t = {k: v[ot] for k, v in shots.items()}
-    x = design.psxg_matrix(design.post_shot_features_from_table(t))
+    feats = design.post_shot_features_from_table(t)
+    x = design.psxg_matrix(feats)
     y = t["goal"]
     tr, te = match_split(t["match_id"])
     mono = design.monotonic_vector(design.PSXG_FEATURES, design.PSXG_MONOTONIC)
-    gbm = fit_gbm(x[tr], y[tr], mono, min_samples_leaf=30)
+    fit, val = inner_split(t["match_id"], tr)
+    choice, _ = select_gbm(x, y, fit, val, mono, PSXG_GRID, max_iter=800)
+    gbm = fit_gbm(x[tr], y[tr], mono, choice)
     p = gbm.predict_proba(x[te])[:, 1]
     scaler, lr = fit_logit(x[tr], y[tr])
     p_lr = lr.predict_proba(scaler.transform(x[te]))[:, 1]
-    # Pre-shot xG of the same on-target shots, as a reference for how much the ball state adds.
     te_idx = np.flatnonzero(te)
+    z_top = t["end_z"] >= 2.0
     m: dict[str, Any] = {
         "n_train": int(tr.sum()),
         "n_test": int(te.sum()),
-        "n_trees": int(gbm.n_iter_),
+        "selection": {"gbm_params": choice.params, "n_trees": choice.n_iter, "grid": choice.grid},
+        "projection": {
+            "saves_with_ratio_gt_cap": int(((t["projection_ratio"] > 1.3) & (y == 0)).sum()),
+            "shots_at_bar_height_2.44": int((t["end_z"] >= 2.439).sum()),
+            "goal_rate_z_ge_2m": float(y[z_top].mean()),
+            "n_z_ge_2m": int(z_top.sum()),
+        },
         "gbm": scores(y[te], p),
-        "shipped_with_speed_prior": scores(y[te], _psxg_shipped(gbm.predict_proba(x[te])[:, 1], t, te_idx, True)),
+        "shipped_with_priors": scores(y[te], _psxg_shipped(gbm.decision_function(x[te]), feats, te_idx)),
+        "keeper_beaten_prior_gt_0.5_share": float((design.keeper_beaten(feats) > 0.5).mean()),
         "logistic": scores(y[te], p_lr),
         "statsbomb_pre_shot_xg_on_same_shots": scores(y[te], t["sb_xg"][te]),
         "calibration": {"gbm": calibration(y[te], p), "logistic": calibration(y[te], p_lr)},
@@ -278,19 +419,19 @@ def train_psxg(shots: Table) -> tuple[dict[str, Any], dict[str, Any]]:
         "Post-shot xG calibration (on-target, held-out)",
         {"gradient boosting": m["calibration"]["gbm"], "logistic baseline": m["calibration"]["logistic"]},
     )
-    final = fit_gbm(x, y, mono, min_samples_leaf=30)
+    final = fit_gbm(x, y, mono, choice)
     ens = export_checked(final, x, design.PSXG_FEATURES)
     idx = np.random.default_rng(2).choice(len(y), 64, replace=False)
-    save_golden("psxg", t, idx, _psxg_shipped(ens.raw(x[idx]), t, idx))
+    save_golden("psxg", feats, idx, _psxg_shipped(ens.raw(x[idx]), feats, idx))
     return {"ensemble": ens, "n_trees_final": int(final.n_iter_)}, m
 
 
-def _psxg_shipped(raw_or_p: FloatArray, t: Table, idx: npt.NDArray[np.int64], is_prob: bool = False) -> FloatArray:
-    """Learned post-shot model plus the speed prior, as analytics.models applies it (average keeper)."""
-    z = design.logit(raw_or_p) if is_prob else raw_or_p
-    speed = np.clip(np.nan_to_num(t["speed_proxy_mps"][idx], nan=20.0), *design.SPEED_RANGE_MPS)
-    z = z + PSXG_SPEED_LOGIT_PER_MPS * (speed - PSXG_REFERENCE_SPEED_MPS)
-    return np.asarray(1.0 / (1.0 + np.exp(-z)), dtype=np.float64)
+def _psxg_shipped(raw_logit: FloatArray, feats: PostShotFeatures, idx: npt.NDArray[np.int64]) -> FloatArray:
+    """The learned post-shot model with the priors exactly as analytics.models applies them (average keeper)."""
+    sub = PostShotFeatures(**{f.name: np.asarray(getattr(feats, f.name))[idx] for f in fields(feats)})
+    return psxg_with_priors(
+        raw_logit, sub, PSXG_SPEED_LOGIT_PER_MPS, PSXG_REFERENCE_SPEED_MPS, PSXG_GK_DIVE_LOGIT_PER_POINT
+    )
 
 
 def _speed_bands(t: Table) -> dict[str, Any]:
@@ -303,12 +444,14 @@ def _speed_bands(t: Table) -> dict[str, Any]:
 
 
 def train_xpass(passes: Table) -> tuple[dict[str, Any], dict[str, Any]]:
-    x = design.xpass_matrix(design.pass_features_from_table(passes))
+    feats = design.pass_features_from_table(passes)
+    x = design.xpass_matrix(feats)
     y = passes["completed"]
     tr, te = match_split(passes["match_id"])
     mono = design.monotonic_vector(design.XPASS_FEATURES, design.XPASS_MONOTONIC)
-    kw = {"max_leaf_nodes": 31, "min_samples_leaf": 100, "learning_rate": 0.1}
-    gbm = fit_gbm(x[tr], y[tr], mono, **kw)
+    fit, val = inner_split(passes["match_id"], tr)
+    choice, _ = select_gbm(x, y, fit, val, mono, XPASS_GRID, max_iter=600)
+    gbm = fit_gbm(x[tr], y[tr], mono, choice)
     p = gbm.predict_proba(x[te])[:, 1]
     scaler, lr = fit_logit(x[tr], y[tr])
     p_lr = lr.predict_proba(scaler.transform(x[te]))[:, 1]
@@ -317,10 +460,20 @@ def train_xpass(passes: Table) -> tuple[dict[str, Any], dict[str, Any]]:
         for name, code in PASS_KIND.items()
         if (passes["kind"][te] == code).sum() > 50
     }
+    failed = y == 0
+    on_line = (np.abs(passes["end_y"]) >= 33.99) | (np.abs(passes["end_x"]) >= 52.49)
     m: dict[str, Any] = {
         "n_train": int(tr.sum()),
         "n_test": int(te.sum()),
-        "n_trees": int(gbm.n_iter_),
+        "selection": {"gbm_params": choice.params, "n_trees": choice.n_iter, "grid": choice.grid},
+        "targets": {
+            "target_to_recorded_end_m_p25_p50_p75_p95": {
+                "completed": np.percentile(passes["target_proxy_m"][~failed], [25, 50, 75, 95]).tolist(),
+                "failed": np.percentile(passes["target_proxy_m"][failed], [25, 50, 75, 95]).tolist(),
+            },
+            "share_on_line_failed": float(on_line[failed].mean()),
+            "share_on_line_completed": float(on_line[~failed].mean()),
+        },
         "gbm": scores(y[te], p),
         "logistic": scores(y[te], p_lr),
         "gbm_by_kind": by_kind,
@@ -331,10 +484,10 @@ def train_xpass(passes: Table) -> tuple[dict[str, Any], dict[str, Any]]:
         "xPass calibration (360 passes, held-out)",
         {"gradient boosting": m["calibration"]["gbm"], "logistic baseline": m["calibration"]["logistic"]},
     )
-    final = fit_gbm(x, y, mono, **kw)
+    final = fit_gbm(x, y, mono, choice)
     ens = export_checked(final, x, design.XPASS_FEATURES)
     idx = np.random.default_rng(3).choice(len(y), 64, replace=False)
-    save_golden("xpass", passes, idx, ens.predict_proba(x[idx]))
+    save_golden("xpass", feats, idx, ens.predict_proba(x[idx]))
     return {"ensemble": ens, "n_trees_final": int(final.n_iter_)}, m
 
 
@@ -395,6 +548,12 @@ def metrica_models() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
         "max_accel_mean": float(acc.mean()),
         "max_accel_std": float(acc.std(ddof=1)),
         "reaction_time_s": float(np.median(rts)),
+        "reaction_time_definition": (
+            "Decision + reaction time measured in hindsight, not a pure reflex: median delay from a Metrica pass "
+            "(>= 10 m, >= 0.8 s flight) being struck until the defender nearest its target accelerates towards the "
+            "target at > 1.5 m/s^2, over the passes in games 1-2 where that defender was not already accelerating "
+            "towards it. The shared field name is reaction_time_s."
+        ),
         "source": "metrica-sample-games-1-2",
         "n_players": len(kin_rows),
         "n_reaction_samples": len(rts),
@@ -565,6 +724,12 @@ def main() -> None:
             "metrics": "metrics.json",
         },
         "penalty_xg": xg_art["penalty"],
+        "xg_blend_weight_gbm": xg_art["weight"],
+        "physical_priors_note": (
+            "reaction_time_s is decision + reaction measured in hindsight on Metrica passes (see "
+            "physical_priors.json); pitch_control_params are Spearman's model constants, used for pitch control and "
+            "the simulator's interception physics, not player kinematics."
+        ),
         "psxg_gk_dive_logit_per_point": PSXG_GK_DIVE_LOGIT_PER_POINT,
         "psxg_speed_logit_per_mps": PSXG_SPEED_LOGIT_PER_MPS,
         "psxg_reference_speed_mps": PSXG_REFERENCE_SPEED_MPS,

@@ -22,6 +22,7 @@ from analytics.features import (
 )
 from analytics.paths import statsbomb_dir
 from shared.geometry import statsbomb_goal_plane, statsbomb_to_attacking_frame
+from shared.schemas.common import PITCH_WIDTH_M
 from shared.model_api import GOAL_X, PASS_HEIGHT, PASS_KIND, SHOT_BODY_PART, SHOT_SITUATION, SHOT_TECHNIQUE
 
 Event = dict[str, Any]
@@ -158,24 +159,35 @@ def shot_situation(event: Event, possession_start_s: float) -> int:
     return SHOT_SITUATION["open_play"]
 
 
-def goal_plane_end(start: tuple[float, float], end: list[float]) -> tuple[float, float, float]:
-    """Project a shot's SB end location onto the goal plane. Returns (end_y, end_z, end_x) in metres.
+GOAL_PLANE_Y_SCALE = 7.32 / 8.0
+"""Metres per StatsBomb yard across the goal mouth (posts at y = 36 / 44). The pitch-wide y scale is 68 / 80, so
+StatsBomb's frame is squeezed laterally near goal; post-shot features use this goal-plane scale for both the ball and
+the keeper so their offsets are comparable."""
+MAX_PROJECTION_RATIO = 1.3
+"""Cap on the y extrapolation factor. Saves made far off the line (keeper rushing out; a third of all saves have a
+ratio > 1.3) keep their touch point rather than being extrapolated up to 3-5x, which would push them past the posts."""
 
-    Saved shots end where the keeper touched the ball (often 1-4 yd off the line); y is extrapolated along the shot
-    line to the goal line and z is scaled by the same ratio (ball rising from ground level). The projected values are
-    snapped back to StatsBomb's 0.1-yard lattice: otherwise every goal (recorded on the lattice) and every save
-    (projected off it) would be separable by quantisation alone, which a tree model learns (AUC 0.98 on placement).
+
+def goal_plane_end(start: tuple[float, float], end: list[float]) -> tuple[float, float, float, float]:
+    """Project a shot's SB end location onto the goal plane. Returns (end_y, end_z, end_x, ratio), metres.
+
+    Saved shots end where the keeper touched the ball (often 1-4 yd off the line). y is extrapolated along the shot
+    line to the goal line (factor capped at MAX_PROJECTION_RATIO); z is kept as recorded (the touch height): scaling it by the extrapolation ratio put 250
+    saves exactly on the bar and taught the model that top-corner shots are always saved. ``ratio`` is the
+    extrapolation factor (1 for shots recorded on the line). The projected y is snapped back to StatsBomb's 0.1-yard
+    lattice: otherwise goals (recorded on the lattice) and saves (projected off it) are separable by quantisation
+    alone, which a tree model learns (AUC 0.98 on placement).
     """
-    ex, ey = to_m(end)
+    ex, _ = to_m(end)
     y_sb = float(end[1])
     z_sb = float(end[2]) if len(end) > 2 else float("nan")
     sx_sb, sy_sb = float(start[0]) * 120.0 / 105.0 + 60.0, 40.0 - float(start[1]) * 80.0 / 68.0
+    ratio = 1.0
     if ex < GOAL_X - 0.05 and ex > start[0] + 0.5:
         ratio = (120.0 - sx_sb) / (float(end[0]) - sx_sb)
-        y_sb = round(sy_sb + (y_sb - sy_sb) * ratio, 1)
-        z_sb = round(z_sb * min(ratio, 3.0), 1)
+        y_sb = round(sy_sb + (y_sb - sy_sb) * min(ratio, MAX_PROJECTION_RATIO), 1)
     gy, gz = statsbomb_goal_plane(y_sb, z_sb)
-    return gy, float(np.clip(gz, 0.0, 2.44)) if not math.isnan(gz) else float("nan"), ex
+    return gy, float(np.clip(gz, 0.0, 2.44)) if not math.isnan(gz) else float("nan"), ex, ratio
 
 
 def possession_starts(events: list[Event]) -> dict[tuple[int, int], float]:
@@ -211,8 +223,9 @@ def extract_shots(events: list[Event], match_id: int = 0) -> list[dict[str, floa
         on_target = outcome in ON_TARGET
         end = shot.get("end_location")
         end_y = end_z = end_x = float("nan")
+        ratio = 1.0
         if end is not None:
-            end_y, end_z, end_x = goal_plane_end((x, y), end)
+            end_y, end_z, end_x, ratio = goal_plane_end((x, y), end)
             if len(end) == 2:
                 end_z = float("nan")
         travel = float("nan")
@@ -234,6 +247,7 @@ def extract_shots(events: list[Event], match_id: int = 0) -> list[dict[str, floa
                 "gk_found": float(gk is not None),
                 "gk_x": gk[0] if gk else GOAL_X,
                 "gk_y": gk[1] if gk else 0.0,
+                "gk_y_goal_plane": (gk[1] if gk else 0.0) * GOAL_PLANE_Y_SCALE / (68.0 / 80.0),
                 "n_defenders_in_cone": float(count_in_shot_cone(xa, ya, opp_arr)[0]),
                 "nearest_defender_m": float(nearest_distance(xa, ya, opp_arr)[0]),
                 "under_pressure": float(bool(e.get("under_pressure", False))),
@@ -243,6 +257,7 @@ def extract_shots(events: list[Event], match_id: int = 0) -> list[dict[str, floa
                 "end_y": end_y,
                 "end_z": end_z,
                 "end_x": end_x,
+                "projection_ratio": ratio,
                 "duration_s": duration,
                 "speed_proxy_mps": travel / duration if duration > 0 else float("nan"),
                 "sb_xg": float(shot.get("statsbomb_xg", float("nan"))),
@@ -271,8 +286,24 @@ def pass_kind(p: Event, x: float, y: float, end_x: float, end_y: float) -> int:
     return PASS_KIND["standard"]
 
 
+def _on_or_over_line(x: float, y: float) -> bool:
+    return abs(x) >= GOAL_X - 1e-6 or abs(y) >= PITCH_WIDTH_M / 2 - 1e-6
+
+
 def extract_passes(events: list[Event], frames: dict[str, list[dict[str, Any]]]) -> list[dict[str, float]]:
-    """One xPass row per open-play / set-piece pass that has a 360 freeze frame (throw-ins and kick-offs excluded)."""
+    """One xPass row per open-play / set-piece pass that has a 360 freeze frame (throw-ins and kick-offs excluded).
+
+    The target is the *intended* destination at the moment of the pass, never the outcome. StatsBomb's end location
+    is the reception point for a completed pass but the interception / out-of-play point for a failed one, which
+    encodes the outcome (6 % of failed passes end on or over a line vs 0.05 % of completed ones). So for every pass,
+    completed or not, the target is the visible teammate (360 frame, passer excluded) nearest the recorded end
+    location, i.e. the receiver's position when the ball was struck - the same thing the simulator asks about.
+
+    Using the teammate proxy only for failed passes (and the reception point for completed ones) still leaks: held-out
+    AUC 0.945 vs 0.900 when both use the proxy, because a reception point is by construction where the ball got
+    through. The proxy distance is not capped: a 15 m cap drops long balls whose receiver is off camera and inflates
+    completion from 84 % to 88 %. Passes with no visible teammate, or whose target is on or over a line, are dropped.
+    """
     rows: list[dict[str, float]] = []
     for e in events:
         if e["type"]["name"] != "Pass" or int(e["period"]) > 4 or e["id"] not in frames:
@@ -284,9 +315,18 @@ def extract_passes(events: list[Event], frames: dict[str, list[dict[str, Any]]])
         if outcome in EXCLUDED_PASS_OUTCOMES:
             continue
         x, y = to_m(e["location"])
-        end_x, end_y = to_m(q["end_location"])
-        opp = [to_m(p["location"]) for p in frames[e["id"]] if not p.get("teammate")]
-        mates = [to_m(p["location"]) for p in frames[e["id"]] if p.get("teammate") and not p.get("actor")]
+        rec_x, rec_y = to_m(q["end_location"])
+        frame = frames[e["id"]]
+        opp = [to_m(p["location"]) for p in frame if not p.get("teammate")]
+        mates = [to_m(p["location"]) for p in frame if p.get("teammate") and not p.get("actor")]
+        if not mates:
+            continue
+        d = [math.hypot(mx - rec_x, my - rec_y) for mx, my in mates]
+        j = int(np.argmin(d))
+        end_x, end_y = mates[j]
+        proxy_m = d[j]
+        if _on_or_over_line(end_x, end_y):
+            continue
         opp_arr = pad_players([opp])
         xa, ya, exa, eya = np.array([x]), np.array([y]), np.array([end_x]), np.array([end_y])
         rows.append(
@@ -301,12 +341,17 @@ def extract_passes(events: list[Event], frames: dict[str, list[dict[str, Any]]])
                 "defenders_in_lane": float(count_in_lane(xa, ya, exa, eya, opp_arr)[0]),
                 "under_pressure": float(bool(e.get("under_pressure", False))),
                 "completed": float(outcome is None),
+                "target_proxy_m": proxy_m,
                 "n_opponents_visible": float(len(opp)),
                 "n_teammates_visible": float(len(mates)),
                 "head": float(_name(q, "body_part", "name") == "Head"),
             }
         )
     return rows
+
+
+def clip_to_pitch(x: float, y: float) -> tuple[float, float]:
+    return float(np.clip(x, -GOAL_X, GOAL_X)), float(np.clip(y, -PITCH_WIDTH_M / 2, PITCH_WIDTH_M / 2))
 
 
 def extract_moves(events: list[Event]) -> list[dict[str, float]]:

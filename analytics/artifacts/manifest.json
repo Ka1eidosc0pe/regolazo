@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "created": "2026-10-26T23:01:51+00:00",
+  "created": "2026-10-26T23:58:27+00:00",
   "versions": {
     "xg": "xg-hgb+logit-blend-1.0.0",
     "psxg": "psxg-hgb-1.0.0",
@@ -19,6 +19,8 @@
     "metrics": "metrics.json"
   },
   "penalty_xg": 0.7722222222222223,
+  "xg_blend_weight_gbm": 0.4,
+  "physical_priors_note": "reaction_time_s is decision + reaction measured in hindsight on Metrica passes (see physical_priors.json); pitch_control_params are Spearman's model constants, used for pitch control and the simulator's interception physics, not player kinematics.",
   "psxg_gk_dive_logit_per_point": 0.01,
   "psxg_speed_logit_per_mps": 0.06,
   "psxg_reference_speed_mps": 22.0,
@@ -31,10 +33,10 @@
     "average_ball_speed_mps": 15.0
   },
   "headline_metrics": {
-    "xg_auc": 0.7983379186162486,
-    "xg_log_loss": 0.248601471721037,
-    "psxg_auc": 0.8957891447025732,
-    "xpass_auc": 0.9414362394274562
+    "xg_auc": 0.799321913636029,
+    "xg_log_loss": 0.2480501489960257,
+    "psxg_auc": 0.8821648088342535,
+    "xpass_auc": 0.8996788029262806
   },
   "data": {
     "statsbomb": "StatsBomb Open Data, https://github.com/statsbomb/open-data",
