@@ -154,6 +154,8 @@ def test_team_match_stats_counts() -> None:
         {**_pass("a", [60.0, 40.0], [70.0, 40.0]), "team": {"id": 20}},
         {**_pass("b", [60.0, 40.0], [70.0, 40.0], outcome={"name": "Out"}), "team": {"id": 20}},
         {**_pass("c", [60.0, 40.0], [70.0, 40.0], type={"name": "Throw-in"}), "team": {"id": 20}},
+        {"type": {"name": "Own Goal For"}, "period": 2, "team": {"id": 20}},
+        _shot(team={"id": 20}, period=3),  # extra time is excluded
     ]
     home, away = sb.team_match_stats(events, info)
     assert (home["goals"], home["shots"], home["header_shots"]) == (2.0, 2.0, 1.0)

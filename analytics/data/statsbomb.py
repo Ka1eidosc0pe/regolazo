@@ -333,20 +333,19 @@ def extract_moves(events: list[Event]) -> list[dict[str, float]]:
 
 
 def team_match_stats(events: list[Event], info: MatchInfo) -> list[dict[str, float]]:
-    """Per-team box-score stats for the realism targets (periods 1-4; passes exclude throw-ins)."""
+    """Per-team box-score stats for the realism targets, over regulation time only (periods 1-2, so extra time does
+    not inflate knockout matches). Goals = shots scored + own goals in the team's favour; passes exclude throw-ins."""
     out: list[dict[str, float]] = []
+    reg = [e for e in events if int(e["period"]) <= 2]
     for team_id in (info.home_team_id, info.away_team_id):
-        shots = [e for e in events if e["type"]["name"] == "Shot" and e["team"]["id"] == team_id and e["period"] <= 4]
+        mine = [e for e in reg if e.get("team", {}).get("id") == team_id]
+        shots = [e for e in mine if e["type"]["name"] == "Shot"]
         passes = [
-            e
-            for e in events
-            if e["type"]["name"] == "Pass"
-            and e["team"]["id"] == team_id
-            and e["period"] <= 4
-            and _name(e, "pass", "type", "name") != "Throw-in"
+            e for e in mine if e["type"]["name"] == "Pass" and _name(e, "pass", "type", "name") != "Throw-in"
         ]
         completed = sum(1 for e in passes if "outcome" not in e["pass"])
-        goals = info.home_score if team_id == info.home_team_id else info.away_score
+        goals = sum(1 for e in shots if _name(e, "shot", "outcome", "name") == "Goal")
+        goals += sum(1 for e in mine if e["type"]["name"] == "Own Goal For")
         dists = [math.hypot(GOAL_X - to_m(s["location"])[0], to_m(s["location"])[1]) for s in shots]
         headers = sum(1 for s in shots if _name(s, "shot", "body_part", "name") == "Head")
         out.append(

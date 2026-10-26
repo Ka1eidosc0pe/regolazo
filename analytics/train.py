@@ -422,6 +422,10 @@ def realism_targets(stats: Table, distance: dict[str, Any], matches: list[dict[s
         header_share = s["header_shots"] / s["shots"]
         shot_dist = s["shot_distance_sum"] / s["shots"]
     total_shots = s["shots"].sum()
+    # Possession proxy: a team's share of the match's passes (StatsBomb has no possession clock).
+    match_passes = {m: s["passes"][mids == m].sum() for m in np.unique(mids)}
+    pass_share = 100 * passes / np.array([match_passes[m] for m in mids])
+    comp_names = {int(m["competition_id"]): str(m["competition"]) for m in matches}
 
     def dist_stats(v: FloatArray, unit: str, rel_tol: float, pooled: float | None = None) -> dict[str, Any]:
         v = v[np.isfinite(v)]
@@ -443,7 +447,7 @@ def realism_targets(stats: Table, distance: dict[str, Any], matches: list[dict[s
         "version": VERSION,
         "description": (
             "Real-football distributions for the simulator realism test (PLAN.md Step 3). Box-score stats come "
-            "from StatsBomb Open Data men's matches (periods 1-4, shoot-outs excluded); passes exclude throw-ins, "
+            "from StatsBomb Open Data men's matches, regulation time only (periods 1-2); passes exclude throw-ins, "
             "completion = pass without an outcome (StatsBomb convention). Distance covered comes from Metrica "
             "sample games 1-2 (outfield players with >= 85 minutes). 'band' is a suggested tolerance for the "
             "simulator's mean over many matches, not for a single match."
@@ -471,8 +475,27 @@ def realism_targets(stats: Table, distance: dict[str, Any], matches: list[dict[s
         "mean_shot_distance_m": dist_stats(
             shot_dist, "metres from goal centre", 0.10, pooled=float(s["shot_distance_sum"].sum() / total_shots)
         ),
+        "possession_share_by_passes_pct": {
+            **dist_stats(pass_share, "team share of the match's passes (possession proxy), %", 0.0),
+            "band_rule": "compare the std (match-to-match spread of the split): sim std within +/- 30% of this std",
+            "std_band": [0.7 * float(pass_share.std(ddof=1)), 1.3 * float(pass_share.std(ddof=1))],
+        },
         "distance_per_outfield_player_m": {
             **dist_stats(np.array(distance["values_m"]), "metres per outfield player per 90 min", 0.10),
+        },
+        "by_competition": {
+            comp_names.get(int(c), str(int(c))): {
+                "team_matches": int((s["competition_id"] == c).sum()),
+                "goals_per_match": float(2 * s["goals"][s["competition_id"] == c].mean()),
+                "shots_per_team": float(s["shots"][s["competition_id"] == c].mean()),
+                "passes_per_team": float(s["passes"][s["competition_id"] == c].mean()),
+                "pass_completion_pct": float(
+                    100
+                    * s["passes_completed"][s["competition_id"] == c].sum()
+                    / s["passes"][s["competition_id"] == c].sum()
+                ),
+            }
+            for c in np.unique(s["competition_id"])
         },
     }
 
