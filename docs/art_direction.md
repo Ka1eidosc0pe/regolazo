@@ -121,3 +121,23 @@ Transitions between cameras are eased blends of position, orientation and field 
 | `ref_replay_goal.jpg` | Replay camera (depth of field) on the finish: name and number on the back, slide tackle, keeper |
 | `ref_replay_celebration.jpg` | Replay camera on the celebration |
 | `ref_stadium_night.jpg` | The bowl: roof floodlight ring, tiers, hospitality glass, LED fascia |
+
+## 10. Renderer tooling and gate results (Step 5)
+
+All commands run in `web/`.
+
+| Command | What it does |
+|---|---|
+| `npm run assets` | Rebuilds `public/assets/athlete.glb` + `athlete_clips.json` from the raw Mixamo FBX files (gitignored) |
+| `npm run dev-clip` | Rebuilds the scripted dev clip `public/dev/clip_demo.json` |
+| `npm run art` | Reference screenshots to `docs/art/` |
+| `node scripts/record.ts` | Recording mode: frames + one `FrameLabels` JSON per frame to `$REGOLAZO_DATA_DIR/renders/<match>-<clip>/` |
+| `node scripts/check-labels.ts` | Label projection test; overlays and `report.json` to `docs/art/labels/` |
+| `node scripts/fps.ts [--unthrottled]` | Frame-rate check of the live view (headed Chromium, 1920 x 1080 viewport) |
+| `npx playwright test --project visual` | Visual regression against `e2e/__screenshots__/` (GPU baselines, skipped on CI) |
+
+Measured on the M3 Pro (ANGLE Metal), 2026-10-26:
+
+- **Frame rate, live view at 1920 x 1080** (dev clip playing, broadcast camera, 2x MSAA, four 2048 shadow maps, bloom, ~30k crowd cards): 85.6 fps mean with vsync on the 120 Hz display (p50 8.4 ms, p95 17.0 ms, p99 17.6 ms over 15 s); 96.7 fps mean with vsync off (p95 12.3 ms). Fixed-size renders (recording, screenshots) use 4x MSAA.
+- **Labels** (676 frames, 8,763 objects): `K [R | t]` reprojection vs the Three.js camera, max 0.007 px; projected box vs GPU silhouette IoU mean 0.965, 5th percentile 0.939, min 0.860 (unoccluded objects at least 20 px tall); ball centre inside its box and ball-shadow pixel at or below the ball in 676 / 676 frames. All 676 label files validate with `FrameLabels.model_validate_json`. Two recordings give identical labels (same SHA-256).
+- **Visual tests**: 5 baselines (broadcast x 3, tactical, replay). A 0.2 s time shift changes 7 % of pixels and fails the test; the tolerance is 1 %.

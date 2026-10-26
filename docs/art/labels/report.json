@@ -1,0 +1,21 @@
+{
+  "frames": 676,
+  "objects_checked": 8763,
+  "reprojection_px": {
+    "mean": 0,
+    "max": 0.0069
+  },
+  "silhouette_iou": {
+    "n": 7341,
+    "mean": 0.9653,
+    "p05": 0.9388,
+    "min": 0.8602,
+    "worst": {
+      "iou": 0.8601853154017317,
+      "frame": 248,
+      "track": "A08"
+    }
+  },
+  "ball_center_in_box": "676/676",
+  "ball_shadow_below_ball": "676/676"
+}
