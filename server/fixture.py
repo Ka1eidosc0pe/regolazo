@@ -74,7 +74,7 @@ def fixture_events(duration_s: float) -> list[MatchEvent]:
     step = (duration_s - 1.0) / len(originals)
     out = []
     for i, e in enumerate(originals):
-        t = round(0.5 + i * step, 3)
+        t = 0.0 if i == 0 else round(0.5 + i * step, 3)  # the first event is the kickoff, at exactly t = 0
         out.append(e.model_copy(update={"index": i, "t": t, "tick": round(t * FIXTURE_HZ)}))
     return out
 

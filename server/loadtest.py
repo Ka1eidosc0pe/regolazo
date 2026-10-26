@@ -1,6 +1,7 @@
 """Load test: N concurrent viewer sessions playing the match, reporting frame rate and latency per session.
 
     uv run python -m server.loadtest --sessions 20 --seconds 10            # spawns a server subprocess
+    uv run python -m server.loadtest --sessions 20 --seconds 10 --spread 4 # divergent positions: no shared frames
     uv run python -m server.loadtest --url ws://host:8000/ws --sessions 20 # an already running server
 
 Per session it reports the frame rate (frames/s), the mean/p95/max lateness of each frame against the ideal
@@ -49,12 +50,18 @@ def _pct(values: list[float], q: float) -> float:
     return s[min(len(s) - 1, round(q * (len(s) - 1)))]
 
 
-async def _session(url: str, index: int, seconds: float, start_at: float) -> SessionStats:
+async def _session(url: str, index: int, seconds: float, start_at: float, offset_s: float) -> SessionStats:
     st = SessionStats(index)
     async with connect(url, max_size=None) as ws:
         hello = json.loads(await ws.recv())
         assert hello["type"] == "hello", hello["type"]
-        await ws.send(json.dumps({"type": "seek", "t": 0}))
+        await ws.send(json.dumps({"type": "seek", "t": offset_s}))
+        seen_clock = False
+        while True:  # consume the initial frame, then the seek's own `clock` + `frame`
+            kind = json.loads(await ws.recv())["type"]
+            seen_clock = seen_clock or kind == "clock"
+            if seen_clock and kind == "frame":
+                break
         await asyncio.sleep(max(0.0, start_at - time.monotonic()))  # start all sessions together
         await ws.send(json.dumps({"type": "play"}))
         t_begin = time.monotonic()
@@ -96,9 +103,10 @@ async def _session(url: str, index: int, seconds: float, start_at: float) -> Ses
     return st
 
 
-async def run_load(url: str, sessions: int, seconds: float) -> list[SessionStats]:
+async def run_load(url: str, sessions: int, seconds: float, spread_s: float = 0.0) -> list[SessionStats]:
+    """Session ``i`` starts watching at match time ``i * spread_s`` (0 = everyone at the same position)."""
     start_at = time.monotonic() + 1.0 + 0.05 * sessions
-    return list(await asyncio.gather(*(_session(url, i, seconds, start_at) for i in range(sessions))))
+    return list(await asyncio.gather(*(_session(url, i, seconds, start_at, i * spread_s) for i in range(sessions))))
 
 
 def format_report(results: list[SessionStats]) -> str:
@@ -148,13 +156,14 @@ def main() -> None:
     ap.add_argument("--sessions", type=int, default=20)
     ap.add_argument("--seconds", type=float, default=10.0)
     ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--spread", type=float, default=0.0, help="seconds between sessions' start positions")
     args = ap.parse_args()
     proc = None
     url = args.url
     if url is None:
         proc, url = _spawn_server(args.port)
     try:
-        print(format_report(asyncio.run(run_load(url, args.sessions, args.seconds))))
+        print(format_report(asyncio.run(run_load(url, args.sessions, args.seconds, args.spread))))
     finally:
         if proc is not None:
             proc.terminate()

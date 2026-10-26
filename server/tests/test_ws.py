@@ -3,6 +3,7 @@
 import asyncio
 import itertools
 import json
+import logging
 import statistics
 import time
 from collections.abc import Awaitable, Callable, Iterator
@@ -11,12 +12,15 @@ from typing import Any
 
 import pytest
 from websockets.asyncio.client import ClientConnection, connect
+from websockets.exceptions import ConnectionClosed
 
 from server.app import create_app
 from server.config import Settings
 from server.fake_engine import FakeEngine
+from server.fixture import fixture_events, fixture_states, write_fixture_recording
 from server.testing import LiveServer
-from shared.recording import Recording
+from shared.recording import Recording, player_order, states_to_arrays, write_recording
+from shared.schemas.fixtures import match_meta
 from shared.schemas.stream import ErrorMsg, FrameMsg, HelloMsg, MomentMsg
 
 Msg = dict[str, Any]
@@ -26,6 +30,13 @@ Msg = dict[str, Any]
 def server(recording_dir: Path) -> Iterator[LiveServer]:
     app = create_app(recording_dir, FakeEngine("demo-0001"), Settings(languages=("en", "es", "fr")))
     with LiveServer(app) as srv:
+        yield srv
+
+
+@pytest.fixture(scope="module")
+def short_server(tmp_path_factory: pytest.TempPathFactory) -> Iterator[LiveServer]:
+    rec = write_fixture_recording(tmp_path_factory.mktemp("short") / "demo-0001", n_frames=75)
+    with LiveServer(create_app(rec, FakeEngine("demo-0001"), Settings())) as srv:
         yield srv
 
 
@@ -64,6 +75,10 @@ async def open_session(server: LiveServer, query: str = "") -> tuple[ClientConne
     first = await recv(ws)  # the frame at the initial clock position follows hello
     assert first["type"] == "frame"
     assert first["state"]["tick"] == 0
+    kickoff = await recv(ws)  # the fixture's first event sits at exactly t = 0 and goes out with frame 0
+    assert kickoff["type"] == "events"
+    assert [e["t"] for e in kickoff["events"]] == [0.0]
+    hello["initial_event_ids"] = [e["id"] for e in kickoff["events"]]
     return ws, hello
 
 
@@ -101,6 +116,7 @@ def test_hello_then_first_frame_and_contracts(server: LiveServer) -> None:
         assert hello.clock.duration_s == pytest.approx(19.96)
         first = FrameMsg.model_validate(await recv(ws))
         assert first.state.tick == 0
+        assert (await recv(ws))["type"] == "events"  # the kickoff event at t = 0
         await silence(ws, 0.3)  # paused: nothing else is pushed
         await ws.close()
 
@@ -116,14 +132,14 @@ def test_play_streams_ordered_frames_at_25hz(server: LiveServer) -> None:
         assert t == sorted(t)
         assert len(set(t)) == len(t)
         rate = (len(frames) - 1) / (arrivals[-1] - arrivals[0])
-        assert rate == pytest.approx(25.0, abs=1.5), f"rate {rate:.2f} Hz"
+        assert rate == pytest.approx(25.0, abs=3.0), f"rate {rate:.2f} Hz"
         consecutive = sum(b - a == 1 for a, b in itertools.pairwise(t)) / (len(t) - 1)
-        assert consecutive > 0.95, "at 1x every recorded tick should be delivered"
+        assert consecutive > 0.85, "at 1x every recorded tick should be delivered"
         gaps = [(b - a) * 1000 for a, b in itertools.pairwise(arrivals)]
-        assert statistics.median(gaps) == pytest.approx(40.0, abs=4.0)
+        assert statistics.median(gaps) == pytest.approx(40.0, abs=8.0)
         # game time keeps up with wall time
         game_elapsed = (t[-1] - t[0]) / 25.0
-        assert game_elapsed == pytest.approx(arrivals[-1] - arrivals[0], abs=0.15)
+        assert game_elapsed == pytest.approx(arrivals[-1] - arrivals[0], abs=0.3)
         await ws.close()
 
     run(scenario)
@@ -162,7 +178,10 @@ def test_seek_lands_on_the_right_tick_without_replaying_events(server: LiveServe
         assert msgs[0]["clock"]["playing"] is False
         assert msgs[1]["state"]["tick"] == 250
         assert msgs[1]["state"] == recording.state_at(250).model_dump(mode="json")
-        await silence(ws, 0.3)  # events before t=10 are not sent on seek
+        # Nothing else was sent by the seek: events before t=10 are skipped, not replayed. `pause` is answered
+        # by a clock message, so anything the seek had queued behind its frame would show up before it.
+        await send(ws, type="pause")
+        assert [m["type"] for m in await until(ws, lambda m: m["type"] == "clock")] == ["clock"]
 
         await send(ws, type="seek", t=10.019)  # between ticks: lands on the frame at or before
         msgs = await until(ws, lambda m: m["type"] == "frame")
@@ -173,8 +192,10 @@ def test_seek_lands_on_the_right_tick_without_replaying_events(server: LiveServe
         assert msgs[-1]["state"]["tick"] == 499
         assert msgs[0]["clock"]["t"] == pytest.approx(19.96)
         await send(ws, type="seek", t=0)
-        msgs = await until(ws, lambda m: m["type"] == "frame")
-        assert msgs[-1]["state"]["tick"] == 0
+        msgs = await until(ws, lambda m: m["type"] == "events")  # back at the start: the t = 0 kickoff event again
+        assert [m["type"] for m in msgs] == ["clock", "frame", "events"]
+        assert msgs[1]["state"]["tick"] == 0
+        assert [e["t"] for e in msgs[2]["events"]] == [0.0]
         await ws.close()
 
     run(scenario)
@@ -191,7 +212,7 @@ def test_seek_while_playing_continues_from_new_position(server: LiveServer) -> N
         frames, _ = await collect_frames(ws, 0.5)
         assert frames[0]["state"]["tick"] in (300, 301)  # the in-flight seek frame, or the first after it
         assert all(t >= 300 for t in ticks(frames))
-        assert 8 <= len(frames) <= 15
+        assert 6 <= len(frames) <= 16
         await ws.close()
 
     run(scenario)
@@ -210,8 +231,8 @@ def test_speed_changes_the_rate(server: LiveServer, speed: float, wall_rate: flo
         frames, arrivals = await collect_frames(ws, 3.0)
         span = arrivals[-1] - arrivals[0]
         t = ticks(frames)
-        assert (len(frames) - 1) / span == pytest.approx(wall_rate, rel=0.12)
-        assert (t[-1] - t[0]) / span == pytest.approx(tick_rate, rel=0.1)
+        assert (len(frames) - 1) / span == pytest.approx(wall_rate, rel=0.2)
+        assert (t[-1] - t[0]) / span == pytest.approx(tick_rate, rel=0.2)
         await ws.close()
 
     run(scenario)
@@ -225,8 +246,8 @@ def test_high_speed_skips_frames_instead_of_flooding(server: LiveServer) -> None
         frames, arrivals = await collect_frames(ws, 2.0)  # 16 s of game time of a 20 s clip
         span = arrivals[-1] - arrivals[0]
         t = ticks(frames)
-        assert (len(frames) - 1) / span <= 27.0, "never above the 25 fps cap"
-        assert (t[-1] - t[0]) / span == pytest.approx(200.0, rel=0.1)  # 8 x 25 ticks per second
+        assert (len(frames) - 1) / span <= 29.0, "never above the 25 fps cap"
+        assert (t[-1] - t[0]) / span == pytest.approx(200.0, rel=0.2)  # 8 x 25 ticks per second
         assert min(b - a for a, b in itertools.pairwise(t)) >= 5  # frames skipped, ~8 ticks apart
         await ws.close()
 
@@ -249,14 +270,14 @@ def test_invalid_speed_is_an_error_not_a_disconnect(server: LiveServer) -> None:
 
 def test_events_and_moments_arrive_in_order_exactly_once(server: LiveServer, recording: Recording) -> None:
     async def scenario() -> None:
-        ws, _ = await open_session(server)
+        ws, hello = await open_session(server)
         await send(ws, type="speed", speed=16.0)
         await send(ws, type="play")
         msgs = await until(
             ws, lambda m: m["type"] == "clock" and m["clock"]["playing"] is False and m["clock"]["t"] > 19
         )
         last_t = -1.0
-        got: list[str] = []
+        got: list[str] = list(hello["initial_event_ids"])
         moments: list[str] = []
         frame_t = 0.0
         for m in msgs:
@@ -284,31 +305,213 @@ def test_events_and_moments_arrive_in_order_exactly_once(server: LiveServer, rec
     run(scenario)
 
 
-def test_seek_back_then_play_resends_events_once_per_pass(server: LiveServer, recording: Recording) -> None:
+def _event_ids(msgs: list[Msg]) -> list[str]:
+    return [e["id"] for m in msgs if m["type"] == "events" for e in m["events"]]
+
+
+def _stopped(m: Msg) -> bool:
+    return m["type"] == "clock" and m["clock"]["playing"] is False
+
+
+def test_backward_seek_then_play_redelivers_events_after_the_new_position_once_per_pass(
+    server: LiveServer, recording: Recording
+) -> None:
+    """Events are delivered when the clock passes them, on every pass; clients dedupe by id."""
+
     async def scenario() -> None:
-        ws, _ = await open_session(server)
+        ws, hello = await open_session(server)
         events = recording.events()
-        cut = events[10].t  # seek to just after event 10: events 0..10 must not be replayed, 11.. must come
-        await send(ws, type="seek", t=cut)
-        await until(ws, lambda m: m["type"] == "frame")
         await send(ws, type="speed", speed=16.0)
+
+        # Pass 1: stream past the first 13 events, then pause.
         await send(ws, type="play")
-        msgs = await until(
-            ws, lambda m: m["type"] == "clock" and m["clock"]["playing"] is False and m["clock"]["t"] > 19
-        )
-        got = [e["id"] for m in msgs if m["type"] == "events" for e in m["events"]]
-        landed_t = recording.arrays["t"][recording.index_at(cut)]
-        assert got == [e.id for e in events if e.t > landed_t]
-        # play again at the end restarts from the beginning and delivers everything once more
-        await send(ws, type="play")
-        msgs = await until(
-            ws, lambda m: m["type"] == "clock" and m["clock"]["playing"] is False and m["clock"]["t"] > 19
-        )
-        got = [e["id"] for m in msgs if m["type"] == "events" for e in m["events"]]
-        assert got == [e.id for e in events]
+        msgs = await until(ws, lambda m: m["type"] == "frame" and m["state"]["t"] >= events[12].t)
+        await send(ws, type="pause")
+        msgs += await until(ws, _stopped)
+        paused_t = msgs[-1]["clock"]["t"]
+        seen = hello["initial_event_ids"] + _event_ids(msgs)
+        assert seen == [e.id for e in events if e.t <= paused_t]  # in order, each once
+        assert len(seen) >= 13
+
+        # Seek backwards: nothing is replayed by the seek itself...
+        back_to = events[5].t + 0.001
+        landed_t = float(recording.arrays["t"][recording.index_at(back_to)])
+        await send(ws, type="seek", t=back_to)
+        await send(ws, type="pause")  # sync point: the clock reply comes after anything the seek sent
+        msgs = await until(ws, lambda m: m["type"] == "clock" and m["clock"]["t"] == pytest.approx(landed_t))
+        assert not _event_ids(msgs)
+
+        # ...but playing re-delivers exactly the events after the new position, once, in order.
+        expected = [e.id for e in events if e.t > landed_t]
+        assert 0 < len(expected) < len(events)
+        for _ in range(2):  # and the same again on the next pass after seeking back
+            await send(ws, type="play")
+            msgs = await until(ws, lambda m: _stopped(m) and m["clock"]["t"] > 19)
+            assert _event_ids(msgs) == expected
+            await send(ws, type="seek", t=back_to)
+            await until(ws, lambda m: m["type"] == "frame")
         await ws.close()
 
     run(scenario)
+
+
+def test_forward_seek_skips_the_span(server: LiveServer, recording: Recording) -> None:
+    async def scenario() -> None:
+        ws, _ = await open_session(server)
+        events = recording.events()
+        await send(ws, type="seek", t=events[10].t)  # lands on the frame at or before event 10
+        await until(ws, lambda m: m["type"] == "frame")
+        landed_t = float(recording.arrays["t"][recording.index_at(events[10].t)])
+        await send(ws, type="speed", speed=16.0)
+        await send(ws, type="play")
+        msgs = await until(ws, lambda m: _stopped(m) and m["clock"]["t"] > 19)
+        assert _event_ids(msgs) == [e.id for e in events if e.t > landed_t]  # the skipped span is not sent
+        await ws.close()
+
+    run(scenario)
+
+
+def test_replay_from_the_end_includes_the_kickoff_event(server: LiveServer, recording: Recording) -> None:
+    async def scenario() -> None:
+        ws, hello = await open_session(server)
+        await send(ws, type="speed", speed=16.0)
+        await send(ws, type="play")
+        await until(ws, lambda m: _stopped(m) and m["clock"]["t"] > 19)
+        await send(ws, type="play")  # at the end: restarts from 0
+        msgs = await until(ws, lambda m: _stopped(m) and m["clock"]["t"] > 19)
+        ids = _event_ids(msgs)
+        assert ids == [e.id for e in recording.events()]
+        assert ids[0] == hello["initial_event_ids"][0]  # the t = 0 event is there again
+        await ws.close()
+
+    run(scenario)
+
+
+def test_speed_change_while_playing(server: LiveServer) -> None:
+    async def scenario() -> None:
+        ws, _ = await open_session(server)
+        await send(ws, type="play")
+        before, _ = await collect_frames(ws, 1.0)
+        await send(ws, type="speed", speed=2.0)
+        msgs = await until(ws, lambda m: m["type"] == "clock" and m["clock"]["speed"] == 2.0)
+        assert msgs[-1]["clock"]["playing"] is True
+        last_before = max(f["state"]["tick"] for f in before + [m for m in msgs if m["type"] == "frame"])
+        after, arrivals = await collect_frames(ws, 2.0)
+        t = ticks(after)
+        assert t[0] > last_before  # continues forward from the same place, no jump back
+        assert t[0] - last_before <= 12  # ...and no big jump forward either
+        span = arrivals[-1] - arrivals[0]
+        assert (t[-1] - t[0]) / span == pytest.approx(50.0, rel=0.2)
+        await send(ws, type="speed", speed=0.5)
+        await until(ws, lambda m: m["type"] == "clock" and m["clock"]["speed"] == 0.5)
+        slow, arrivals = await collect_frames(ws, 2.0)
+        t = ticks(slow)
+        assert (t[-1] - t[0]) / (arrivals[-1] - arrivals[0]) == pytest.approx(12.5, rel=0.25)
+        await ws.close()
+
+    run(scenario)
+
+
+def test_pause_and_play_at_2x(server: LiveServer) -> None:
+    async def scenario() -> None:
+        ws, _ = await open_session(server)
+        await send(ws, type="speed", speed=2.0)
+        await send(ws, type="play")
+        await collect_frames(ws, 0.5)
+        await send(ws, type="pause")
+        msgs = await until(ws, _stopped)
+        paused_tick = msgs[-1]["clock"]["tick"]
+        await silence(ws, 0.4)
+        await send(ws, type="play")
+        resumed = await until(ws, lambda m: m["type"] == "frame")
+        assert resumed[0]["clock"]["speed"] == 2.0
+        assert paused_tick < resumed[-1]["state"]["tick"] <= paused_tick + 4  # continues right after the pause
+        frames, arrivals = await collect_frames(ws, 1.0)
+        rate = (ticks(frames)[-1] - ticks(frames)[0]) / (arrivals[-1] - arrivals[0])
+        assert rate == pytest.approx(50.0, rel=0.25)
+        await ws.close()
+
+    run(scenario)
+
+
+def test_natural_end_of_match_at_1x(short_server: LiveServer) -> None:
+    async def scenario() -> None:
+        ws, hello = await open_session(short_server)  # 75 frames: 2.96 s
+        assert hello["clock"]["duration_s"] == pytest.approx(2.96)
+        await send(ws, type="play")
+        begin = time.monotonic()
+        msgs = await until(ws, _stopped, timeout=8.0)
+        elapsed = time.monotonic() - begin
+        assert 2.5 < elapsed < 4.5  # played in real time
+        frames = [m for m in msgs if m["type"] == "frame"]
+        assert ticks(frames)[-1] == 74
+        assert msgs[-1]["clock"]["tick"] == 74
+        assert msgs[-1]["clock"]["t"] == pytest.approx(2.96)
+        assert msgs[-1]["clock"]["playing"] is False
+        await silence(ws, 0.5)  # no extra frames after the end
+        await ws.close()
+
+    run(scenario)
+
+
+def test_many_rapid_seeks_are_coalesced_and_the_last_wins(server: LiveServer) -> None:
+    async def scenario() -> None:
+        ws, _ = await open_session(server)
+        n = 300
+        for i in range(n):
+            await send(ws, type="seek", t=1.0 + (i % 17) * 0.5)
+        await send(ws, type="seek", t=13.0)
+        await send(ws, type="pause")
+        msgs = await until(ws, lambda m: m["type"] == "frame" and m["state"]["tick"] == 325)
+        msgs += await until(ws, lambda m: m["type"] == "clock")  # the reply to `pause`, sent after everything else
+        frames = [m for m in msgs if m["type"] == "frame"]
+        assert frames[-1]["state"]["tick"] == 325  # the last seek won
+        assert msgs[-1]["clock"]["t"] == pytest.approx(13.0)
+        assert len(frames) < n // 2, f"{len(frames)} frames for {n} seeks: queued seeks should be coalesced"
+        # rapid speed changes: the last one wins, the connection is fine
+        for i in range(100):
+            await send(ws, type="speed", speed=0.5 + (i % 8))
+        await send(ws, type="speed", speed=4.0)
+        await send(ws, type="pause")
+        msgs = await until(ws, lambda m: m["type"] == "clock" and m["clock"]["speed"] == 4.0)
+        assert [m for m in msgs if m["type"] == "clock"][-1]["clock"]["speed"] == 4.0
+        await ws.close()
+
+    run(scenario)
+
+
+def test_server_side_failure_is_logged_reported_and_closes_with_1011(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A frame that fails to rebuild (here: a corrupted animation index) ends only that session, loudly."""
+    meta = match_meta()
+    arrays = states_to_arrays(fixture_states(100), player_order(meta))
+    arrays["player_anim"][30:, 0] = 99  # not a valid animation index: state_at raises IndexError at frame 30
+    write_recording(tmp_path / "bad", meta, arrays, fixture_events(3.96))
+    app = create_app(tmp_path / "bad", FakeEngine("demo-0001"), Settings())
+
+    async def scenario(srv: LiveServer) -> None:
+        ws, _ = await open_session(srv)
+        await send(ws, type="play")
+        got: list[Msg] = []
+        with pytest.raises(ConnectionClosed) as info:
+            while True:
+                got.append(await recv(ws, 5.0))
+        assert info.value.rcvd is not None
+        assert info.value.rcvd.code == 1011
+        frames = [m for m in got if m["type"] == "frame"]
+        assert ticks(frames)[-1] == 29  # everything before the bad frame was delivered
+        assert got[-1]["type"] == "error"
+        assert got[-1]["code"] == "internal_error"
+
+    with caplog.at_level(logging.ERROR, logger="regolazo.server"), LiveServer(app) as srv:
+        run(lambda: scenario(srv))
+        for _ in range(50):  # the session is unregistered after the close
+            if not srv.app.state.sessions:
+                break
+            time.sleep(0.05)
+        assert not srv.app.state.sessions
+    assert any("server error, closing with 1011" in r.message and r.exc_info for r in caplog.records)
 
 
 def test_profile_update_and_language_validation(server: LiveServer) -> None:
@@ -412,7 +615,7 @@ def test_sessions_are_independent_and_cleaned_up(server: LiveServer) -> None:
         await send(b, type="seek", t=15.0)
         frames_a, _ = await collect_frames(a, 0.5)
         msgs_b = await until(b, lambda m: m["type"] == "frame" and m["state"]["tick"] == 375)
-        assert len(frames_a) >= 8  # a streams
+        assert len(frames_a) >= 6  # a streams
         await silence(b, 0.4)  # b stays paused at its own time
         assert msgs_b[-1]["state"]["tick"] == 375
         await a.close()

@@ -12,7 +12,7 @@ class UnknownSnapshotError(KeyError):
 def parse_snapshot_ref(ref: str) -> tuple[str, int]:
     """``snap:<match_id>:<tick>`` -> (match_id, tick)."""
     parts = ref.split(":")
-    if len(parts) != 3 or parts[0] != "snap" or not parts[1] or not parts[2].isdigit():
+    if len(parts) != 3 or parts[0] != "snap" or not parts[1] or not (parts[2].isascii() and parts[2].isdecimal()):
         raise UnknownSnapshotError(f"malformed snapshot ref {ref!r}")
     return parts[1], int(parts[2])
 

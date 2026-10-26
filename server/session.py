@@ -8,15 +8,21 @@ Clock semantics
   clock; it simply receives fewer frames (the newest frame at or before ``t`` is always the one sent).
 - Frames are sent at the recorded rate scaled by speed (25 Hz at 1x, 6.25 Hz at 0.25x) and never faster than
   ``max_fps``: at 2x and above, frames are skipped, not queued.
-- ``events`` / ``moment`` messages are sent when the clock passes them, always after the frame whose time
-  covers them. A seek moves the cursors without sending anything: events are not replayed backwards (or
-  forwards over the skipped span); a client wanting history uses ``GET /api/events``.
+- ``events`` / ``moment`` messages are delivered when the clock passes them during playback, on every pass,
+  always after the frame whose time covers them. A backward seek followed by play therefore re-delivers
+  everything after the new position, in order, once per pass; clients dedupe by ``MatchEvent.id`` /
+  ``DecisionMoment.id``. A forward seek skips the span without sending it; clients fetch history from
+  ``GET /api/events`` and ``GET /api/moments``. Seeking to the first frame rewinds the cursors fully, so
+  events at ``t <= 0`` (the kickoff) are delivered again with that frame.
 - After a seek the clock snaps to the frame at the requested time, then ``clock`` and ``frame`` are sent.
   Pause freezes the clock at the last frame sent.
+- Consecutive ``seek`` (or ``speed``) commands that are already queued are coalesced: only the last is applied.
+- The inbox is bounded; a client flooding commands is back-pressured through its socket.
 """
 
 import asyncio
 import bisect
+import contextlib
 import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -43,8 +49,10 @@ from shared.schemas.stream import (
 log = logging.getLogger("regolazo.session")
 
 Send = Callable[[str], Awaitable[None]]
+ClientCmd = PlayCmd | PauseCmd | SeekCmd | SpeedCmd | ProfileCmd
 
 _EPS = 1e-4
+INBOX_SIZE = 256
 ClientMessageAdapter: TypeAdapter[ClientMessage] = TypeAdapter(ClientMessage)
 
 
@@ -81,7 +89,10 @@ class Session:
         self.profile = profile
         self.languages = languages
         self.max_fps = max_fps
-        self.inbox: asyncio.Queue[_Close | _Raw | _Push] = asyncio.Queue()
+        self._loop = asyncio.get_running_loop()  # Sessions are created by the /ws handler, on the server loop
+        self.inbox: asyncio.Queue[_Close | _Raw | _Push] = asyncio.Queue(maxsize=INBOX_SIZE)
+        self._carry: _Close | _Raw | _Push | None = None
+        self._closed = False
         # Clock
         self.playing = False
         self.speed = 1.0
@@ -93,24 +104,38 @@ class Session:
         self._event_cursor = 0
         self._moment_cursor = 0
         self._send: Send | None = None
-        self._loop: asyncio.AbstractEventLoop | None = None
         self.frames_sent = 0
 
     # --- public ---------------------------------------------------------------------------------------------
 
-    def push(self, message: BaseModel) -> None:
-        """Queue a server message (e.g. cues, a narrative) for in-order delivery to this viewer. Thread-safe."""
-        item = _Push(message.model_dump_json())
-        if self._loop is None:
-            self.inbox.put_nowait(item)
-        else:
-            self._loop.call_soon_threadsafe(self.inbox.put_nowait, item)
+    def push(self, message: BaseModel) -> bool:
+        """Queue a server message (e.g. cues, a narrative) for in-order delivery to this viewer.
 
-    def receive(self, text: str) -> None:
-        self.inbox.put_nowait(_Raw(text))
+        Thread-safe. Returns False (and drops the message) once the session has finished or its inbox is full.
+        """
+        if self._closed:
+            return False
+        item = _Push(message.model_dump_json())
+        try:
+            self._loop.call_soon_threadsafe(self._put_nowait, item)
+        except RuntimeError:  # the event loop is closed (server shutting down)
+            return False
+        return True
+
+    def _put_nowait(self, item: _Close | _Raw | _Push) -> None:
+        try:
+            self.inbox.put_nowait(item)
+        except asyncio.QueueFull:
+            log.warning("session %s: inbox full, dropped %s", self.id, type(item).__name__)
+
+    async def receive(self, text: str) -> None:
+        """Queue one raw client frame; waits when the inbox is full, which back-pressures the socket."""
+        await self.inbox.put(_Raw(text))
 
     def close(self) -> None:
-        self.inbox.put_nowait(_Close())
+        self._closed = True
+        with contextlib.suppress(asyncio.QueueFull):
+            self.inbox.put_nowait(_Close())  # if full, the run loop sees ``_closed`` after its next item
 
     def clock_status(self) -> ClockStatus:
         tl = self.timeline
@@ -136,24 +161,29 @@ class Session:
     async def run(self, send: Send) -> None:
         """Send ``hello`` and the first frame, then serve commands and the clock until closed."""
         self._send = send
-        self._loop = asyncio.get_running_loop()
-        await send(self.hello().model_dump_json())
-        await self._emit_frame(0)
-        while True:
-            timeout: float | None = None
-            if self.playing:
-                timeout = max(0.0, self._next_wall() - self._loop_time())
-            try:
-                item = await asyncio.wait_for(self.inbox.get(), timeout)
-            except TimeoutError:
-                await self._tick()
-                continue
-            if isinstance(item, _Close):
-                return
-            if isinstance(item, _Push):
-                await send(item.text)
-            else:
-                await self._handle_raw(item.text)
+        try:
+            await send(self.hello().model_dump_json())
+            await self._emit_frame(0)
+            while not self._closed:
+                item = self._carry
+                self._carry = None
+                if item is None:
+                    timeout: float | None = None
+                    if self.playing:
+                        timeout = max(0.0, self._next_wall() - self._loop_time())
+                    try:
+                        item = await asyncio.wait_for(self.inbox.get(), timeout)
+                    except TimeoutError:
+                        await self._tick()
+                        continue
+                if isinstance(item, _Close):
+                    return
+                if isinstance(item, _Push):
+                    await send(item.text)
+                else:
+                    await self._handle_raw(item.text)
+        finally:
+            self._closed = True
 
     # --- clock ----------------------------------------------------------------------------------------------
 
@@ -226,6 +256,26 @@ class Session:
 
     # --- commands -------------------------------------------------------------------------------------------
 
+    @staticmethod
+    def _parse(text: str) -> ClientCmd | None:
+        try:
+            return ClientMessageAdapter.validate_json(text)
+        except ValidationError:
+            return None
+
+    def _coalesce(self, cmd: SeekCmd | SpeedCmd) -> SeekCmd | SpeedCmd:
+        """Fold already-queued consecutive commands of the same kind into the last one."""
+        while not self.inbox.empty():
+            nxt = self.inbox.get_nowait()
+            if isinstance(nxt, _Raw):
+                parsed = self._parse(nxt.text)
+                if type(parsed) is type(cmd) and isinstance(parsed, SeekCmd | SpeedCmd):
+                    cmd = parsed
+                    continue
+            self._carry = nxt
+            break
+        return cmd
+
     async def _handle_raw(self, text: str) -> None:
         try:
             cmd = ClientMessageAdapter.validate_json(text)
@@ -238,6 +288,8 @@ class Session:
                 where = ".".join(str(p) for p in first["loc"])
                 await self._error("invalid_message", f"{where}: {first['msg']}"[:300])
             return
+        if isinstance(cmd, SeekCmd | SpeedCmd):
+            cmd = self._coalesce(cmd)
         now = self._loop_time()
         tl = self.timeline
         if isinstance(cmd, PlayCmd):
@@ -277,13 +329,20 @@ class Session:
         idx = tl.index_at(min(t, tl.duration_s))
         t_frame = tl.time_of(idx)
         self._rebase(now, t_frame)
-        self._idx = idx
+        self.playing = play and idx < tl.n_frames - 1
+        self._pace_wall = float("-inf")
+        if idx == 0:
+            # Back to the very start: rewind the cursors so events at t <= 0 (kickoff) go out with this frame.
+            self._event_cursor = self._moment_cursor = 0
+            self._idx = 0
+            await self._send_clock()
+            await self._emit_frame(0)
+            return
         self._event_cursor = bisect.bisect_right(tl.event_times, t_frame)
         self._moment_cursor = bisect.bisect_right(tl.moment_times, t_frame)
-        self.playing = play and idx < tl.n_frames - 1
+        self._idx = idx
         await self._send_clock()
         assert self._send is not None
-        self._pace_wall = float("-inf")
         self._advance_pace()
         await self._send(tl.frame_json(idx))
         self.frames_sent += 1

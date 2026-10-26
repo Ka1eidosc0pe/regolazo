@@ -30,6 +30,9 @@ class Timeline:
         self.event_times: list[float] = [e.t for e in self.events]
         self.moments: list[DecisionMoment] = sorted(recording.moments(), key=lambda m: m.t)
         self.moment_times: list[float] = [m.t for m in self.moments]
+        self.keyframe_ticks: frozenset[int] = frozenset(
+            int(t) for t in self.ticks[recording.arrays["keyframe"].astype(bool)]
+        )
         self._cache: OrderedDict[int, str] = OrderedDict()
         self._cache_size = frame_cache_size
 
