@@ -164,7 +164,16 @@ All in `shared/schemas/` as Pydantic models with exported JSON Schema → genera
 Each step lists **build** and **test gates**. Do not proceed past a gate that fails; fix first. Commit at each green gate with a descriptive message.
 
 ### Step 0 — Environment & repo setup
-**Build**
+**Already done in the planning session (verify, don't redo):**
+- Azure CLI 2.91 and azd 1.37 installed; `az login` done (subscription "Azure subscription 1", `866944d2-416d-4fd5-a940-d7e8a9448c75`, free-trial with $200 credit).
+- Resource group `rg-regolazo` (eastus2); Azure AI Foundry resource `regolazo-ai-j76s9` (kind AIServices, project management enabled) — serves both Azure OpenAI and Azure AI Speech.
+- Model deployments: **`gpt-5-mini`** (main reasoning/narrative, 400K TPM) and **`gpt-4.1-mini`** (fast/high-frequency, 150K TPM). Newer models (gpt-5.x, gpt-6.x) currently have **zero quota** on this trial subscription; design so the deployment names are config-only and can be swapped if quota appears. Remaining quota headroom: o4-mini 100K, gpt-4o (Standard) 50K.
+- `.env` (gitignored) holds endpoints, key, deployment names, speech region; `.env.example` is committed. `scripts/smoke_azure.py` passes (both chat deployments + EN/ES/FR neural TTS: `en-GB-RyanNeural`, `es-ES-AlvaroNeural`, `fr-FR-HenriNeural`). Run it with `uv run scripts/smoke_azure.py`.
+- Git repo initialized on `main` with `.gitignore`; remote **private** GitHub repo `Ka1eidosc0pe/regolazo` (must be made **public before submission** — ask the user first).
+- `ffmpeg` 9, Docker, Node 25, uv, gh available locally.
+- Character/animation assets: see `docs/assets_mixamo.md`; raw files in `assets/third_party/mixamo/` (gitignored).
+
+**Build (remaining)**
 - Monorepo: `sim/`, `analytics/`, `vision/`, `agents/`, `server/`, `web/`, `shared/`, `infra/`, `docs/`, `scripts/`.
 - Python via `uv` (3.12), ruff + mypy (or pyright), pytest. Web via Vite + TS, ESLint, Vitest, Playwright.
 - GitHub Actions CI: lint + type check + unit tests for Python and web.
