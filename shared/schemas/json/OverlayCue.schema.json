@@ -1,0 +1,840 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/OverlayCue.json",
+  "$defs": {
+    "AccuracyPanelPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "accuracy_panel",
+          "default": "accuracy_panel",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/AccuracyRow"
+          },
+          "type": "array"
+        },
+        "window": {
+          "default": "match_so_far",
+          "enum": [
+            "live_window",
+            "match_so_far"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "rows",
+        "window"
+      ],
+      "title": "AccuracyPanelPayload",
+      "type": "object"
+    },
+    "AccuracyRow": {
+      "additionalProperties": false,
+      "properties": {
+        "event_type": {
+          "enum": [
+            "pass",
+            "ball_receipt",
+            "carry",
+            "take_on",
+            "shot",
+            "duel",
+            "interception",
+            "block",
+            "clearance",
+            "ball_recovery",
+            "dispossessed",
+            "miscontrol",
+            "deflection",
+            "foul_committed",
+            "foul_won",
+            "gk_action",
+            "restart",
+            "ball_out_of_play",
+            "offside",
+            "own_goal",
+            "period_start",
+            "period_end",
+            "pressure",
+            "pressing_sequence",
+            "off_ball_run",
+            "sprint",
+            "high_intensity_run",
+            "acceleration",
+            "line_step_up"
+          ],
+          "type": "string"
+        },
+        "precision": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "recall": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "f1": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "support": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "event_type",
+        "precision",
+        "recall",
+        "f1",
+        "support"
+      ],
+      "title": "AccuracyRow",
+      "type": "object"
+    },
+    "CaptionPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "caption",
+          "default": "caption",
+          "type": "string"
+        },
+        "narrative_id": {
+          "type": "string"
+        },
+        "speak": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "narrative_id",
+        "speak"
+      ],
+      "title": "CaptionPayload",
+      "type": "object"
+    },
+    "ControlChaosPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "control_chaos",
+          "default": "control_chaos",
+          "type": "string"
+        },
+        "index": {
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "series": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SeriesPoint"
+          },
+          "type": "array"
+        },
+        "drivers": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "default": {},
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "index",
+        "series",
+        "drivers"
+      ],
+      "title": "ControlChaosPayload",
+      "type": "object"
+    },
+    "CueAnchor": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "player",
+            "screen",
+            "pitch"
+          ],
+          "type": "string"
+        },
+        "player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "region": {
+          "anyOf": [
+            {
+              "enum": [
+                "top_left",
+                "top_right",
+                "top_center",
+                "bottom_left",
+                "bottom_right",
+                "lower_third",
+                "center"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pitch_xy": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "player",
+        "region",
+        "pitch_xy"
+      ],
+      "title": "CueAnchor",
+      "type": "object"
+    },
+    "HighlightPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "highlight",
+          "default": "highlight",
+          "type": "string"
+        },
+        "players": {
+          "items": {
+            "examples": [
+              "H07",
+              "A10"
+            ],
+            "pattern": "^[HA]\\d{2}$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "style": {
+          "default": "ring",
+          "enum": [
+            "ring",
+            "spotlight",
+            "trail",
+            "arrow"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "players",
+        "style"
+      ],
+      "title": "HighlightPayload",
+      "type": "object"
+    },
+    "MilestonePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "milestone",
+          "default": "milestone",
+          "type": "string"
+        },
+        "narrative_id": {
+          "type": "string"
+        },
+        "milestone": {
+          "type": "string"
+        },
+        "team": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "type",
+        "narrative_id",
+        "milestone",
+        "team",
+        "player"
+      ],
+      "title": "MilestonePayload",
+      "type": "object"
+    },
+    "MomentumChartPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "momentum_chart",
+          "default": "momentum_chart",
+          "type": "string"
+        },
+        "home": {
+          "items": {
+            "$ref": "#/$defs/SeriesPoint"
+          },
+          "type": "array"
+        },
+        "away": {
+          "items": {
+            "$ref": "#/$defs/SeriesPoint"
+          },
+          "type": "array"
+        },
+        "window_s": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "home",
+        "away",
+        "window_s"
+      ],
+      "title": "MomentumChartPayload",
+      "type": "object"
+    },
+    "NameTagPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "name_tag",
+          "default": "name_tag",
+          "type": "string"
+        },
+        "player": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "emphasis": {
+          "default": "normal",
+          "enum": [
+            "normal",
+            "highlight"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "player",
+        "emphasis"
+      ],
+      "title": "NameTagPayload",
+      "type": "object"
+    },
+    "PassCardPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "pass_card",
+          "default": "pass_card",
+          "type": "string"
+        },
+        "event_id": {
+          "examples": [
+            "ev_000123"
+          ],
+          "pattern": "^ev_[0-9a-z_]+$",
+          "type": "string"
+        },
+        "passer": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "recipient": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "length_m": {
+          "type": "number"
+        },
+        "ball_speed_kmh": {
+          "type": "number"
+        },
+        "xpass": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "difficulty": {
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "technique": {
+          "enum": [
+            "standard",
+            "driven",
+            "lofted",
+            "chipped",
+            "curled",
+            "outside_of_boot",
+            "backheel"
+          ],
+          "type": "string"
+        },
+        "pass_type": {
+          "enum": [
+            "standard",
+            "cross",
+            "cutback",
+            "through_ball",
+            "layoff",
+            "flick_on",
+            "back_pass"
+          ],
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "intercepted",
+            "out_of_play",
+            "offside"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "event_id",
+        "passer",
+        "recipient",
+        "length_m",
+        "ball_speed_kmh",
+        "xpass",
+        "difficulty",
+        "technique",
+        "pass_type",
+        "outcome"
+      ],
+      "title": "PassCardPayload",
+      "type": "object"
+    },
+    "RewindPromptPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "rewind_prompt",
+          "default": "rewind_prompt",
+          "type": "string"
+        },
+        "moment_id": {
+          "type": "string"
+        },
+        "narrative_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "type",
+        "moment_id",
+        "narrative_id"
+      ],
+      "title": "RewindPromptPayload",
+      "type": "object"
+    },
+    "SeriesPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "t": {
+          "type": "number"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "t",
+        "value"
+      ],
+      "title": "SeriesPoint",
+      "type": "object"
+    },
+    "ShotCardPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "shot_card",
+          "default": "shot_card",
+          "type": "string"
+        },
+        "event_id": {
+          "examples": [
+            "ev_000123"
+          ],
+          "pattern": "^ev_[0-9a-z_]+$",
+          "type": "string"
+        },
+        "shooter": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "xg": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "psxg": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ball_speed_kmh": {
+          "type": "number"
+        },
+        "distance_m": {
+          "type": "number"
+        },
+        "technique": {
+          "enum": [
+            "driven",
+            "placed",
+            "finesse",
+            "chip",
+            "volley",
+            "half_volley",
+            "header",
+            "diving_header",
+            "toe_poke",
+            "backheel",
+            "overhead_kick"
+          ],
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "goal",
+            "saved",
+            "saved_to_post",
+            "off_target",
+            "blocked",
+            "woodwork",
+            "wayward"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "event_id",
+        "shooter",
+        "xg",
+        "psxg",
+        "ball_speed_kmh",
+        "distance_m",
+        "technique",
+        "outcome"
+      ],
+      "title": "ShotCardPayload",
+      "type": "object"
+    },
+    "ThresholdBadgePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "threshold_badge",
+          "default": "threshold_badge",
+          "type": "string"
+        },
+        "player": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "top_speed",
+            "sprint_speed",
+            "distance_covered",
+            "sprint_count",
+            "shot_speed",
+            "pass_distance"
+          ],
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "km/h",
+            "m/s",
+            "m",
+            "km",
+            "count"
+          ],
+          "type": "string"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "record": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "player",
+        "metric",
+        "value",
+        "unit",
+        "threshold",
+        "record"
+      ],
+      "title": "ThresholdBadgePayload",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "t_start": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "t_end": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "priority": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "anchor": {
+      "$ref": "#/$defs/CueAnchor"
+    },
+    "payload": {
+      "discriminator": {
+        "mapping": {
+          "accuracy_panel": "#/$defs/AccuracyPanelPayload",
+          "caption": "#/$defs/CaptionPayload",
+          "control_chaos": "#/$defs/ControlChaosPayload",
+          "highlight": "#/$defs/HighlightPayload",
+          "milestone": "#/$defs/MilestonePayload",
+          "momentum_chart": "#/$defs/MomentumChartPayload",
+          "name_tag": "#/$defs/NameTagPayload",
+          "pass_card": "#/$defs/PassCardPayload",
+          "rewind_prompt": "#/$defs/RewindPromptPayload",
+          "shot_card": "#/$defs/ShotCardPayload",
+          "threshold_badge": "#/$defs/ThresholdBadgePayload"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/NameTagPayload"
+        },
+        {
+          "$ref": "#/$defs/ThresholdBadgePayload"
+        },
+        {
+          "$ref": "#/$defs/PassCardPayload"
+        },
+        {
+          "$ref": "#/$defs/ShotCardPayload"
+        },
+        {
+          "$ref": "#/$defs/MomentumChartPayload"
+        },
+        {
+          "$ref": "#/$defs/ControlChaosPayload"
+        },
+        {
+          "$ref": "#/$defs/AccuracyPanelPayload"
+        },
+        {
+          "$ref": "#/$defs/RewindPromptPayload"
+        },
+        {
+          "$ref": "#/$defs/CaptionPayload"
+        },
+        {
+          "$ref": "#/$defs/MilestonePayload"
+        },
+        {
+          "$ref": "#/$defs/HighlightPayload"
+        }
+      ]
+    },
+    "modes": {
+      "default": [
+        "analyst",
+        "casual"
+      ],
+      "items": {
+        "enum": [
+          "analyst",
+          "casual"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "team_focus": {
+      "anyOf": [
+        {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "evidence": {
+      "default": [],
+      "items": {
+        "examples": [
+          "ev_000123"
+        ],
+        "pattern": "^ev_[0-9a-z_]+$",
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "t_start",
+    "t_end",
+    "priority",
+    "anchor",
+    "payload",
+    "modes",
+    "team_focus",
+    "evidence"
+  ],
+  "title": "OverlayCue",
+  "type": "object"
+}

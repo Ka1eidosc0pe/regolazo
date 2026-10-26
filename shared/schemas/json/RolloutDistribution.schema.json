@@ -1,0 +1,593 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/RolloutDistribution.json",
+  "$defs": {
+    "ActionIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "pass_player",
+            "pass_space",
+            "shot",
+            "carry",
+            "clearance"
+          ],
+          "type": "string"
+        },
+        "player": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "target_player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "target": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "path": {
+          "default": [],
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "items": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "additionalItems": false,
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "curve": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "power": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "pass_technique_override": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shot_technique_override": {
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source": {
+          "default": "ai",
+          "enum": [
+            "ai",
+            "fan"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "player",
+        "target_player",
+        "target",
+        "path",
+        "curve",
+        "power",
+        "pass_technique_override",
+        "shot_technique_override",
+        "source"
+      ],
+      "title": "ActionIntent",
+      "type": "object"
+    },
+    "BallLaunch": {
+      "additionalProperties": false,
+      "properties": {
+        "speed_mps": {
+          "maximum": 45,
+          "minimum": 0,
+          "type": "number"
+        },
+        "elevation_rad": {
+          "maximum": 1.5,
+          "minimum": -0.5,
+          "type": "number"
+        },
+        "azimuth_rad": {
+          "type": "number"
+        },
+        "spin": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        }
+      },
+      "required": [
+        "speed_mps",
+        "elevation_rad",
+        "azimuth_rad",
+        "spin"
+      ],
+      "title": "BallLaunch",
+      "type": "object"
+    },
+    "ExecutionEllipse": {
+      "additionalProperties": false,
+      "description": "1-sigma execution uncertainty at the intended end point, sized by the player's skill and pressure.",
+      "properties": {
+        "center": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "semi_major_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "semi_minor_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "angle_rad": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "center",
+        "semi_major_m",
+        "semi_minor_m",
+        "angle_rad"
+      ],
+      "title": "ExecutionEllipse",
+      "type": "object"
+    },
+    "Interval": {
+      "additionalProperties": false,
+      "properties": {
+        "lo": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "hi": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "lo",
+        "hi"
+      ],
+      "title": "Interval",
+      "type": "object"
+    },
+    "ResolvedAction": {
+      "additionalProperties": false,
+      "properties": {
+        "intent": {
+          "$ref": "#/$defs/ActionIntent"
+        },
+        "action_type": {
+          "enum": [
+            "pass",
+            "shot",
+            "carry",
+            "dribble",
+            "clearance"
+          ],
+          "type": "string"
+        },
+        "body_part": {
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pass_technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pass_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "cross",
+                "cutback",
+                "through_ball",
+                "layoff",
+                "flick_on",
+                "back_pass"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pass_height": {
+          "anyOf": [
+            {
+              "enum": [
+                "ground",
+                "low",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shot_technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "intended_end": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "launch": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BallLaunch"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "curve_applied": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "ellipse": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionEllipse"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "preview_arc": {
+          "default": [],
+          "items": {
+            "maxItems": 3,
+            "minItems": 3,
+            "items": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "additionalItems": false,
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "override_rejected": {
+          "default": false,
+          "type": "boolean"
+        },
+        "weak_foot": {
+          "default": false,
+          "type": "boolean"
+        },
+        "execution_quality": {
+          "default": 1.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "intent",
+        "action_type",
+        "body_part",
+        "pass_technique",
+        "pass_type",
+        "pass_height",
+        "shot_technique",
+        "intended_end",
+        "launch",
+        "curve_applied",
+        "ellipse",
+        "preview_arc",
+        "override_rejected",
+        "weak_foot",
+        "execution_quality"
+      ],
+      "title": "ResolvedAction",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "type": "string"
+    },
+    "snapshot_ref": {
+      "type": "string"
+    },
+    "intent": {
+      "$ref": "#/$defs/ActionIntent"
+    },
+    "resolved": {
+      "$ref": "#/$defs/ResolvedAction"
+    },
+    "n": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "outcome_counts": {
+      "additionalProperties": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "propertyNames": {
+        "enum": [
+          "goal",
+          "shot_saved",
+          "shot_off_target",
+          "shot_blocked",
+          "woodwork",
+          "chance_created",
+          "possession_retained",
+          "turnover",
+          "out_of_play",
+          "foul_won",
+          "offside"
+        ]
+      },
+      "type": "object"
+    },
+    "p_primary_success": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "type": "number"
+    },
+    "p_primary_success_ci95": {
+      "$ref": "#/$defs/Interval"
+    },
+    "p_goal": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "type": "number"
+    },
+    "p_goal_ci95": {
+      "$ref": "#/$defs/Interval"
+    },
+    "mean_xg": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "mean_xt_delta": {
+      "type": "number"
+    },
+    "model_p_success": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "type": "number"
+    },
+    "elapsed_ms": {
+      "minimum": 0,
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_ref",
+    "intent",
+    "resolved",
+    "n",
+    "seed",
+    "outcome_counts",
+    "p_primary_success",
+    "p_primary_success_ci95",
+    "p_goal",
+    "p_goal_ci95",
+    "mean_xg",
+    "mean_xt_delta",
+    "model_p_success",
+    "elapsed_ms"
+  ],
+  "title": "RolloutDistribution",
+  "type": "object"
+}

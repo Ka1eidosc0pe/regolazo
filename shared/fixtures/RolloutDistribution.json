@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0.0",
+  "snapshot_ref": "snap:demo-0001:58310",
+  "intent": {
+    "kind": "pass_space",
+    "player": "H10",
+    "target_player": null,
+    "target": [
+      38.0,
+      -4.0,
+      0.0
+    ],
+    "path": [
+      [
+        18.4,
+        6.1
+      ],
+      [
+        27.0,
+        3.0
+      ],
+      [
+        33.0,
+        -1.5
+      ],
+      [
+        38.0,
+        -4.0
+      ]
+    ],
+    "curve": 0.35,
+    "power": 0.62,
+    "pass_technique_override": null,
+    "shot_technique_override": null,
+    "source": "fan"
+  },
+  "resolved": {
+    "intent": {
+      "kind": "pass_space",
+      "player": "H10",
+      "target_player": null,
+      "target": [
+        38.0,
+        -4.0,
+        0.0
+      ],
+      "path": [
+        [
+          18.4,
+          6.1
+        ],
+        [
+          27.0,
+          3.0
+        ],
+        [
+          33.0,
+          -1.5
+        ],
+        [
+          38.0,
+          -4.0
+        ]
+      ],
+      "curve": 0.35,
+      "power": 0.62,
+      "pass_technique_override": null,
+      "shot_technique_override": null,
+      "source": "fan"
+    },
+    "action_type": "pass",
+    "body_part": "left_foot",
+    "pass_technique": "curled",
+    "pass_type": "through_ball",
+    "pass_height": "ground",
+    "shot_technique": null,
+    "intended_end": [
+      38.0,
+      -4.0,
+      0.0
+    ],
+    "launch": {
+      "speed_mps": 17.5,
+      "elevation_rad": 0.03,
+      "azimuth_rad": -0.52,
+      "spin": [
+        0.0,
+        0.0,
+        -8.0
+      ]
+    },
+    "curve_applied": 0.3,
+    "ellipse": {
+      "center": [
+        38.0,
+        -4.0,
+        0.0
+      ],
+      "semi_major_m": 1.8,
+      "semi_minor_m": 0.9,
+      "angle_rad": -0.52
+    },
+    "preview_arc": [
+      [
+        18.4,
+        6.1,
+        0.11
+      ],
+      [
+        25.9,
+        3.4,
+        0.11
+      ],
+      [
+        32.4,
+        -0.6,
+        0.11
+      ],
+      [
+        38.0,
+        -4.0,
+        0.11
+      ]
+    ],
+    "override_rejected": false,
+    "weak_foot": false,
+    "execution_quality": 0.84
+  },
+  "n": 1000,
+  "seed": 7,
+  "outcome_counts": {
+    "goal": 182,
+    "shot_saved": 151,
+    "shot_off_target": 96,
+    "turnover": 418,
+    "possession_retained": 153
+  },
+  "p_primary_success": 0.574,
+  "p_primary_success_ci95": {
+    "lo": 0.543,
+    "hi": 0.605
+  },
+  "p_goal": 0.182,
+  "p_goal_ci95": {
+    "lo": 0.159,
+    "hi": 0.207
+  },
+  "mean_xg": 0.19,
+  "mean_xt_delta": 0.11,
+  "model_p_success": 0.58,
+  "elapsed_ms": 2140.0
+}

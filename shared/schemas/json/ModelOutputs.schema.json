@@ -1,0 +1,738 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/ModelOutputs.json",
+  "$defs": {
+    "ActionIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "pass_player",
+            "pass_space",
+            "shot",
+            "carry",
+            "clearance"
+          ],
+          "type": "string"
+        },
+        "player": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "target_player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "target": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "path": {
+          "default": [],
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "items": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "additionalItems": false,
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "curve": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "power": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "pass_technique_override": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shot_technique_override": {
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source": {
+          "default": "ai",
+          "enum": [
+            "ai",
+            "fan"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "player",
+        "target_player",
+        "target",
+        "path",
+        "curve",
+        "power",
+        "pass_technique_override",
+        "shot_technique_override",
+        "source"
+      ],
+      "title": "ActionIntent",
+      "type": "object"
+    },
+    "BallLaunch": {
+      "additionalProperties": false,
+      "properties": {
+        "speed_mps": {
+          "maximum": 45,
+          "minimum": 0,
+          "type": "number"
+        },
+        "elevation_rad": {
+          "maximum": 1.5,
+          "minimum": -0.5,
+          "type": "number"
+        },
+        "azimuth_rad": {
+          "type": "number"
+        },
+        "spin": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        }
+      },
+      "required": [
+        "speed_mps",
+        "elevation_rad",
+        "azimuth_rad",
+        "spin"
+      ],
+      "title": "BallLaunch",
+      "type": "object"
+    },
+    "ExecutionEllipse": {
+      "additionalProperties": false,
+      "description": "1-sigma execution uncertainty at the intended end point, sized by the player's skill and pressure.",
+      "properties": {
+        "center": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "semi_major_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "semi_minor_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "angle_rad": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "center",
+        "semi_major_m",
+        "semi_minor_m",
+        "angle_rad"
+      ],
+      "title": "ExecutionEllipse",
+      "type": "object"
+    },
+    "OptionEvaluation": {
+      "additionalProperties": false,
+      "description": "One option available to the ball carrier, scored by the analytics models.",
+      "properties": {
+        "option_id": {
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/ActionIntent"
+        },
+        "resolved": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResolvedAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "label": {
+          "type": "string"
+        },
+        "p_success": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "p_success_baseline": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value_if_success": {
+          "type": "number"
+        },
+        "xg": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "xt_gain": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "decision_value": {
+          "type": "number"
+        },
+        "viable": {
+          "default": true,
+          "type": "boolean"
+        },
+        "is_real": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "option_id",
+        "intent",
+        "resolved",
+        "label",
+        "p_success",
+        "p_success_baseline",
+        "value_if_success",
+        "xg",
+        "xt_gain",
+        "decision_value",
+        "viable",
+        "is_real"
+      ],
+      "title": "OptionEvaluation",
+      "type": "object"
+    },
+    "PitchControlGrid": {
+      "additionalProperties": false,
+      "description": "Probability that ``team`` controls each cell. Row-major: ``values[iy * nx + ix]``.\n\nCell (ix, iy) is centred at ``(x0 + ix * cell_m, y0 + iy * cell_m)`` in world coordinates.",
+      "properties": {
+        "team": {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "nx": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "ny": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "x0": {
+          "type": "number"
+        },
+        "y0": {
+          "type": "number"
+        },
+        "cell_m": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "values": {
+          "items": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "team",
+        "nx",
+        "ny",
+        "x0",
+        "y0",
+        "cell_m",
+        "values"
+      ],
+      "title": "PitchControlGrid",
+      "type": "object"
+    },
+    "ResolvedAction": {
+      "additionalProperties": false,
+      "properties": {
+        "intent": {
+          "$ref": "#/$defs/ActionIntent"
+        },
+        "action_type": {
+          "enum": [
+            "pass",
+            "shot",
+            "carry",
+            "dribble",
+            "clearance"
+          ],
+          "type": "string"
+        },
+        "body_part": {
+          "anyOf": [
+            {
+              "enum": [
+                "right_foot",
+                "left_foot",
+                "head",
+                "chest",
+                "other",
+                "hands",
+                "no_touch",
+                "left_hand",
+                "right_hand",
+                "both_hands"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pass_technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pass_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "cross",
+                "cutback",
+                "through_ball",
+                "layoff",
+                "flick_on",
+                "back_pass"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pass_height": {
+          "anyOf": [
+            {
+              "enum": [
+                "ground",
+                "low",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shot_technique": {
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "intended_end": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "launch": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BallLaunch"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "curve_applied": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "ellipse": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionEllipse"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "preview_arc": {
+          "default": [],
+          "items": {
+            "maxItems": 3,
+            "minItems": 3,
+            "items": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "additionalItems": false,
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "override_rejected": {
+          "default": false,
+          "type": "boolean"
+        },
+        "weak_foot": {
+          "default": false,
+          "type": "boolean"
+        },
+        "execution_quality": {
+          "default": 1.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "intent",
+        "action_type",
+        "body_part",
+        "pass_technique",
+        "pass_type",
+        "pass_height",
+        "shot_technique",
+        "intended_end",
+        "launch",
+        "curve_applied",
+        "ellipse",
+        "preview_arc",
+        "override_rejected",
+        "weak_foot",
+        "execution_quality"
+      ],
+      "title": "ResolvedAction",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "type": "string"
+    },
+    "tick": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "t": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "team_in_possession": {
+      "anyOf": [
+        {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ball_carrier": {
+      "anyOf": [
+        {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ball_xy": {
+      "maxItems": 2,
+      "minItems": 2,
+      "items": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "additionalItems": false,
+      "type": "array"
+    },
+    "xt_at_ball": {
+      "type": "number"
+    },
+    "shot_xg_now": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "pitch_control": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PitchControlGrid"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "options": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/OptionEvaluation"
+      },
+      "type": "array"
+    },
+    "model_versions": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "tick",
+    "t",
+    "team_in_possession",
+    "ball_carrier",
+    "ball_xy",
+    "xt_at_ball",
+    "shot_xg_now",
+    "pitch_control",
+    "options",
+    "model_versions"
+  ],
+  "title": "ModelOutputs",
+  "type": "object"
+}

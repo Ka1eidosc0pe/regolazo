@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "session_id": "sess_a1b2",
+  "mode": "analyst",
+  "favorite_club": "home",
+  "language": "fr",
+  "voice_enabled": true,
+  "voice": null,
+  "show_numbers_first": false
+}

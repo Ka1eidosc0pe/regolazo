@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/ViewerProfile.json",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "mode": {
+      "default": "casual",
+      "enum": [
+        "analyst",
+        "casual"
+      ],
+      "type": "string"
+    },
+    "favorite_club": {
+      "anyOf": [
+        {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "language": {
+      "default": "en",
+      "examples": [
+        "en",
+        "es",
+        "fr"
+      ],
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+      "type": "string"
+    },
+    "voice_enabled": {
+      "default": false,
+      "type": "boolean"
+    },
+    "voice": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "show_numbers_first": {
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema_version",
+    "session_id",
+    "mode",
+    "favorite_club",
+    "language",
+    "voice_enabled",
+    "voice",
+    "show_numbers_first"
+  ],
+  "title": "ViewerProfile",
+  "type": "object"
+}

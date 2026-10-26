@@ -1,0 +1,218 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/RolloutRequest.json",
+  "$defs": {
+    "ActionIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "pass_player",
+            "pass_space",
+            "shot",
+            "carry",
+            "clearance"
+          ],
+          "type": "string"
+        },
+        "player": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "target_player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "target": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "path": {
+          "default": [],
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "items": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "additionalItems": false,
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "curve": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": -1,
+          "type": "number"
+        },
+        "power": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "pass_technique_override": {
+          "anyOf": [
+            {
+              "enum": [
+                "standard",
+                "driven",
+                "lofted",
+                "chipped",
+                "curled",
+                "outside_of_boot",
+                "backheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shot_technique_override": {
+          "anyOf": [
+            {
+              "enum": [
+                "driven",
+                "placed",
+                "finesse",
+                "chip",
+                "volley",
+                "half_volley",
+                "header",
+                "diving_header",
+                "toe_poke",
+                "backheel",
+                "overhead_kick"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source": {
+          "default": "ai",
+          "enum": [
+            "ai",
+            "fan"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "player",
+        "target_player",
+        "target",
+        "path",
+        "curve",
+        "power",
+        "pass_technique_override",
+        "shot_technique_override",
+        "source"
+      ],
+      "title": "ActionIntent",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "snapshot_ref": {
+      "type": "string"
+    },
+    "intent": {
+      "$ref": "#/$defs/ActionIntent"
+    },
+    "horizon_s": {
+      "default": 10.0,
+      "maximum": 20,
+      "minimum": 1,
+      "type": "number"
+    },
+    "n": {
+      "default": 1,
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "seed": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "return_frames": {
+      "default": true,
+      "type": "boolean"
+    },
+    "frame_stride": {
+      "default": 1,
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "snapshot_ref",
+    "intent",
+    "horizon_s",
+    "n",
+    "seed",
+    "return_frames",
+    "frame_stride"
+  ],
+  "title": "RolloutRequest",
+  "type": "object"
+}

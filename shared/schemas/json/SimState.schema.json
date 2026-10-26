@@ -1,0 +1,459 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/SimState.json",
+  "$defs": {
+    "BallState": {
+      "additionalProperties": false,
+      "properties": {
+        "pos": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "vel": {
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "spin": {
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "in_play": {
+          "default": true,
+          "type": "boolean"
+        },
+        "last_touch": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "pos",
+        "vel",
+        "spin",
+        "in_play",
+        "last_touch"
+      ],
+      "title": "BallState",
+      "type": "object"
+    },
+    "PlayerState": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "pos": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "vel": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "facing": {
+          "type": "number"
+        },
+        "z": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "anim": {
+          "default": "idle",
+          "enum": [
+            "idle",
+            "jog",
+            "run",
+            "sprint",
+            "jog_back",
+            "strafe_left",
+            "strafe_right",
+            "turn",
+            "receive_ground",
+            "receive_aerial",
+            "dribble",
+            "pass_short",
+            "pass_long",
+            "cross",
+            "shoot",
+            "chip",
+            "volley",
+            "header_standing",
+            "header_jumping",
+            "tackle",
+            "slide_tackle",
+            "fall",
+            "get_up",
+            "throw_in",
+            "gk_idle",
+            "gk_dive_left",
+            "gk_dive_right",
+            "gk_block_left",
+            "gk_block_right",
+            "gk_catch_high",
+            "gk_catch_low",
+            "gk_scoop",
+            "gk_throw",
+            "gk_drop_kick",
+            "celebrate",
+            "disappointed"
+          ],
+          "type": "string"
+        },
+        "anim_t": {
+          "default": 0.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "stamina": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "on_pitch": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "pos",
+        "vel",
+        "facing",
+        "z",
+        "anim",
+        "anim_t",
+        "stamina",
+        "on_pitch"
+      ],
+      "title": "PlayerState",
+      "type": "object"
+    },
+    "Possession": {
+      "additionalProperties": false,
+      "properties": {
+        "team": {
+          "anyOf": [
+            {
+              "enum": [
+                "home",
+                "away"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "player": {
+          "anyOf": [
+            {
+              "examples": [
+                "H07",
+                "A10"
+              ],
+              "pattern": "^[HA]\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sequence_id": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "team",
+        "player",
+        "sequence_id"
+      ],
+      "title": "Possession",
+      "type": "object"
+    },
+    "RefereeState": {
+      "additionalProperties": false,
+      "properties": {
+        "pos": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "vel": {
+          "maxItems": 2,
+          "minItems": 2,
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "type": "array"
+        },
+        "facing": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "pos",
+        "vel",
+        "facing"
+      ],
+      "title": "RefereeState",
+      "type": "object"
+    },
+    "Score": {
+      "additionalProperties": false,
+      "properties": {
+        "home": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "away": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "home",
+        "away"
+      ],
+      "title": "Score",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "type": "string"
+    },
+    "tick": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "t": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "period": {
+      "enum": [
+        1,
+        2
+      ],
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "pre_match",
+        "first_half",
+        "half_time",
+        "second_half",
+        "full_time"
+      ],
+      "type": "string"
+    },
+    "ball": {
+      "$ref": "#/$defs/BallState"
+    },
+    "players": {
+      "items": {
+        "$ref": "#/$defs/PlayerState"
+      },
+      "type": "array"
+    },
+    "referee": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RefereeState"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "possession": {
+      "$ref": "#/$defs/Possession"
+    },
+    "phase": {
+      "enum": [
+        "build_up",
+        "progression",
+        "final_third",
+        "attacking_transition",
+        "defensive_transition",
+        "counter_attack",
+        "set_piece",
+        "out_of_possession",
+        "dead_ball"
+      ],
+      "type": "string"
+    },
+    "restart": {
+      "anyOf": [
+        {
+          "enum": [
+            "kick_off",
+            "throw_in",
+            "goal_kick",
+            "corner",
+            "free_kick_direct",
+            "free_kick_indirect",
+            "penalty",
+            "drop_ball"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "score": {
+      "$ref": "#/$defs/Score"
+    },
+    "attacking_positive_x": {
+      "enum": [
+        "home",
+        "away"
+      ],
+      "type": "string"
+    },
+    "keyframe": {
+      "default": false,
+      "type": "boolean"
+    },
+    "snapshot_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "schema_version",
+    "tick",
+    "t",
+    "period",
+    "status",
+    "ball",
+    "players",
+    "referee",
+    "possession",
+    "phase",
+    "restart",
+    "score",
+    "attacking_positive_x",
+    "keyframe",
+    "snapshot_ref"
+  ],
+  "title": "SimState",
+  "type": "object"
+}

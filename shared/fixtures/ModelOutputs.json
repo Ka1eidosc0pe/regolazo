@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0.0",
+  "tick": 58310,
+  "t": 2332.4,
+  "team_in_possession": "home",
+  "ball_carrier": "H10",
+  "ball_xy": [
+    18.4,
+    6.1
+  ],
+  "xt_at_ball": 0.034,
+  "shot_xg_now": 0.03,
+  "pitch_control": {
+    "team": "home",
+    "nx": 8,
+    "ny": 5,
+    "x0": -49.0,
+    "y0": -27.2,
+    "cell_m": 13.6,
+    "values": [
+      0.24,
+      0.3,
+      0.36,
+      0.42,
+      0.48,
+      0.54,
+      0.6,
+      0.66,
+      0.28,
+      0.34,
+      0.4,
+      0.46,
+      0.52,
+      0.58,
+      0.64,
+      0.7,
+      0.32,
+      0.38,
+      0.44,
+      0.5,
+      0.56,
+      0.62,
+      0.68,
+      0.74,
+      0.28,
+      0.34,
+      0.4,
+      0.46,
+      0.52,
+      0.58,
+      0.64,
+      0.7,
+      0.24,
+      0.3,
+      0.36,
+      0.42,
+      0.48,
+      0.54,
+      0.6,
+      0.66
+    ]
+  },
+  "options": [
+    {
+      "option_id": "opt_1",
+      "intent": {
+        "kind": "pass_space",
+        "player": "H10",
+        "target_player": null,
+        "target": [
+          38.0,
+          -4.0,
+          0.0
+        ],
+        "path": [
+          [
+            18.4,
+            6.1
+          ],
+          [
+            27.0,
+            3.0
+          ],
+          [
+            33.0,
+            -1.5
+          ],
+          [
+            38.0,
+            -4.0
+          ]
+        ],
+        "curve": 0.35,
+        "power": 0.62,
+        "pass_technique_override": null,
+        "shot_technique_override": null,
+        "source": "fan"
+      },
+      "resolved": null,
+      "label": "Through ball to Demir",
+      "p_success": 0.58,
+      "p_success_baseline": 0.49,
+      "value_if_success": 0.21,
+      "xg": null,
+      "xt_gain": 0.176,
+      "decision_value": 0.102,
+      "viable": true,
+      "is_real": true
+    },
+    {
+      "option_id": "opt_2",
+      "intent": {
+        "kind": "pass_player",
+        "player": "H10",
+        "target_player": "H02",
+        "target": null,
+        "path": [],
+        "curve": 0.0,
+        "power": 0.5,
+        "pass_technique_override": null,
+        "shot_technique_override": null,
+        "source": "ai"
+      },
+      "resolved": null,
+      "label": "Pass to the overlapping Mensah",
+      "p_success": 0.86,
+      "p_success_baseline": 0.84,
+      "value_if_success": 0.09,
+      "xg": null,
+      "xt_gain": 0.056,
+      "decision_value": 0.071,
+      "viable": true,
+      "is_real": false
+    },
+    {
+      "option_id": "opt_3",
+      "intent": {
+        "kind": "shot",
+        "player": "H10",
+        "target_player": null,
+        "target": [
+          52.5,
+          -2.9,
+          0.4
+        ],
+        "path": [],
+        "curve": 0.0,
+        "power": 0.9,
+        "pass_technique_override": null,
+        "shot_technique_override": null,
+        "source": "ai"
+      },
+      "resolved": null,
+      "label": "Shoot from distance",
+      "p_success": 0.03,
+      "p_success_baseline": null,
+      "value_if_success": 1.0,
+      "xg": 0.03,
+      "xt_gain": null,
+      "decision_value": 0.03,
+      "viable": true,
+      "is_real": false
+    }
+  ],
+  "model_versions": {
+    "xg": "xg-gbm-v1",
+    "xpass": "xpass-gbm-v1",
+    "pitch_control": "spearman2018",
+    "xt": "xt-16x12-v1"
+  }
+}

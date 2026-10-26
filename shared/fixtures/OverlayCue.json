@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "id": "cue_shot_004211",
+  "t_start": 2335.0,
+  "t_end": 2341.0,
+  "priority": 80,
+  "anchor": {
+    "kind": "screen",
+    "player": null,
+    "region": "lower_third",
+    "pitch_xy": null
+  },
+  "payload": {
+    "type": "shot_card",
+    "event_id": "ev_004211",
+    "shooter": "H09",
+    "xg": 0.31,
+    "psxg": 0.42,
+    "ball_speed_kmh": 86.8,
+    "distance_m": 13.8,
+    "technique": "placed",
+    "outcome": "saved"
+  },
+  "modes": [
+    "analyst",
+    "casual"
+  ],
+  "team_focus": null,
+  "evidence": [
+    "ev_004211"
+  ]
+}

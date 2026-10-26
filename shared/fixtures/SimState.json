@@ -1,0 +1,427 @@
+{
+  "schema_version": "1.0.0",
+  "tick": 58310,
+  "t": 2332.4,
+  "period": 1,
+  "status": "first_half",
+  "ball": {
+    "pos": [
+      18.4,
+      6.1,
+      0.11
+    ],
+    "vel": [
+      6.2,
+      0.4,
+      0.0
+    ],
+    "spin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "in_play": true,
+    "last_touch": "H10"
+  },
+  "players": [
+    {
+      "id": "H01",
+      "pos": [
+        -38.0,
+        -25.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H02",
+      "pos": [
+        -30.0,
+        -8.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H05",
+      "pos": [
+        -30.0,
+        9.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H04",
+      "pos": [
+        -22.0,
+        -24.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H03",
+      "pos": [
+        -22.0,
+        -7.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H06",
+      "pos": [
+        -22.0,
+        10.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H08",
+      "pos": [
+        -14.0,
+        -23.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H10",
+      "pos": [
+        -14.0,
+        -6.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H07",
+      "pos": [
+        -14.0,
+        11.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H11",
+      "pos": [
+        -6.0,
+        -22.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "sprint",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "H09",
+      "pos": [
+        -6.0,
+        -5.0
+      ],
+      "vel": [
+        4.1,
+        0.6
+      ],
+      "facing": 0.0,
+      "z": 0.0,
+      "anim": "sprint",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A01",
+      "pos": [
+        46.0,
+        -25.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A02",
+      "pos": [
+        38.0,
+        -8.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A05",
+      "pos": [
+        38.0,
+        9.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A04",
+      "pos": [
+        30.0,
+        -24.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A03",
+      "pos": [
+        30.0,
+        -7.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A06",
+      "pos": [
+        30.0,
+        10.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A08",
+      "pos": [
+        22.0,
+        -23.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A10",
+      "pos": [
+        22.0,
+        -6.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A07",
+      "pos": [
+        22.0,
+        11.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "jog",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A11",
+      "pos": [
+        14.0,
+        -22.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "sprint",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    },
+    {
+      "id": "A09",
+      "pos": [
+        14.0,
+        -5.0
+      ],
+      "vel": [
+        -2.0,
+        0.3
+      ],
+      "facing": 3.14159,
+      "z": 0.0,
+      "anim": "sprint",
+      "anim_t": 0.8,
+      "stamina": 0.86,
+      "on_pitch": true
+    }
+  ],
+  "referee": {
+    "pos": [
+      10.0,
+      12.0
+    ],
+    "vel": [
+      3.0,
+      0.0
+    ],
+    "facing": 0.0
+  },
+  "possession": {
+    "team": "home",
+    "player": "H10",
+    "sequence_id": 214
+  },
+  "phase": "counter_attack",
+  "restart": null,
+  "score": {
+    "home": 1,
+    "away": 1
+  },
+  "attacking_positive_x": "home",
+  "keyframe": true,
+  "snapshot_ref": "snap:demo-0001:58310"
+}

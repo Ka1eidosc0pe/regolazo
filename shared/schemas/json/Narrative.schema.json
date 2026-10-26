@@ -1,0 +1,203 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/Narrative.json",
+  "$defs": {
+    "Evidence": {
+      "additionalProperties": false,
+      "description": "A tool output that backs a claim. Every number in a narrative must trace to one of these.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "event",
+            "model_output",
+            "stat",
+            "rollout",
+            "moment"
+          ],
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "ref",
+        "field",
+        "value"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "FactCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "verified": {
+          "type": "boolean"
+        },
+        "attempts": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "verified",
+        "attempts",
+        "issues"
+      ],
+      "title": "FactCheck",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "live_commentary",
+        "why_it_matters",
+        "milestone",
+        "rewind_hook",
+        "verdict",
+        "recap"
+      ],
+      "type": "string"
+    },
+    "t": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "language": {
+      "examples": [
+        "en",
+        "es",
+        "fr"
+      ],
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "analyst",
+        "casual"
+      ],
+      "type": "string"
+    },
+    "club_perspective": {
+      "anyOf": [
+        {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "text": {
+      "type": "string"
+    },
+    "evidence": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "type": "array"
+    },
+    "fact_check": {
+      "$ref": "#/$defs/FactCheck"
+    },
+    "source_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "audio_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "voice": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "kind",
+    "t",
+    "language",
+    "mode",
+    "club_perspective",
+    "text",
+    "evidence",
+    "fact_check",
+    "source_id",
+    "audio_url",
+    "voice"
+  ],
+  "title": "Narrative",
+  "type": "object"
+}

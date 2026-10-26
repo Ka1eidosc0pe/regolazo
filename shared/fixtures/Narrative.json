@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "nar_0412_es_casual",
+  "kind": "why_it_matters",
+  "t": 2334.9,
+  "language": "es",
+  "mode": "casual",
+  "club_perspective": "home",
+  "text": "¡Qué contra! Marchetti la puso al hueco y Demir obligó al portero a lucirse: una ocasión de 0,31 xG.",
+  "evidence": [
+    {
+      "kind": "event",
+      "ref": "ev_004211",
+      "field": "qualifiers.xg",
+      "value": 0.31
+    }
+  ],
+  "fact_check": {
+    "verified": true,
+    "attempts": 1,
+    "issues": []
+  },
+  "source_id": "nar_0412_en_casual",
+  "audio_url": null,
+  "voice": "es-ES-AlvaroNeural"
+}

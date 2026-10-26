@@ -1,0 +1,621 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://regolazo.dev/schemas/1.0.0/MatchMeta.json",
+  "$defs": {
+    "CrestSpec": {
+      "additionalProperties": false,
+      "description": "Parameters for the generated (original) crest.",
+      "properties": {
+        "shape": {
+          "enum": [
+            "shield",
+            "circle",
+            "roundel",
+            "diamond",
+            "hexagon"
+          ],
+          "type": "string"
+        },
+        "monogram": {
+          "maxLength": 3,
+          "minLength": 1,
+          "type": "string"
+        },
+        "primary": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "secondary": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "emblem": {
+          "enum": [
+            "star",
+            "wave",
+            "bird",
+            "lion",
+            "tower",
+            "bolt",
+            "anchor",
+            "oak"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "shape",
+        "monogram",
+        "primary",
+        "secondary",
+        "emblem"
+      ],
+      "title": "CrestSpec",
+      "type": "object"
+    },
+    "KitColors": {
+      "additionalProperties": false,
+      "properties": {
+        "primary": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "secondary": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "accent": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "number": {
+          "examples": [
+            "#0b3d91"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
+        },
+        "pattern": {
+          "default": "plain",
+          "enum": [
+            "plain",
+            "stripes",
+            "hoops",
+            "sash",
+            "halves",
+            "chevron"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "primary",
+        "secondary",
+        "accent",
+        "number",
+        "pattern"
+      ],
+      "title": "KitColors",
+      "type": "object"
+    },
+    "PhysicalParams": {
+      "additionalProperties": false,
+      "description": "Kinematic limits used by the simulator, derived from attributes and real tracking distributions.",
+      "properties": {
+        "max_speed_mps": {
+          "exclusiveMinimum": 0,
+          "maximum": 12.5,
+          "type": "number"
+        },
+        "max_accel_mps2": {
+          "exclusiveMinimum": 0,
+          "maximum": 10.0,
+          "type": "number"
+        },
+        "max_decel_mps2": {
+          "exclusiveMinimum": 0,
+          "maximum": 12.0,
+          "type": "number"
+        },
+        "reaction_time_s": {
+          "maximum": 1.0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "jump_reach_m": {
+          "default": 2.6,
+          "exclusiveMinimum": 0,
+          "maximum": 3.6,
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_speed_mps",
+        "max_accel_mps2",
+        "max_decel_mps2",
+        "reaction_time_s",
+        "jump_reach_m"
+      ],
+      "title": "PhysicalParams",
+      "type": "object"
+    },
+    "PitchSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "length_m": {
+          "default": 105.0,
+          "type": "number"
+        },
+        "width_m": {
+          "default": 68.0,
+          "type": "number"
+        },
+        "goal_width_m": {
+          "default": 7.32,
+          "type": "number"
+        },
+        "goal_height_m": {
+          "default": 2.44,
+          "type": "number"
+        }
+      },
+      "required": [
+        "length_m",
+        "width_m",
+        "goal_width_m",
+        "goal_height_m"
+      ],
+      "title": "PitchSpec",
+      "type": "object"
+    },
+    "PlayerAttributes": {
+      "additionalProperties": false,
+      "description": "Synthetic 1-99 ratings (PLAN.md section 2.6). Goalkeeping ratings are present for every player.",
+      "properties": {
+        "pace": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "acceleration": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "stamina": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "strength": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "jumping": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "short_passing": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "long_passing": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "vision": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "crossing": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "curve": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "technique": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "dribbling": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "finishing": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "shot_power": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "long_shots": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "volleys": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "heading": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "composure": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "tackling": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "interceptions": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "marking": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "positioning": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_reflexes": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_diving": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_handling": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_positioning": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "gk_distribution": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pace",
+        "acceleration",
+        "stamina",
+        "strength",
+        "jumping",
+        "short_passing",
+        "long_passing",
+        "vision",
+        "crossing",
+        "curve",
+        "technique",
+        "dribbling",
+        "finishing",
+        "shot_power",
+        "long_shots",
+        "volleys",
+        "heading",
+        "composure",
+        "tackling",
+        "interceptions",
+        "marking",
+        "positioning",
+        "gk_reflexes",
+        "gk_diving",
+        "gk_handling",
+        "gk_positioning",
+        "gk_distribution"
+      ],
+      "title": "PlayerAttributes",
+      "type": "object"
+    },
+    "PlayerMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "examples": [
+            "H07",
+            "A10"
+          ],
+          "pattern": "^[HA]\\d{2}$",
+          "type": "string"
+        },
+        "team": {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "shirt_number": {
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "position": {
+          "enum": [
+            "GK",
+            "RB",
+            "RCB",
+            "CB",
+            "LCB",
+            "LB",
+            "RWB",
+            "LWB",
+            "DM",
+            "CM",
+            "RCM",
+            "LCM",
+            "AM",
+            "RM",
+            "LM",
+            "RW",
+            "LW",
+            "CF",
+            "ST"
+          ],
+          "type": "string"
+        },
+        "archetype": {
+          "enum": [
+            "advanced_playmaker",
+            "deep_lying_playmaker",
+            "box_to_box",
+            "ball_winning_midfielder",
+            "poacher",
+            "target_forward",
+            "inside_forward",
+            "touchline_winger",
+            "overlapping_fullback",
+            "inverted_fullback",
+            "ball_playing_centre_back",
+            "stopper",
+            "sweeper_keeper",
+            "shot_stopper"
+          ],
+          "type": "string"
+        },
+        "preferred_foot": {
+          "enum": [
+            "left",
+            "right"
+          ],
+          "type": "string"
+        },
+        "weak_foot": {
+          "maximum": 5,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "height_cm": {
+          "maximum": 210,
+          "minimum": 150,
+          "type": "integer"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/PlayerAttributes"
+        },
+        "physical": {
+          "$ref": "#/$defs/PhysicalParams"
+        },
+        "starter": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "team",
+        "first_name",
+        "last_name",
+        "display_name",
+        "shirt_number",
+        "position",
+        "archetype",
+        "preferred_foot",
+        "weak_foot",
+        "height_cm",
+        "nationality",
+        "attributes",
+        "physical",
+        "starter"
+      ],
+      "title": "PlayerMeta",
+      "type": "object"
+    },
+    "TeamMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "side": {
+          "enum": [
+            "home",
+            "away"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "short_name": {
+          "maxLength": 3,
+          "minLength": 3,
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "formation": {
+          "examples": [
+            "4-3-3"
+          ],
+          "pattern": "^\\d(-\\d){2,4}$",
+          "type": "string"
+        },
+        "kit": {
+          "$ref": "#/$defs/KitColors"
+        },
+        "gk_kit": {
+          "$ref": "#/$defs/KitColors"
+        },
+        "crest": {
+          "$ref": "#/$defs/CrestSpec"
+        },
+        "players": {
+          "items": {
+            "$ref": "#/$defs/PlayerMeta"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "side",
+        "name",
+        "short_name",
+        "city",
+        "formation",
+        "kit",
+        "gk_kit",
+        "crest",
+        "players"
+      ],
+      "title": "TeamMeta",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "type": "string"
+    },
+    "match_id": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "sim_hz": {
+      "default": 25,
+      "exclusiveMinimum": 0,
+      "type": "integer"
+    },
+    "period_duration_s": {
+      "default": 2700.0,
+      "exclusiveMinimum": 0,
+      "type": "number"
+    },
+    "pitch": {
+      "$ref": "#/$defs/PitchSpec",
+      "default": {
+        "length_m": 105.0,
+        "width_m": 68.0,
+        "goal_width_m": 7.32,
+        "goal_height_m": 2.44
+      }
+    },
+    "home": {
+      "$ref": "#/$defs/TeamMeta"
+    },
+    "away": {
+      "$ref": "#/$defs/TeamMeta"
+    },
+    "home_attacks_positive_x_first_half": {
+      "default": true,
+      "type": "boolean"
+    },
+    "kickoff_team": {
+      "default": "home",
+      "enum": [
+        "home",
+        "away"
+      ],
+      "type": "string"
+    },
+    "venue": {
+      "type": "string"
+    },
+    "weather": {
+      "default": "clear_night",
+      "enum": [
+        "clear_night",
+        "light_rain_night",
+        "misty_night"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "match_id",
+    "seed",
+    "sim_hz",
+    "period_duration_s",
+    "pitch",
+    "home",
+    "away",
+    "home_attacks_positive_x_first_half",
+    "kickoff_team",
+    "venue",
+    "weather"
+  ],
+  "title": "MatchMeta",
+  "type": "object"
+}

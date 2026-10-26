@@ -1,0 +1,20 @@
+{
+  "snapshot_ref": "snap:demo-0001:58310",
+  "intent": {
+    "kind": "pass_player",
+    "player": "H10",
+    "target_player": "H02",
+    "target": null,
+    "path": [],
+    "curve": 0.0,
+    "power": 0.5,
+    "pass_technique_override": null,
+    "shot_technique_override": null,
+    "source": "ai"
+  },
+  "horizon_s": 10.0,
+  "n": 1000,
+  "seed": 7,
+  "return_frames": true,
+  "frame_stride": 1
+}
