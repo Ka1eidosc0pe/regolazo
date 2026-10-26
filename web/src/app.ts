@@ -60,14 +60,17 @@ export class App {
   private height: number;
   private readonly fixedSize: boolean;
   private readonly opts: AppOptions;
+  private readonly container: HTMLElement;
   fps = 0;
 
   constructor(container: HTMLElement, source: FrameSource, opts: AppOptions = {}) {
     this.opts = opts;
     this.source = source;
     this.fixedSize = opts.width !== undefined && opts.height !== undefined;
-    this.width = opts.width ?? container.clientWidth;
-    this.height = opts.height ?? container.clientHeight;
+    this.container = container;
+    // fall back to the window if the container has not been laid out yet
+    this.width = opts.width ?? (container.clientWidth || window.innerWidth || 1280);
+    this.height = opts.height ?? (container.clientHeight || window.innerHeight || 720);
     this.renderer = new THREE.WebGLRenderer({
       antialias: false,
       powerPreference: "high-performance",
@@ -88,7 +91,7 @@ export class App {
     const msaa = opts.msaa ?? (opts.quality === "low" ? 0 : this.fixedSize || opts.record ? 4 : 2);
     this.post = new Post(this.renderer, this.scene, this.director.camera, this.width, this.height, msaa);
     if (!this.fixedSize) {
-      window.addEventListener("resize", () => this.resize(container.clientWidth, container.clientHeight));
+      new ResizeObserver(() => this.ensureSize()).observe(container);
     }
   }
 
@@ -98,6 +101,14 @@ export class App {
     this.renderer.setSize(w, h, !this.fixedSize);
     this.post.setSize(w, h);
     this.director.setAspect(w / h);
+  }
+
+  /** Match the drawing buffer and post targets to the container (never zero-sized). */
+  ensureSize(): void {
+    if (this.fixedSize) return;
+    const w = this.container.clientWidth || window.innerWidth;
+    const h = this.container.clientHeight || window.innerHeight;
+    if (w > 0 && h > 0 && (w !== this.width || h !== this.height)) this.resize(w, h);
   }
 
   get size(): { width: number; height: number } {
@@ -280,6 +291,7 @@ export class App {
   }
 
   render(): void {
+    this.ensureSize();
     this.post.render(this.frameNo++);
   }
 

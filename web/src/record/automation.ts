@@ -3,10 +3,13 @@ import type * as THREE_NS from "three";
 import type { App } from "../app.ts";
 import type { CameraMode } from "../camera/director.ts";
 import { worldToThree, type V3 } from "../coords.ts";
+import { Recorder } from "./recorder.ts";
 
 export interface Automation {
   ready: Promise<void>;
   app: App;
+  /** Deterministic recording (frames + FrameLabels); see scripts/record.ts. */
+  recorder: Recorder;
   /** Settle dynamics and render the frame at match time t (paused afterwards). */
   jumpTo(t: number, warm?: number): void;
   setCamera(mode: CameraMode, replayTarget?: string | null): void;
@@ -28,6 +31,7 @@ export function installAutomation(app: App, ready: Promise<void>, THREE: typeof 
   const api: Automation = {
     ready,
     app,
+    recorder: new Recorder(app),
     jumpTo(t, warm = 2.5) {
       app.stop();
       app.source.pause();
