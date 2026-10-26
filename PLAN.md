@@ -307,6 +307,7 @@ You own the outcome. Delegate to go faster and keep your context clean, but **yo
   - Renderer & art direction (Step 5)
   - Server / streaming (Step 4)
   Later wave: Spotter (Step 6, needs Steps 3+5), Analyst engine (Step 7), Agent layer (Step 8), Rewind UI (Step 9), Overlays/personalization (Step 10).
+- **Model choice for subagents:** core build subagents for the hard, design-heavy pieces (simulation, analytics models, renderer and art, Spotter, agent layer, Rewind UI) run on Opus (inherit). Well-specified, lower-judgement pieces (server/streaming boilerplate, overlays wiring, infra templates, docs) can run on Sonnet.
 - **Research subagents** (`Explore` / general-purpose, cheaper model such as Sonnet or Haiku): look up formulas and reference implementations (Spearman pitch control, xT method, StatsBomb 360 schema, Microsoft Agent Framework APIs, Azure Speech voices), returning concise summaries — not file dumps.
 - **Mechanical subagents** (cheaper model): data download scripts, test fixture generation, docs formatting, Dockerfiles, CI config.
 - **Independent review subagents**: after each step, spawn a reviewer that receives the code and the step's spec (not your conclusions) to find bugs and gaps; also use `/code-review` on diffs. For visual work, have a reviewer judge screenshots against the art direction doc.

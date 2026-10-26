@@ -55,3 +55,20 @@ Mixamo's exact clip names vary; search the term and pick the best-looking match.
 - [ ] Disappointed / defeated reaction
 
 When done, put everything in `assets/third_party/mixamo/` in this project.
+
+## Inventory (downloaded and verified 2026-10-26)
+37 FBX files in `assets/third_party/mixamo/`. Verified by parsing each with Three.js `FBXLoader` (r170): all load, all clips are 30 fps, animation files contain no meshes, and every animated bone name (`mixamorig*`) exists in the character rig (65 bones), so clips apply to the character directly with no retargeting.
+
+| Group | Files |
+|---|---|
+| Character | `character_ybot.fbx` (2 meshes: body + joints) |
+| Locomotion | `Breathing_Idle`, `Jog_Forward`, `Jog_Strafe_Left`, `Jog_Strafe_Right`, `Run_forward`, `Sprint`, `Running_Backward`, `Running_Turn_180` |
+| On-ball | `Soccer_Pass`, `long_pass`, `Strike_Foward` (shot), `standing_Header`, `jumping_Header`, `Receive_ground_pass`, `Receive_aerial_pass`, `Dribble`, `Throw_In` |
+| Defending / contact | `Soccer_Tackle`, `Slide_Tackle`, `Soccer_Trip`, `Getting_Up` |
+| Goalkeeper | `Goalkeeper_Idle`, `Goalkeeper_Diving_Save_left`, `Goalkeeper_Diving_Save_Right`, `Goalkeeper_Body_Block_left`, `Goalkeeper_Body_Block_right`, `Goalkeeper_Catch_highshot`, `Goalkeeper_Catch_lowshot`, `Goalkeeper_Drop_Kick`, `Goalkeeper_Overhand_Throw`, `Goalkeeper_Scoop` |
+| Emotion | `celebration_Cheering`, `celebration_Fist_Pump`, `celebration_Victory`, `Disappointed` |
+
+**Notes for the renderer:**
+- **Root motion:** the looping locomotion clips are in place, except **`Sprint`** (~3.2 m hip drift per loop). Many one-shot clips also carry root motion (e.g. `long_pass` ~5 m, `Dribble` ~4.6 m, `Slide_Tackle` ~4.4 m, GK dives ~2.8 m). The simulation owns player positions, so the asset pipeline must strip horizontal (XZ) hip translation from every clip. Keep vertical (Y) motion for dives, jumps and slides. Optionally keep the extracted root path to sync a clip's timing with the sim's movement.
+- **Coverage gaps:** there is a single shot clip and no dedicated chip, volley, curler or cross clip. Derive these from `Strike_Foward`, `long_pass` and `Soccer_Pass` by varying playback speed, blending, and additive leg/upper-body adjustments. Use the left/right GK pairs directly and mirror other clips where a side-specific version is needed.
+- Kit colors, numbers and names are applied by our own shaders or materials on the Y Bot body mesh. The Y Bot's original material is not used as-is.
