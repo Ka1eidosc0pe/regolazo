@@ -316,6 +316,8 @@ def resolve(
     near_cap = np.where(mc > 0, np.abs(curve_applied) / np.maximum(mc, 1e-6), 0.0)
     mult = mult * (1.0 + 0.25 * near_cap * np.isin(kick, [K.K_CURLED, K.K_OUTSIDE, K.K_SHOT_FINESSE]))
     mult = mult * np.where(ctx.first_time & ~is_shot, 1.1, 1.0)
+    # close in, a strike is easier to keep on target than a speculative effort from distance
+    mult = mult * np.where(is_shot, np.clip(sdist / 18.0, 0.55, 1.35), 1.0)
 
     tgt = target.copy()
     # passes aimed at a player: lofted balls drop at the feet, crosses arrive at head height

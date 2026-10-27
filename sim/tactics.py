@@ -379,14 +379,14 @@ def box_marking(w: World, sq: Squad, sign: F, poss: IA, tgt: F, cap: F, n_pairs:
             goal = np.column_stack([-HALF_LENGTH * sign[bi, t], np.zeros(len(bi))])
             to_goal = goal - a_pos
             to_goal /= np.maximum(np.linalg.norm(to_goal, axis=1, keepdims=True), 1e-6)
-            out[bi, di] = a_pos + 1.2 * to_goal + 0.3 * w.vel[bi, aj]
+            out[bi, di] = a_pos + 0.9 * to_goal + 0.4 * w.vel[bi, aj]
             cap[bi, di] = np.maximum(cap[bi, di], 0.9 * sq.max_speed[di])
             d[bi, i[ok], :] = np.inf
             d[bi, :, j[ok]] = np.inf
     return out, cap
 
 
-BOX_EDGE = 33.0
+BOX_EDGE = 27.0
 """Attackers this close to goal (team frame x beyond -33) count as box threats."""
 
 

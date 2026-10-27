@@ -543,6 +543,9 @@ class Match:
         so those are started in the past: the recorder back-fills the preceding frames (``backfill``)."""
         w = self.w
         lead = CONTACT_LEAD_S if name in STRIKE_ANIMS else (RECEIVE_LEAD_S if name in RECEIVE_ANIMS else 0.0)
+        playing = ANIMS[int(w.anim[b, i])]
+        if lead > 0 and w.anim_lock[b, i] > 0 and playing in STRIKE_ANIMS and w.anim_t[b, i] < 0.6:
+            return  # the player is still in the strike he just made: do not restart (and rewrite) it
         w.anim[b, i] = A[name]
         # _animate adds one tick before the frame is recorded
         w.anim_t[b, i] = lead - DT
@@ -1271,7 +1274,7 @@ class Match:
         w = self.w
         self._launch_pending(pend)
         shots = [p for p in pend if p.flight == FLIGHT_SHOT]
-        n_mc = 24
+        n_mc = 64  # enough samples that 1 / E[on x psxg] is not biased upward
         pos = np.stack([w.ball_pos[p.b] for p in pend])
         vel = np.stack([w.ball_vel[p.b] for p in pend])
         spin = np.stack([w.ball_spin[p.b] for p in pend])

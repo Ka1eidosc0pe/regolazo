@@ -60,12 +60,15 @@ def predict_paths(pos: F, vel: F, spin: F, steps: int) -> Paths:
                 break
     over_goal = np.abs(xs[..., 0]) > HALF_LENGTH + BALL_RADIUS
     in_mouth = (np.abs(xs[..., 1]) < HALF_GOAL) & (xs[..., 2] < GOAL_HEIGHT)
-    goal = over_goal & in_mouth
-    out = (over_goal & ~in_mouth) | (np.abs(xs[..., 1]) > HALF_WIDTH + BALL_RADIUS)
-    goal_k = np.where(goal.any(axis=0), np.argmax(goal, axis=0), NEVER)
-    out_k = np.where(out.any(axis=0), np.argmax(out, axis=0), NEVER)
-    # a ball that went in first is a goal, not out
-    out_k = np.where(goal_k < out_k, NEVER, out_k)
+    # the first time the ball leaves the field decides: in the mouth it is a goal, anywhere else it is out
+    # (a ball over the bar that drops onto the net behind is out, as the match engine judges it)
+    leaves = over_goal | (np.abs(xs[..., 1]) > HALF_WIDTH + BALL_RADIUS)
+    first = np.where(leaves.any(axis=0), np.argmax(leaves, axis=0), NEVER)
+    k_first = np.minimum(first, steps)
+    cols = np.arange(n)
+    scored = (first < NEVER) & over_goal[k_first, cols] & in_mouth[k_first, cols]
+    goal_k = np.where(scored, first, NEVER)
+    out_k = np.where(scored, NEVER, first)
     side = np.sign(xs[np.minimum(goal_k, steps), np.arange(n), 0])
     return Paths(xs=xs, vs=vs, wood=wood, out_k=out_k.astype(np.int64), goal_k=goal_k.astype(np.int64), goal_side=side)
 

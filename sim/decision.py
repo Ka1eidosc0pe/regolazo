@@ -516,9 +516,9 @@ def score_table(
     util = dv_seen.copy().reshape(d, o)
     arch = np.array([sq.players[i].archetype for i in range(len(sq.players))])
     arch_c = arch[c]
-    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.025
+    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.022
     # speculative efforts from distance are part of the game (about a fifth of all shots come from 25 m+)
-    long_try = (sdist > 22.0) * (0.016 + 0.012 * (sq.attr["long_shots"][c] - 70) / 20)
+    long_try = (sdist > 22.0) * (0.022 + 0.012 * (sq.attr["long_shots"][c] - 70) / 20)
     util += (cat == S_SHOT) * (shot_bias + long_try)[:, None]
     vision = sq.attr["vision"][c] / 99.0
     directness = np.array([styles[0].directness, styles[1].directness])[c // N_ON]
