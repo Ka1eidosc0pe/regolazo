@@ -51,8 +51,8 @@ def styles_for(seed: int) -> tuple[TeamStyle, TeamStyle]:
                 press=float(rng.uniform(0.3, 0.9)),
                 line=float(rng.uniform(-4.0, 4.0)),
                 width=float(rng.uniform(0.92, 1.08)),
-                tempo=float(rng.uniform(0.85, 1.15)),
-                directness=float(rng.uniform(0.2, 0.8)),
+                tempo=float(rng.uniform(0.7, 1.3)),
+                directness=float(rng.uniform(0.0, 1.0)),
             )
         )
     return out[0], out[1]
@@ -157,7 +157,7 @@ def shape_targets(
     ty = np.clip(ty, -HALF_WIDTH + 1.0, HALF_WIDTH - 1.0)
     target = np.stack([tx * s_p, ty * s_p], axis=-1)
     dist = np.linalg.norm(target - w.pos, axis=-1)
-    urgency = np.where(in_poss, 1.0, 1.15)
+    urgency = np.where(in_poss, 0.85, 1.1)
     cap = np.clip(0.25 + 0.18 * dist, 0.4, 3.8) * urgency
     cap = np.where(dist > 15.0, 0.75 * sq.max_speed[None, :], cap)
     return target, np.minimum(cap, sq.max_speed[None, :])

@@ -484,7 +484,8 @@ def score_table(
         in_path = np.where(dribble[is_carry], np.maximum(in_path - 1.0, 0.0), in_path)
         # and opponents waiting where the carry ends (a run into a packed box rarely survives)
         near_end = (np.linalg.norm(rep(opp_pos)[is_carry] - seg_e[:, None, :], axis=2) < 3.5).sum(axis=1)
-        crowd = n_close + 1.3 * in_path + 0.8 * near_end
+        end_in_box = (end_t[is_carry, 0] > 36.0) & (np.abs(end_t[is_carry, 1]) < 20.16)
+        crowd = n_close + 1.3 * in_path + 0.8 * near_end + 0.7 * end_in_box
         pr = carry_retention(sq, rep(c)[is_carry], crowd, rep(pressure)[is_carry], dribble[is_carry])
         p[is_carry] = pr
         p0[is_carry] = pr
@@ -533,7 +534,7 @@ def score_table(
     util += (cat == S_CLEAR) * (0.02 * pressure)[:, None]
     # forward progress tendency
     fwd = (end_t[:, 0] - origin_t[:, 0]).reshape(d, o)
-    util += 0.0004 * directness[:, None] * np.clip(fwd, -20, 30)
+    util += 0.0008 * (directness[:, None] - 0.3) * np.clip(fwd, -20, 30)  # direct sides go forward, others keep it
     # perception: long balls and through balls are only seen by players with vision
     if rng is not None:
         long_ = (np.linalg.norm(end_t - origin_t, axis=1) > 30.0).reshape(d, o)

@@ -19,7 +19,6 @@ COMMON = {
     "type:carry",
     "type:shot",
     "type:duel",
-    "type:interception",
     "type:ball_recovery",
     "type:restart",
     "type:off_ball_run",
