@@ -23,8 +23,12 @@ def steer(
     max_decel: F,
     dt: float = DT,
     arrive_gain: float = 0.75,
+    tau: F | float = 0.4,
 ) -> tuple[F, F]:
-    """One kinematic step toward ``target``. Shapes: pos/vel/target (..., 2), the rest (...). Returns new pos, vel."""
+    """One kinematic step toward ``target``. Shapes: pos/vel/target (..., 2), the rest (...). Returns new pos, vel.
+
+    The velocity relaxes toward the desired velocity with time constant ``tau`` and is clipped to the limits.
+    """
     to = target - pos
     dist = np.linalg.norm(to, axis=-1)
     direction = to / np.maximum(dist, 1e-9)[..., None]
@@ -34,7 +38,8 @@ def steer(
     desired_speed = np.minimum(cap, arrive)
     desired_speed = np.where(dist < 0.05, 0.0, desired_speed)
     v_des = direction * desired_speed[..., None]
-    dv = v_des - vel
+    # first-order response (time constant tau): small corrections are gentle, big ones saturate the limits
+    dv = (v_des - vel) * np.minimum(1.0, dt / np.asarray(tau))[..., None]
     speed = np.linalg.norm(vel, axis=-1)
     u = vel / np.maximum(speed, 1e-9)[..., None]
     par = np.sum(dv * u, axis=-1)

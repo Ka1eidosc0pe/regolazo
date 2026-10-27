@@ -358,7 +358,7 @@ def plan_kicks(origin: F, target: F, kick: IA, power: F, curve: F, arrive_speed:
     speed = np.zeros(n)
     ground = mode == MODE_GROUND
     if ground.any():
-        va = 3.5 + 6.5 * power[ground] if arrive_speed is None else arrive_speed[ground]
+        va = 2.5 + 4.5 * power[ground] if arrive_speed is None else arrive_speed[ground]
         g_speed = ground_speed_for(dist[ground], va)
         lofted_ground = elev[ground] > 0
         # low curled / outside balls skid first: a touch faster than a pure roll

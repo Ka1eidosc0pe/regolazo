@@ -35,6 +35,9 @@ F = npt.NDArray[np.float64]
 B = npt.NDArray[np.bool_]
 
 ROLL_VZ = 0.45
+ROLL_MAGNUS = 0.6
+"""Side-spin turning rate of a rolling ball, as a fraction of the airborne Magnus effect."""
+SPIN_DECAY_GROUND_SIDE = 1.0
 """Bounces slower than this (m/s, vertical) turn into rolling."""
 
 
@@ -64,6 +67,20 @@ def _air_accel(vel: F, spin: F, p: BallParams) -> F:
     acc = -p.drag_k * speed * vel + p.magnus_k * np.cross(spin, vel)
     acc[:, 2] -= p.gravity
     return acc
+
+
+def roll(speed: F, dt: float, p: BallParams = DEFAULT) -> tuple[F, F]:
+    """Exact rolling update for dv/dt = -(a + k v^2): new speed and distance travelled in ``dt``."""
+    a, k = p.roll_decel, p.drag_k
+    if k <= 0:
+        t_stop = speed / a
+        tt = np.minimum(dt, t_stop)
+        return np.maximum(speed - a * dt, 0.0), speed * tt - 0.5 * a * tt * tt
+    c = np.sqrt(k / a)
+    w = np.sqrt(a * k)
+    phi = np.arctan(speed * c)
+    phi1 = np.maximum(phi - w * dt, 0.0)
+    return np.tan(phi1) / c, np.log(np.cos(phi1) / np.cos(phi)) / k
 
 
 def on_ground(pos: F, vel: F) -> B:
@@ -96,16 +113,21 @@ def step_ball(pos: F, vel: F, spin: F, dt: float = DT, p: BallParams = DEFAULT, 
         g = np.nonzero(ground)[0]
         vh = vel[g, :2]
         speed = np.linalg.norm(vh, axis=1)
-        decel = p.roll_decel + p.drag_k * speed**2
-        new_speed = np.maximum(speed - decel * dt, 0.0)
+        new_speed, travel = roll(speed, dt, p)
         new_speed[new_speed < REST_SPEED] = 0.0
-        scale = np.divide(new_speed, speed, out=np.zeros_like(speed), where=speed > 0)
-        vh_new = vh * scale[:, None]
-        pos[g, :2] += 0.5 * (vh + vh_new) * dt
+        # side-spin on a rolling ball turns its direction (weaker than in the air)
+        turn = ROLL_MAGNUS * p.magnus_k * spin[g, 2] * dt
+        heading = np.arctan2(vh[:, 1], vh[:, 0])
+        mid = heading + 0.5 * turn
+        moving = speed > 0
+        pos[g, 0] += np.where(moving, travel * np.cos(mid), 0.0)
+        pos[g, 1] += np.where(moving, travel * np.sin(mid), 0.0)
         pos[g, 2] = BALL_RADIUS
-        vel[g, :2] = vh_new
+        vel[g, 0] = new_speed * np.cos(heading + turn)
+        vel[g, 1] = new_speed * np.sin(heading + turn)
         vel[g, 2] = 0.0
-        spin[g] *= np.exp(-SPIN_DECAY_GROUND * dt)
+        spin[g, :2] *= np.exp(-SPIN_DECAY_GROUND * dt)
+        spin[g, 2] *= np.exp(-SPIN_DECAY_GROUND_SIDE * dt)
     woodwork = collide_goal_frame(prev, pos, vel, dt) if frame else np.zeros(n, dtype=bool)
     return StepFlags(bounced=bounced, woodwork=woodwork)
 
