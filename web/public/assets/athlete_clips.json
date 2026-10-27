@@ -66,18 +66,26 @@
       0.113
     ]
   },
+  "skull_m": {
+    "center": [
+      0,
+      1.705,
+      0.019
+    ],
+    "radii": [
+      0.087,
+      0.113,
+      0.1
+    ]
+  },
   "source": "Mixamo Y Bot + 35 Mixamo clips, processed by scripts/assets/convert_mixamo.mjs",
   "units": "metres, y-up, character faces +z",
-  "height_m": 1.805,
+  "height_m": 1.82,
   "bones": 65,
   "vertices": [
     {
-      "name": "Alpha_Surface",
-      "count": 21094
-    },
-    {
-      "name": "Alpha_Joints",
-      "count": 10514
+      "name": "Body",
+      "count": 19970
     }
   ],
   "clips": {

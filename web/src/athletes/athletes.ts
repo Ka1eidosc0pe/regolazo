@@ -23,6 +23,8 @@ const YBOT_HEIGHT_M = 1.805;
 
 interface Manifest {
   clips: Record<string, ClipInfo>;
+  /** Cranium ellipsoid of the figurine body (bind pose, metres). */
+  skull_m?: { center: [number, number, number]; radii: [number, number, number] };
 }
 
 const LOWER_BODY = /mixamorig(Hips|LeftUpLeg|LeftLeg|LeftFoot|LeftToe|RightUpLeg|RightLeg|RightFoot|RightToe)/;
@@ -40,10 +42,12 @@ export class AthleteFactory {
     this.info = manifest.clips;
     let body: THREE.SkinnedMesh | null = null;
     template.traverse((o) => {
-      if ((o as THREE.SkinnedMesh).isSkinnedMesh && o.name === "Alpha_Surface") body = o as THREE.SkinnedMesh;
+      if ((o as THREE.SkinnedMesh).isSkinnedMesh && (o.name === "Body" || o.name === "Alpha_Surface")) body = o as THREE.SkinnedMesh;
     });
-    if (!body) throw new Error("athlete.glb: no Alpha_Surface mesh");
-    this.head = fitHead((body as THREE.SkinnedMesh).geometry);
+    if (!body) throw new Error("athlete.glb: no body mesh");
+    this.head = manifest.skull_m
+      ? { center: new THREE.Vector3(...manifest.skull_m.center), radii: new THREE.Vector3(...manifest.skull_m.radii) }
+      : fitHead((body as THREE.SkinnedMesh).geometry);
     // aPlate = 1 on vertices driven by the rib-cage bone (Spine1), 2 on the shoulder yoke (Spine2): rigid plates,
     // so the number / crest / sponsor (ribs) and the name (yoke) never straddle the torso segments
     template.traverse((o) => {
@@ -95,12 +99,12 @@ export class AthleteFactory {
     });
     let hair: THREE.Mesh | null = null;
     const hg = this.hair(opts.hair, opts.seed);
-    const body = meshes.find((m) => m.name === "Alpha_Surface") ?? meshes[0]!;
+    const body = meshes.find((m) => m.name === "Body" || m.name === "Alpha_Surface") ?? meshes[0]!;
     const headIdx = body.skeleton.bones.findIndex((b) => b.name === "mixamorigHead");
     if (hg && headIdx >= 0) {
       const headBone = body.skeleton.bones[headIdx]!;
       const local = hg.clone().applyMatrix4(body.skeleton.boneInverses[headIdx]!);
-      hair = new THREE.Mesh(local, hairMaterial(opts.hairColor));
+      hair = new THREE.Mesh(local, hairMaterial(opts.hairColor, opts.look.skin, opts.hair));
       hair.castShadow = true;
       hair.receiveShadow = true;
       hair.frustumCulled = false;
@@ -112,6 +116,14 @@ export class AthleteFactory {
 
 function markPlate(m: THREE.SkinnedMesh): void {
   const g = m.geometry;
+  if (m.name === "Body") {
+    // the smooth body has no segments: number / crest / sponsor below the shoulder line, name above it
+    const pos = g.getAttribute("position");
+    const out = new Float32Array(pos.count);
+    for (let i = 0; i < pos.count; i++) out[i] = pos.getY(i) < 1.372 ? 1 : 2;
+    g.setAttribute("aPlate", new THREE.BufferAttribute(out, 1));
+    return;
+  }
   const si = g.getAttribute("skinIndex");
   const sw = g.getAttribute("skinWeight");
   const ribs = m.skeleton.bones.findIndex((b) => b.name === "mixamorigSpine1");
@@ -168,7 +180,11 @@ export class Athlete {
   private lastT: number | null = null;
   private cur: Layer | null = null;
   private prev: Layer | null = null;
-  /** Bind pose of every bone, restored before each evaluation (see apply). */
+  /**
+   * Bind pose of every bone, restored on resetDynamics before a fresh mixer is made (the mixer saves each
+   * binding's "original" value when an action starts, so that must not depend on history). Not restored per
+   * frame: the mixer only writes values that changed, so a reset bone would stay at rest.
+   */
   private readonly rest: { bone: THREE.Bone; q: THREE.Quaternion; p: THREE.Vector3 }[] = [];
 
   constructor(
@@ -334,8 +350,9 @@ export class Athlete {
 
   update(p: RenderPlayer, t: number): void {
     // match-time step: zero while paused; a jump (seek, rewind) resets the dynamics
-    let dtm = this.lastT === null ? 0 : t - this.lastT;
-    if (dtm < 0 || dtm > 0.5) {
+    let dtm = this.lastT === null ? 0 : Math.max(0, t - this.lastT);
+    if (this.lastT !== null && t - this.lastT < -1e-6) dtm = -1;
+    if (dtm < -1e-6 || dtm > 0.5) {
       this.resetDynamics();
       dtm = 0;
     }
@@ -376,13 +393,6 @@ export class Athlete {
   }
 
   private apply(pose: Pose): void {
-    // Start every evaluation from the bind pose. The mixer saves a binding's "original" value when an action
-    // starts and blends any missing weight with it; without this the saved value is whatever pose the bone had
-    // then, so the result would depend on history (and recordings would not be reproducible).
-    for (const r of this.rest) {
-      r.bone.quaternion.copy(r.q);
-      r.bone.position.copy(r.p);
-    }
     for (const name of this.active) {
       if (!pose.has(name)) {
         this.actions.get(name)?.stop();

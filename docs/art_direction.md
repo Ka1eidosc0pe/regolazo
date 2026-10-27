@@ -4,6 +4,8 @@
 
 Reference screenshots live in [`docs/art/`](art/) and are regenerated with `npm run art` in `web/` (see section 9).
 
+**Status (2026-10-26):** the user approved the stadium, lighting and kit direction. Before merge they asked for athlete polish: smooth sculpted bodies without visible mannequin joints, hair silhouettes, and crowd variety. That polish is in place (sections 4 and 5) and the screenshots were re-captured for review.
+
 ## 1. Mood
 
 - **Night, under floodlights.** The sky is close to black. A ring of LED floodlights along the roof edge is the only strong light source. The pitch is the brightest surface in the frame and the stands fall off into shadow.
@@ -65,10 +67,10 @@ Flat, two-colour, geometric. One outer shape from `CrestSpec.shape` (shield, cir
 
 ## 4. Athletes
 
-- **Body:** the Mixamo Y Bot (smooth, faceless mannequin with real athletic proportions), scaled per player from `height_cm`.
+- **Body:** a smooth sculpted figurine generated for the Mixamo skeleton (`scripts/assets/figurine.mjs`): tapered capsules and ellipsoids on the bind-pose bones (V-shaped torso, deltoids, biceps, forearms, strong thighs and calves, mitten hands, boots), smoothly unioned into one signed distance field, polygonised with marching cubes (about 40k triangles) and skinned by distance to each bone's shapes. No joints, no segments, no seams. Scaled per player from `height_cm`. The Mixamo clips drive it unchanged.
 - **Surface:** a single kit shader decides per pixel, in bind-pose space, what each part is (skin, shirt, sleeves, collar, shorts, socks, boots, gloves). That keeps all 22 players on one shader program while every player has their own colours, number and name.
 - **Skin:** smooth satin, like painted vinyl, with a slight clear coat. Six skin tones, assigned deterministically per player.
-- **Head:** no face. Hair is a sculpted silhouette (crop, buzz, high-top, bun, quiff, tied-back, shaved) in one of six natural colours, attached to the head bone. Silhouettes vary, so players stay distinguishable at broadcast distance.
+- **Head:** a smooth egg with a soft jaw and no face. Hair is a sculpted shell on the cranium (crop, fade, curls, bun, ponytail, shaved, quiff) that meets the scalp tangentially at a shaped hairline (forehead, temples, sideburns, nape), with combed grooves or curl bumps in the shader and short sides fading into the skin tone, so it reads as hair rather than a helmet. Style, hair colour and skin tone are picked deterministically from the player id.
 - **Boots:** glossy, one colour per player from a small set (black, white, volt, flare, ice, red).
 - **Goalkeepers:** long sleeves and gloves.
 
@@ -76,7 +78,7 @@ Flat, two-colour, geometric. One outer shape from `CrestSpec.shape` (shield, cir
 
 - **Bowl:** a continuous two-tier bowl on a rounded-rectangle plan. Lower tier from the pitch-side wall up to a concourse band; a glowing hospitality strip (warm glass) between tiers; a steeper upper tier; a thin cantilevered roof.
 - **Floodlights:** a continuous ring of LED lamp heads along the inner roof edge, angled down to the pitch, rendered as HDR emissive so they bloom. Haze makes their light visible as soft cones.
-- **Crowd:** instanced, about 30,000 simple seated figures. Home colours dominate; the away end is red and black. Figures bob and sway out of phase; a few phone lights twinkle. Goals make the crowd rise.
+- **Crowd:** instanced, about 30,000 shader cards: seated, broad seated and standing silhouettes (standing fans in the away end and behind the goals, never in the back rows below the LED fascia), size and width variety, some caps and striped scarves, skin-tone heads. Home colours dominate; the away end is red, black and gold. Figures bob and sway out of phase, raise their arms after a goal; a few phone lights twinkle. Distant stands fade to a soft texture; replays soften them further with depth of field.
 - **Pitch surround:** grass run-off, then LED advertising boards on all four sides with **fictional sponsors** (NOVA LUME, TIDEWATER, KESTREL AIR, ORBIT FIZZ, HALCYON MOTORS, BLUEFIN, MERIDIAN, PIXEL HARVEST), then a teal synthetic track to the stands. The boards scroll slowly and glow.
 - **Pitch:** 105 x 68 m, 20 mowing stripes across the length, shader-drawn markings (sharp at every distance), subtle wear in the goalmouths, grass micro-detail in close-ups.
 - **Goals:** white round posts and crossbar, a dark back frame, a fine net that bulges when the ball hits it.
@@ -136,8 +138,16 @@ All commands run in `web/`.
 | `node scripts/fps.ts [--unthrottled]` | Frame-rate check of the live view (headed Chromium, 1920 x 1080 viewport) |
 | `npx playwright test --project visual` | Visual regression against `e2e/__screenshots__/` (GPU baselines, skipped on CI) |
 
-Measured on the M3 Pro (ANGLE Metal), 2026-10-26:
+Measured on the M3 Pro (ANGLE Metal), 2026-10-26, after the athlete polish (figurine bodies, hair, crowd variety):
 
-- **Frame rate, live view at 1920 x 1080** (dev clip playing, broadcast camera, 2x MSAA, four 2048 shadow maps, bloom, ~30k crowd cards): 85.6 fps mean with vsync on the 120 Hz display (p50 8.4 ms, p95 17.0 ms, p99 17.6 ms over 15 s); 96.7 fps mean with vsync off (p95 12.3 ms). Fixed-size renders (recording, screenshots) use 4x MSAA.
-- **Labels** (676 frames, 8,763 objects): `K [R | t]` reprojection vs the Three.js camera, max 0.007 px; projected box vs GPU silhouette IoU mean 0.965, 5th percentile 0.939, min 0.860 (unoccluded objects at least 20 px tall); ball centre inside its box and ball-shadow pixel at or below the ball in 676 / 676 frames. All 676 label files validate with `FrameLabels.model_validate_json`. Two recordings give identical labels (same SHA-256).
+- **Frame rate, live view at 1920 x 1080** (`node scripts/fps.ts [--unthrottled] --extra cam=...`, headed Chromium, dev clip playing, 2x MSAA, two 2048 shadow maps, half-res bloom, ~30k crowd cards, 15 s of `requestAnimationFrame` timestamps):
+
+  | Camera | vsync on (120 Hz display) | vsync off |
+  |---|---|---|
+  | Broadcast | 112.3 fps mean, p50 8.3 ms, p95 16.6 ms, p99 16.9 ms | 134.4 fps, p50 7.0 ms, p95 14.0 ms, p99 14.6 ms |
+  | Replay (DOF on, close to the players) | 95.1 fps mean, p50 8.4 ms, p95 16.7 ms, p99 17.5 ms | 111.8 fps, p50 8.3 ms, p95 16.8 ms, p99 26.4 ms |
+
+  With vsync, frame times are whole refresh intervals (8.3 or 16.7 ms), so p95 at 16.7 ms means no frame took longer than two intervals. The biggest wins were the crowd as shader cards, the figurine body at about 40k triangles (replay p95 27 to 16.5 ms unthrottled), two shadow-casting banks instead of four, depth of field from the scene depth texture, and half-res bloom. Fixed-size renders (recording, screenshots) use 4x MSAA.
+- **Labels** (`node scripts/check-labels.ts`, 676 frames, 8,664 objects): `K [R | t]` reprojection vs the Three.js camera, max 0.007 px; projected box vs GPU silhouette IoU mean 0.965, 5th percentile 0.940, min 0.880 (unoccluded objects at least 20 px tall); ball centre inside its box and ball-shadow pixel at or below the ball in 676 / 676 frames. All 676 label files validate with `FrameLabels.model_validate_json`.
+- **Determinism** (Playwright `visual` project): two recordings in the same page, and recordings in two fresh pages, give identical frames and labels; after other playback in the same page the labels are identical (a few GPU edge pixels can differ).
 - **Visual tests**: 5 baselines (broadcast x 3, tactical, replay). A 0.2 s time shift changes 7 % of pixels and fails the test; the tolerance is 1 %.

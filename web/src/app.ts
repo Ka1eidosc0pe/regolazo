@@ -180,7 +180,7 @@ export class App {
     const ref = factory.create({
       id: "referee",
       heightCm: 181,
-      hair: "buzz",
+      hair: "fade",
       hairColor: "#2b1d14",
       seed: refLook.seed,
       look: {

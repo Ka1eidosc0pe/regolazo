@@ -1,19 +1,19 @@
 {
   "frames": 676,
-  "objects_checked": 8763,
+  "objects_checked": 8664,
   "reprojection_px": {
     "mean": 0,
-    "max": 0.0069
+    "max": 0.007
   },
   "silhouette_iou": {
-    "n": 7341,
-    "mean": 0.9653,
-    "p05": 0.9388,
-    "min": 0.8602,
+    "n": 7261,
+    "mean": 0.9654,
+    "p05": 0.9396,
+    "min": 0.8798,
     "worst": {
-      "iou": 0.8601853154017317,
-      "frame": 248,
-      "track": "A08"
+      "iou": 0.8798422619610281,
+      "frame": 264,
+      "track": "A01"
     }
   },
   "ball_center_in_box": "676/676",

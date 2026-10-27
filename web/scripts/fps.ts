@@ -11,7 +11,7 @@ const seconds = sIdx >= 0 ? Number(args[sIdx + 1]) : 10;
 const qIdx = args.indexOf("--quality");
 const quality = qIdx >= 0 ? args[qIdx + 1] : "high";
 const dIdx = args.indexOf("--debug");
-const debug = dIdx >= 0 ? (JSON.parse(args[dIdx + 1]!) as { hide?: string[]; shadows?: boolean; bloom?: boolean; shadowLights?: number }) : null;
+const debug = dIdx >= 0 ? (JSON.parse(args[dIdx + 1]!) as { hide?: string[]; shadows?: boolean; bloom?: boolean; shadowLights?: number; dofBlur?: number }) : null;
 
 const unthrottled = args.includes("--unthrottled");
 const h = await startHarness({ headed, unthrottled });

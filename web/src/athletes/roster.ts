@@ -25,8 +25,7 @@ export interface PlayerLook {
 export function lookFor(id: string, name: string): PlayerLook {
   const h = hashString(`${id}:${name}`);
   const skinIdx = h % SKIN_TONES.length;
-  const styles = HAIR_STYLES.filter((s) => s !== "shaved");
-  const hair = styles[(h >>> 4) % styles.length]!;
+  const hair = HAIR_STYLES[(h >>> 4) % HAIR_STYLES.length]!;
   // darker hair is more common, and lighter shades only appear with lighter skin tones
   const hcIdx = skinIdx >= 3 ? (h >>> 9) % 2 : (h >>> 9) % HAIR_COLORS.length;
   return {

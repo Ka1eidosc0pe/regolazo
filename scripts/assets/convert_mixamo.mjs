@@ -27,6 +27,8 @@ const THREE = await import(join(threeDir, "build/three.module.js"));
 const { FBXLoader } = await import(join(threeDir, "examples/jsm/loaders/FBXLoader.js"));
 const { GLTFExporter } = await import(join(threeDir, "examples/jsm/exporters/GLTFExporter.js"));
 const { mergeVertices } = await import(join(threeDir, "examples/jsm/utils/BufferGeometryUtils.js"));
+const { edgeTable, triTable } = await import(join(threeDir, "examples/jsm/objects/MarchingCubes.js"));
+const { buildFigurine, figurineShapes, skull } = await import(join(here, "figurine.mjs"));
 
 const args = process.argv.slice(2);
 const arg = (name, fallback) => {
@@ -150,6 +152,38 @@ for (const d of dupes) d.removeFromParent();
 realHips.traverse((b) => b.position.multiplyScalar(CM));
 character.name = "athlete";
 character.updateMatrixWorld(true);
+
+// ---------------------------------------------------------------- smooth figurine body
+// Replace the segmented Y Bot surface and its joint pieces with one smooth sculpted body on the same skeleton
+// (scripts/assets/figurine.mjs). `--ybot` keeps the original mannequin meshes.
+if (!args.includes("--ybot")) {
+  const skel = meshes[0].skeleton;
+  skel.pose();
+  character.updateMatrixWorld(true);
+  const wp = (name) => {
+    const b = realByName.get(name);
+    if (!b) throw new Error(`no bone ${name}`);
+    return b.getWorldPosition(new THREE.Vector3()).toArray();
+  };
+  const t0 = Date.now();
+  const fig = buildFigurine({ shapes: figurineShapes(wp), boneNames: skel.bones.map((b) => b.name), step: 0.0115, edgeTable, triTable });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(fig.positions, 3));
+  g.setAttribute("normal", new THREE.BufferAttribute(fig.normals, 3));
+  g.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(fig.skinIndex, 4));
+  g.setAttribute("skinWeight", new THREE.BufferAttribute(fig.skinWeight, 4));
+  g.setIndex(fig.indices);
+  g.computeBoundingBox();
+  g.computeBoundingSphere();
+  const body = new THREE.SkinnedMesh(g, new THREE.MeshStandardMaterial({ name: "Body", color: 0xcccccc, roughness: 0.6 }));
+  body.name = "Body";
+  body.bind(skel, new THREE.Matrix4());
+  for (const m of meshes) m.removeFromParent();
+  meshes.length = 0;
+  meshes.push(body);
+  character.add(body);
+  console.log(`figurine body: ${fig.positions.length / 3} vertices, ${fig.indices.length / 3} triangles (${Date.now() - t0} ms)`);
+}
 
 // ---------------------------------------------------------------- clips
 const boneNames = new Set(realByName.keys());
@@ -314,6 +348,10 @@ for (const nm of ["mixamorigHips", "mixamorigSpine2", "mixamorigNeck", "mixamori
 }
 const manifest = {
   bind_landmarks_m: landmarks,
+  skull_m: (() => {
+    const s = skull(landmarks.Head);
+    return { center: s.center.map((x) => +x.toFixed(4)), radii: s.radii };
+  })(),
   source: "Mixamo Y Bot + 35 Mixamo clips, processed by scripts/assets/convert_mixamo.mjs",
   units: "metres, y-up, character faces +z",
   height_m: +(bounds.max.y - bounds.min.y).toFixed(3),
