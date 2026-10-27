@@ -75,3 +75,41 @@ test("recording after other playback: labels identical (images may differ in a f
   const c = await record(other, 10);
   expect(a.labels).toEqual(c.labels);
 });
+
+// The turf is rough and weakly specular: from the low broadcast angle the far corner used to mirror a floodlight
+// bank and turn white. Render only the pitch and measure the share of near-white (min channel > 150) pitch pixels;
+// painted lines are legitimately white but cover only a few percent of the frame.
+for (const t of [T0 + 13.5, T0 + 15.0, T0 + 6.4]) {
+  test(`pitch does not wash out under the floodlights (broadcast, t=${(t - T0).toFixed(1)})`, async ({ page }) => {
+    await page.goto("/?record=1&w=1280&h=720");
+    await page.waitForFunction(() => document.body.dataset.ready === "1", null, { timeout: 90_000 });
+    const share = await page.evaluate((time) => {
+      const r = window.regolazo!;
+      r.setClean(true);
+      r.setCamera("broadcast", null);
+      r.jumpTo(time, 2.5);
+      const scene = r.app.scene;
+      const hidden = scene.children.filter((o) => o.visible && o.name !== "pitch" && o.name !== "lighting");
+      for (const o of hidden) o.visible = false;
+      r.app.render();
+      const c = r.app.renderer.domElement;
+      const cx = document.createElement("canvas");
+      cx.width = c.width;
+      cx.height = c.height;
+      const ctx = cx.getContext("2d")!;
+      ctx.drawImage(c, 0, 0);
+      const d = ctx.getImageData(0, 0, c.width, c.height).data;
+      let pitch = 0;
+      let white = 0;
+      for (let i = 0; i < d.length; i += 16) {
+        const [rr, gg, bb] = [d[i]!, d[i + 1]!, d[i + 2]!];
+        if (rr + gg + bb < 40) continue; // background (everything but the pitch is hidden)
+        pitch++;
+        if (Math.min(rr, gg, bb) > 150) white++;
+      }
+      for (const o of hidden) o.visible = true;
+      return white / Math.max(1, pitch);
+    }, t);
+    expect(share).toBeLessThan(0.05);
+  });
+}

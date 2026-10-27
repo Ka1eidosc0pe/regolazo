@@ -1,9 +1,12 @@
 // The pitch and its surround: mowing stripes with view-dependent grain, shader-drawn markings (anti-aliased SDF),
-// goalmouth wear, wet sheen (low roughness + environment reflections) and grass micro-bump.
+// goalmouth wear, a subtle damp sheen and grass micro-bump. Turf is rough and weakly specular: blades shadow each
+// other, so real grass never mirrors the floodlights, even at grazing angles (see GRASS_SPECULAR).
 import * as THREE from "three";
 import { HALF_L, HALF_W } from "../coords.ts";
 
 export const BOARD_X = HALF_L + 6.0;
+/** Specular strength of the turf relative to a standard dielectric (1.0). */
+export const GRASS_SPECULAR = 0.35;
 export const BOARD_Y = HALF_W + 5.0;
 
 const PARS = /* glsl */ `
@@ -81,7 +84,7 @@ void pitchSurface(vec3 wp, vec3 viewDir, out vec3 albedo, out float rough, out f
   float bladeFade = 1.0 - smoothstep(0.02, 0.09, fw);
   grass *= 1.0 + (blades - 0.5) * 0.25 * bladeFade;
   h = (blades - 0.5) * 0.0016 * bladeFade + (n2 - 0.5) * 0.003;
-  rough = mix(0.62, 0.36, uWet) + 0.14 * n1 + wear * 0.2;
+  rough = mix(0.90, 0.76, uWet) + 0.08 * n1 + wear * 0.06;
   // markings
   float d = markings(p);
   float aa = max(fwidth(d), 0.004);
@@ -111,7 +114,16 @@ vec3 pitchPerturb(vec3 surfPos, vec3 surfNorm, float h, float faceDir) {
 export function createPitch(): THREE.Mesh {
   const geo = new THREE.PlaneGeometry(150, 110, 1, 1);
   geo.rotateX(-Math.PI / 2);
-  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0, envMapIntensity: 0.9 });
+  // MeshPhysical for specularIntensity, which scales both F0 and the grazing-angle F90 (direct and environment
+  // light). A plain standard material reflects ~100 % at grazing angles, which turned the far corner white where
+  // the mirror direction lines up with a floodlight bank.
+  const mat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    roughness: 0.85,
+    metalness: 0,
+    specularIntensity: GRASS_SPECULAR,
+    envMapIntensity: 0.35,
+  });
   const uniforms = { uWet: { value: 1.0 } };
   mat.userData.uniforms = uniforms;
   mat.onBeforeCompile = (shader) => {
@@ -134,7 +146,7 @@ export function createPitch(): THREE.Mesh {
         "#include <normal_fragment_maps>\n  normal = pitchPerturb(-vViewPosition, normal, pH, faceDirection);",
       );
   };
-  mat.customProgramCacheKey = () => "regolazo-pitch-v1";
+  mat.customProgramCacheKey = () => "regolazo-pitch-v2";
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   mesh.name = "pitch";
