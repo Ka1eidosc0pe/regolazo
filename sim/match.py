@@ -329,6 +329,7 @@ class Match:
         self.backfill: list[tuple[int, int, int, int, bool, int, int]] = []
         """(b, tick, player, anim, mirror, variant, n_frames): clips that started before the current tick."""
         self._dead_since = np.full(batch, -1e9)
+        self._replan_after = np.full(batch, -1e9)
 
     # ------------------------------------------------------------------------------------------------------
     # set-up
@@ -389,6 +390,7 @@ class Match:
         self._move_ball()
         self._update_phase()
         self._animate()
+        self._end_of_tick_snapshot()
         if self.on_frame is not None:
             self.on_frame(self)
         w.tick += 1
@@ -529,6 +531,25 @@ class Match:
             tick = int(self.w.tick[0])
             if not self.snapshots or self.snapshots[-1][0] != tick:
                 self.snapshots.append((tick, self.w.snapshot(0)))
+
+    def _end_of_tick_snapshot(self) -> None:
+        """Touches that did not lead to an immediate action (receipts, recoveries) are keyframes too: store the
+        state at the start of the next tick, with the player in control, under this tick's number."""
+        if not self.take_snapshots or not self.keyframe[0]:
+            return
+        w = self.w
+        tick = int(w.tick[0])
+        if self.snapshots and self.snapshots[-1][0] == tick:
+            return
+        if w.ball_state[0] != BS_OWNED or w.owner[0] < 0:
+            return
+        snap = w.snapshot(0)
+        snap["tick"] = np.array(tick + 1)
+        snap["t"] = np.array((tick + 1) / SIM_HZ)
+        self.snapshots.append((tick, snap))
+
+    def has_snapshot(self, tick: int) -> bool:
+        return bool(self.snapshots) and self.snapshots[-1][0] == tick
 
     def _new_possession(self, b: int, team: int, pattern: str, turnover: bool) -> None:
         w = self.w
@@ -1649,13 +1670,35 @@ class Match:
     # ------------------------------------------------------------------------------------------------------
     def _interactions(self) -> None:
         w = self.w
+        sq = self.sq
         fl = (w.ball_state == BS_FLIGHT) & ~self.done
         if fl.any():
-            for b in np.nonzero(fl)[0]:
+            # vectorized pre-filter: only elements where something can happen this tick go through Python
+            bp = w.ball_pos
+            out = (np.abs(bp[:, 0]) > HALF_LENGTH + BALL_RADIUS) | (np.abs(bp[:, 1]) > HALF_WIDTH + BALL_RADIUS)
+            c = w.collector
+            has_c = c >= 0
+            rows = np.arange(w.b)
+            d = np.linalg.norm(bp[:, :2] - w.pos[rows, np.maximum(c, 0)], axis=1)
+            due = w.tick >= w.collect_tick - 2
+            near = has_c & due & (d <= CONTROL_RADIUS + 1.3)
+            late = has_c & (w.tick - w.collect_tick > 10)
+            speed = np.linalg.norm(w.ball_vel, axis=1)
+            since = w.t - w.flight_t0
+            shot_free = (w.flight_mode == FM_FREE) & (w.flight_kind == FLIGHT_SHOT)
+            loose = ~has_c & ~shot_free & ((speed < 9.0) | ((since > 0.6) & (w.tick % 6 == 0)))
+            loose &= w.t >= self._replan_after
+            flagged = fl & (out | self._wood | near | late | loose)
+            for b in np.nonzero(flagged)[0]:
                 self._flight_events(int(b))
         owned = (w.ball_state == BS_OWNED) & ~self.done
         if owned.any():
-            self._tackles(np.nonzero(owned)[0])
+            team = sq.team[np.maximum(w.owner, 0)]
+            db = np.linalg.norm(w.pos - w.ball_pos[:, None, :2], axis=2)
+            opp = sq.team[None, :] != team[:, None]
+            contest = owned & (opp & (db < CONTROL_RADIUS)).any(axis=1)
+            if contest.any():
+                self._tackles(np.nonzero(contest)[0])
             for b in np.nonzero(owned & (w.ball_state == BS_OWNED))[0]:
                 self._owned_bounds(int(b))
         if int(w.tick[0]) % 12 == 0:
@@ -1704,8 +1747,10 @@ class Match:
         since = w.t[b] - w.flight_t0[b]
         if w.flight_mode[b] == FM_FREE and w.flight_kind[b] == FLIGHT_SHOT:
             return  # goal / out decides it
-        if speed < 9.0 or (since > 0.6 and tick % 6 == 0):
+        if (speed < 9.0 or (since > 0.6 and tick % 6 == 0)) and w.t[b] >= self._replan_after[b]:
             self._replan_loose(b, exclude=int(w.last_touch[b]) if since < 0.4 else -1)
+            if w.collector[b] < 0:
+                self._replan_after[b] = w.t[b] + 0.4  # nobody can get there yet: look again shortly
 
     def _miss_save(self, b: int) -> None:
         """The keeper could not get to a shot he was meant to save: it goes on under physics."""

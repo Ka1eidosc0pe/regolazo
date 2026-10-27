@@ -117,7 +117,7 @@ class FrameRecorder:
         a["restart"][k] = w.restart[b] if w.ball_state[b] == BS_DEAD else -1
         a["score"][k] = w.score[b]
         a["attacking_positive_x"][k] = 0 if m.sign[b, 0] > 0 else 1
-        a["keyframe"][k] = m.keyframe[b]
+        a["keyframe"][k] = m.has_snapshot(int(w.tick[b])) if m.take_snapshots else False
         self.n += 1
         for bb, tick, i, code, mirror, variant, nf in m.backfill:
             if bb != b:
