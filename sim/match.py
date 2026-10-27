@@ -2832,7 +2832,7 @@ class Match:
         loc = w.ball_pos[b].copy()
         tq = a["tackling"][j] / 99.0
         slide = self.rng.random() < 0.2 and np.linalg.norm(w.vel[b, j]) > 3.0
-        p_foul = (0.038 + 0.098 * (1.0 - tq)) * (1.6 if slide else 1.0)
+        p_foul = (0.032 + 0.083 * (1.0 - tq)) * (1.6 if slide else 1.0)
         if sq.is_gk[j]:
             p_foul = 0.06
         team_j = int(sq.team[j])

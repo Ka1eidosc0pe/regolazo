@@ -550,7 +550,7 @@ def score_table(
     util = dv_seen.copy().reshape(d, o)
     arch = np.array([sq.players[i].archetype for i in range(len(sq.players))])
     arch_c = arch[c]
-    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.035
+    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.033
     # speculative efforts from distance are part of the game (about a fifth of all shots come from 25 m+)
     long_try = (sdist > 22.0) * (0.007 + 0.012 * (sq.attr["long_shots"][c] - 70) / 20)
     # in the box players shoot through bodies rather than wait for a clear lane
