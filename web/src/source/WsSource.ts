@@ -17,6 +17,8 @@ export class WsSource implements FrameSource {
   private renderT = 0;
   private serverClock: PlaybackClock = { t: 0, playing: false, speed: 1, durationS: 0 };
   private latestT = -1;
+  /** Time of a seek we sent and whose `clock` answer has not arrived yet. */
+  private pendingSeek: number | null = null;
   private readonly url: string;
 
   constructor(url: string) {
@@ -55,12 +57,18 @@ export class WsSource implements FrameSource {
       case "hello":
       case "clock": {
         const c = msg.clock;
-        const seeked = Math.abs(c.t - this.serverClock.t) > 1.0 && msg.type === "clock";
+        // A clock message follows every play / pause / speed change and every seek. It is a seek when it answers
+        // the seek we sent, or when the server's time is far from what we are showing (a seek from elsewhere);
+        // pause and speed changes keep the buffer.
+        const answered = this.pendingSeek !== null && Math.abs(c.t - this.pendingSeek) < 0.25;
+        const showing = this.latestT >= 0 ? this.latestT : this.renderT;
+        const jumped = msg.type === "clock" && Math.abs(c.t - showing) > 1.5;
         this.serverClock = { t: c.t, playing: c.playing, speed: c.speed, durationS: c.duration_s };
-        if (seeked || msg.type === "hello") {
+        if (msg.type === "hello" || answered || jumped) {
           this.buffer.clear();
           this.latestT = -1;
           this.renderT = c.t;
+          this.pendingSeek = null;
         }
         break;
       }
@@ -78,8 +86,8 @@ export class WsSource implements FrameSource {
   }
 
   advance(dtReal: number): number {
-    if (this.latestT < 0) return this.renderT;
-    if (this.serverClock.playing) this.renderT += dtReal * this.serverClock.speed;
+    if (this.latestT < 0 || !this.serverClock.playing) return this.renderT; // paused: hold the frame
+    this.renderT += dtReal * this.serverClock.speed;
     const target = this.latestT - RENDER_DELAY_S * Math.max(1, this.serverClock.speed);
     const err = target - this.renderT;
     if (Math.abs(err) > 1.5) this.renderT = target;
@@ -108,6 +116,7 @@ export class WsSource implements FrameSource {
   }
 
   seek(t: number): void {
+    this.pendingSeek = t;
     this.send({ type: "seek", t });
   }
 

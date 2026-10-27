@@ -193,7 +193,12 @@
         "dz": 0,
         "dy_max": 0.061
       },
-      "contact_s": 0.417,
+      "contact_toe_m": [
+        -0.08,
+        0.135,
+        0.204
+      ],
+      "contact_s": 0.433,
       "contact_part": "right",
       "contact_speed_mps": 9.26
     },
@@ -205,7 +210,12 @@
         "dz": 5.035,
         "dy_max": 0.159
       },
-      "contact_s": 0.467,
+      "contact_toe_m": [
+        -0.051,
+        0.05,
+        0.544
+      ],
+      "contact_s": 0.533,
       "contact_part": "right",
       "contact_speed_mps": 9.82
     },
@@ -217,7 +227,12 @@
         "dz": 0,
         "dy_max": 0.213
       },
-      "contact_s": 0.467,
+      "contact_toe_m": [
+        -0.094,
+        0.089,
+        0.721
+      ],
+      "contact_s": 0.417,
       "contact_part": "right",
       "contact_speed_mps": 15.02
     },
@@ -229,7 +244,12 @@
         "dz": 3.321,
         "dy_max": 0.238
       },
-      "contact_s": 2.1,
+      "contact_toe_m": [
+        -0.547,
+        0.231,
+        0.455
+      ],
+      "contact_s": 2.083,
       "contact_part": "right",
       "contact_speed_mps": 14.76
     },
@@ -292,7 +312,12 @@
         "dz": 3.79,
         "dy_max": 0.794
       },
-      "contact_s": 0.633,
+      "contact_toe_m": [
+        -0.173,
+        0.042,
+        0.332
+      ],
+      "contact_s": 0.583,
       "contact_part": "right",
       "contact_speed_mps": 12.11
     },
@@ -330,7 +355,8 @@
         "dx": 2.166,
         "dz": 1.805,
         "dy_max": 0.76
-      }
+      },
+      "lie_s": 1.417
     },
     "Goalkeeper_Diving_Save_Right": {
       "kind": "oneshot",
@@ -339,7 +365,8 @@
         "dx": -2.691,
         "dz": 1.017,
         "dy_max": 0.756
-      }
+      },
+      "lie_s": 1.383
     },
     "Goalkeeper_Body_Block_left": {
       "kind": "oneshot",

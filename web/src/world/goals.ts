@@ -14,6 +14,7 @@ export interface Goal {
   frame: THREE.Mesh[];
   /** ball position in world coords; dt seconds. */
   update(ball: [number, number, number], dt: number): void;
+  reset(): void;
 }
 
 function netMaterial(uniforms: Record<string, THREE.IUniform>): THREE.ShaderMaterial {
@@ -150,6 +151,10 @@ export function createGoal(side: 1 | -1): Goal {
     group,
     side,
     frame,
+    reset() {
+      strength = 0;
+      uniforms.uStrength.value = 0;
+    },
     update(ball, dt) {
       const [bx, by, bz] = ball;
       const inside = side * bx > HALF_L && Math.abs(by) < hw && bz < H;

@@ -1,5 +1,6 @@
 // LED advertising boards around the pitch with fictional sponsors, scrolling and glowing.
 import * as THREE from "three";
+import { FONT_FAMILY } from "../brand/fonts.ts";
 import { BOARD_X, BOARD_Y } from "./pitch.ts";
 
 export const BOARD_SPONSORS: [string, string, string][] = [
@@ -28,18 +29,28 @@ function boardTexture(): THREE.CanvasTexture {
     ctx.fillStyle = grad;
     ctx.fillRect(x, 0, w, 96);
     ctx.fillStyle = fg;
-    ctx.font = `800 62px "Barlow Condensed", "Arial Narrow", Arial, sans-serif`;
+    // lay out [mark][gap][word] as one group, shrunk to fit the panel with a margin
+    const mark = 28;
+    const gap = 16;
+    const margin = 30;
+    let size = 64;
+    ctx.font = `800 ${size}px "${FONT_FAMILY}"`;
+    while (ctx.measureText(label).width + mark + gap > w - 2 * margin && size > 20) {
+      size -= 2;
+      ctx.font = `800 ${size}px "${FONT_FAMILY}"`;
+    }
+    const tw = ctx.measureText(label).width;
+    const left = x + (w - (mark + gap + tw)) / 2;
+    ctx.beginPath();
+    ctx.arc(left + mark / 2, 48, mark / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(left + mark + gap + tw / 2, 51);
+    ctx.transform(1, 0, -0.15, 1, 0, 0);
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.save();
-    ctx.translate(x + w / 2, 50);
-    ctx.transform(1, 0, -0.15, 1, 0, 0);
     ctx.fillText(label, 0, 0);
     ctx.restore();
-    // a simple original mark next to the word
-    ctx.beginPath();
-    ctx.arc(x + 34, 48, 14, 0, Math.PI * 2);
-    ctx.fill();
   });
   // LED pixel grid
   ctx.fillStyle = "rgba(0,0,0,0.22)";

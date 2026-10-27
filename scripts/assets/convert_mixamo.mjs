@@ -217,7 +217,7 @@ for (const [file, kind] of Object.entries(CLIPS)) {
   clips.push(clip);
 
   const info = { kind, duration_s: +clip.duration.toFixed(4), root_motion_m: root };
-  const feet = ["mixamorigLeftToeBase", "mixamorigRightToeBase", "mixamorigHead"];
+  const feet = ["mixamorigLeftToeBase", "mixamorigRightToeBase", "mixamorigHead", "mixamorigHips"];
   const { n, dt, out } = sampleBones(clip, feet);
   if (kind === "loop" && file !== "Breathing_Idle" && file !== "Goalkeeper_Idle") {
     // natural ground speed: horizontal speed of a foot while it is planted (lowest 3 cm of its height range)
@@ -252,6 +252,8 @@ for (const [file, kind] of Object.entries(CLIPS)) {
     let best = 0;
     let bestT = 0;
     let foot = "";
+    let bestI = 0;
+    let bestK = 0;
     paths.forEach((path, k) => {
       // ignore the last frames: some clips jump back to the start pose at the loop seam
       for (let i = 1; i < n - 4; i++) {
@@ -259,13 +261,39 @@ for (const [file, kind] of Object.entries(CLIPS)) {
         if (s > best) {
           best = s;
           bestT = i * dt;
+          bestI = i;
+          bestK = k;
           foot = kind === "head" ? "head" : k === 0 ? "left" : "right";
         }
       }
     });
+    if (kind === "kick") {
+      // the ball is struck at the bottom of the swing: the lowest point of the kicking toe while it moves forward
+      // fast, shortly before its peak speed (the peak comes in the follow-through)
+      const path = paths[bestK];
+      const lo = Math.max(1, bestI - Math.round(0.3 / dt));
+      const hi = Math.min(n - 5, bestI + Math.round(0.1 / dt));
+      let lowY = Infinity;
+      for (let i = lo; i <= hi; i++) {
+        const s = path[i].distanceTo(path[i - 1]) / dt;
+        if (s > 0.4 * best && path[i].z > path[i - 1].z && path[i].y < lowY) {
+          lowY = path[i].y;
+          bestT = i * dt;
+          bestI = i;
+        }
+      }
+      info.contact_toe_m = path[bestI].toArray().map((x) => +x.toFixed(3));
+    }
     info.contact_s = +bestT.toFixed(3);
     info.contact_part = foot;
     info.contact_speed_mps = +best.toFixed(2);
+  }
+  if (file.startsWith("Goalkeeper_Diving_Save")) {
+    // first frame lying on the ground after the dive (the clip then plays its own recovery)
+    const hips = out[3];
+    const minY = Math.min(...hips.map((q) => q.y));
+    const i = hips.findIndex((q) => q.y < minY + 0.06);
+    info.lie_s = +(i * dt).toFixed(3);
   }
   report[file] = info;
 }

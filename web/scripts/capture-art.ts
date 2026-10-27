@@ -12,6 +12,8 @@ interface Shot {
   cam?: CameraMode;
   target?: string;
   free?: { pos: V3; look: V3; fov: number };
+  /** Free camera placed relative to a player after settling: in front of (or behind) the player's facing. */
+  follow?: { id: string; side: "front" | "back"; dist: number; height: number; fov: number; lateral?: number };
 }
 
 const T0 = 1520;
@@ -24,6 +26,8 @@ export const SHOTS: Shot[] = [
   { name: "ref_replay_goal", t: T0 + 18.4, cam: "replay", target: "H08" },
   { name: "ref_replay_celebration", t: T0 + 24.5, cam: "replay", target: "H08" },
   { name: "ref_stadium_night", t: T0 + 3, free: { pos: [-30, -40, 9], look: [25, 30, 8], fov: 58 } },
+  { name: "ref_front_two_players", t: T0 + 12.0, follow: { id: "A03", side: "front", dist: 6.5, height: 1.45, fov: 30, lateral: 0.8 } },
+  { name: "ref_back_name_number", t: T0 + 11.4, follow: { id: "H07", side: "back", dist: 4.2, height: 1.5, fov: 30 } },
 ];
 
 const args = process.argv.slice(2);
@@ -46,6 +50,17 @@ try {
       if (shot.free) r.setFreePose(shot.free.pos, shot.free.look, shot.free.fov);
       else r.setCamera(shot.cam ?? "broadcast", shot.target ?? null);
       r.jumpTo(shot.t, 2.5);
+      if (shot.follow) {
+        const f = shot.follow;
+        const p = r.app.state!.players.find((q) => q.id === f.id)!;
+        const s = f.side === "front" ? 1 : -1;
+        const dx = Math.cos(p.facing);
+        const dy = Math.sin(p.facing);
+        const lat = f.lateral ?? 0;
+        r.setFreePose([p.x + s * dx * f.dist - dy * lat, p.y + s * dy * f.dist + dx * lat, f.height], [p.x, p.y, 1.05], f.fov);
+        r.app.step(shot.t, 0);
+        r.app.render();
+      }
     }, s);
     const file = join(out, `${s.name}.jpg`);
     await page.locator("#app").screenshot({ path: file, type: "jpeg", quality: 90 });

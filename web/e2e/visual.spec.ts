@@ -1,7 +1,8 @@
 // Visual regression: the dev clip at fixed match times and cameras, compared with approved baselines
 // (e2e/__screenshots__/, rendered on the M3 Pro GPU). Update after an approved art change with:
 //   npx playwright test --project visual --update-snapshots
-import { expect, test } from "@playwright/test";
+import { createHash } from "node:crypto";
+import { expect, test, type Page } from "@playwright/test";
 
 test.skip(!!process.env.CI, "baselines are GPU renders; CI has only SwiftShader");
 
@@ -16,7 +17,8 @@ const SHOTS: { name: string; t: number; cam: "broadcast" | "tactical" | "replay"
 
 for (const s of SHOTS) {
   test(`frame ${s.name}`, async ({ page }) => {
-    await page.goto("/?w=1280&h=720&paused=1");
+    // record mode: no live loop running before the jump, so the frame depends only on (t, camera)
+    await page.goto("/?record=1&w=1280&h=720");
     await page.waitForFunction(() => document.body.dataset.ready === "1", null, { timeout: 90_000 });
     const info = await page.evaluate((shot) => {
       const r = window.regolazo!;
@@ -29,3 +31,47 @@ for (const s of SHOTS) {
     await expect(page.locator("#stage")).toHaveScreenshot(`${s.name}.png`);
   });
 }
+
+async function record(page: Page, n: number): Promise<{ img: string[]; labels: string[] }> {
+  await page.evaluate(() => window.regolazo!.recorder.start({ start: 1531, fps: 25, format: "png" }));
+  const img: string[] = [];
+  const labels: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const f = await page.evaluate((k) => window.regolazo!.recorder.frame(k), i);
+    img.push(createHash("sha256").update(f.image).digest("hex").slice(0, 16));
+    labels.push(createHash("sha256").update(JSON.stringify(f.labels)).digest("hex").slice(0, 16));
+  }
+  return { img, labels };
+}
+
+async function fresh(page: Page): Promise<void> {
+  await page.goto("/?record=1&w=640&h=360");
+  await page.waitForFunction(() => document.body.dataset.ready === "1", null, { timeout: 90_000 });
+}
+
+test("recording is deterministic: twice in one page, and in two fresh pages, frames and labels are identical", async ({ page, browser }) => {
+  await fresh(page);
+  const a = await record(page, 10);
+  const b = await record(page, 10);
+  const other = await browser.newPage({ viewport: { width: 640, height: 360 } });
+  await fresh(other);
+  const c = await record(other, 10);
+  expect(b).toEqual(a);
+  expect(c).toEqual(a);
+  expect(new Set(a.img).size).toBe(10);
+});
+
+test("recording after other playback: labels identical (images may differ in a few GPU edge pixels)", async ({ page, browser }) => {
+  await fresh(page);
+  // play something else first, so any leaked state (phases, blends, ball spin, net, camera, grain) would show
+  await page.evaluate(() => {
+    const r = window.regolazo!;
+    r.setCamera("replay", "H08");
+    r.jumpTo(1540, 3);
+  });
+  const a = await record(page, 10);
+  const other = await browser.newPage({ viewport: { width: 640, height: 360 } });
+  await fresh(other);
+  const c = await record(other, 10);
+  expect(a.labels).toEqual(c.labels);
+});

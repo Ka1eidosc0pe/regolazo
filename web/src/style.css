@@ -1,3 +1,15 @@
+/* Barlow Condensed (SIL OFL 1.1, public/fonts/OFL.txt) */
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("/fonts/BarlowCondensed-Bold.ttf") format("truetype");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("/fonts/BarlowCondensed-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+}
+
 :root {
   font-family: "Inter", system-ui, sans-serif;
   color-scheme: dark;

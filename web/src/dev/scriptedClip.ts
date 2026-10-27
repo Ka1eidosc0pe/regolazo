@@ -7,6 +7,10 @@ import { angleDelta, clamp, HALF_L, HALF_W, mulberry32 } from "../coords.ts";
 
 /** Strike anims reach ball contact this long after anim_t = 0 (renderer convention, see athletes/animMap.ts). */
 export const CONTACT_S = 0.4;
+/** Seconds from the save (the dive's "contact") until the keeper's dive state ends lying on the ground. */
+const DIVE_DOWN_S = 1.1;
+/** Length of the get_up state (Getting_Up from lying to standing at the renderer's playback rate). */
+const GET_UP_S = 4.5;
 
 type Vec = [number, number];
 
@@ -154,10 +158,12 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
     // left-footed strikes play the right-footed clips mirrored
     const footed = !k.anim.startsWith("gk_") && !k.anim.startsWith("header");
     const mirror = k.mirror ?? (footed && footOf(k.by) === "left");
-    oneShots.push([k.by, k.anim, k.t - CONTACT_S, k.t + (k.anim.startsWith("gk_dive") ? 2.0 : 0.75), mirror]);
+    // a dive ends once the keeper is lying (the renderer holds the dive clip there); get_up chains from it
+    oneShots.push([k.by, k.anim, k.t - CONTACT_S, k.t + (k.anim.startsWith("gk_dive") ? DIVE_DOWN_S : 0.75), mirror]);
     if (k.receiver && k.receiveAnim) oneShots.push([k.receiver, k.receiveAnim, k.arrive - 0.15, k.arrive + 0.55, false]);
   }
-  oneShots.push([A("GK"), "get_up", 18.8, 21.5, false]);
+  const dive = kicks.find((k) => k.anim.startsWith("gk_dive"))!;
+  oneShots.push([A("GK"), "get_up", dive.t + DIVE_DOWN_S, dive.t + DIVE_DOWN_S + GET_UP_S, false]);
   oneShots.push([A("LCB"), "slide_tackle", 17.9, 19.2, false]);
   for (const p of players) {
     if (p.team === "home" && p.position !== "GK") oneShots.push([p.id, "celebrate", GOAL_T + 2.6 + rng() * 1.5, duration + 1, false]);
@@ -322,7 +328,14 @@ export function buildScriptedClip(meta: MatchMeta, opts: ScriptOptions = {}): Cl
         feedForward = waypointVelocity(runs[p.id] ?? [], s);
       } else if (afterGoal) {
         const scorer = body(H("RCM")).pos;
-        target = p.team === "home" && p.position !== "GK" ? [scorer[0] - 4 + rng() * 0.2, scorer[1] + 3] : [baseOf(p)[0] * 0.5, baseOf(p)[1] * 0.6];
+        // teammates gather round the scorer on a ring (one slot each), so they never stack on one spot
+        const slot = players.indexOf(p);
+        const ang = slot * 2.39996;
+        const ring = 1.4 + (slot % 3) * 0.5;
+        target =
+          p.team === "home" && p.position !== "GK"
+            ? [scorer[0] - 2.5 + Math.cos(ang) * ring, scorer[1] + 2 + Math.sin(ang) * ring]
+            : [baseOf(p)[0] * 0.5, baseOf(p)[1] * 0.6];
       } else {
         const bb = baseOf(p);
         if (p.position === "GK") {

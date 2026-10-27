@@ -1,6 +1,6 @@
 // Entry point. URL parameters:
 //   ?clip=/dev/clip_demo.json   local clip (default)        ?ws=ws://host:8000/ws   live server instead
-//   ?cam=broadcast|tactical|replay                          ?t=<match seconds>      start (or freeze) time
+//   ?cam=broadcast|tactical|replay [&target=H08]                         ?t=<match seconds>      start (or freeze) time
 //   ?paused=1  freeze                                       ?quality=low            1k shadows, no MSAA
 //   ?w=1920&h=1080  fixed render size (recording / screenshots)
 import "./style.css";
@@ -35,6 +35,7 @@ const app = new App(stageRoot, source, {
 
 const ready = app.init().then(() => {
   const cam = params.get("cam") as CameraMode | null;
+  app.director.replayTarget = params.get("target");
   if (cam) app.setCamera(cam, 0);
   const t = params.get("t");
   if (t) source.seek(Number(t));

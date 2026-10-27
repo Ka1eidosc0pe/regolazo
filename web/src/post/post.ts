@@ -1,9 +1,10 @@
-// Post-processing: HDR render (MSAA) -> optional depth of field -> bloom -> ACES tone mapping + sRGB -> grade
-// (vignette, cool-shadow / warm-highlight split, gentle contrast, light grain, faint edge chromatic aberration).
+// Post-processing: HDR render (MSAA, with a depth texture) -> optional depth of field -> bloom (half res) ->
+// ACES tone mapping + sRGB -> grade (vignette, cool-shadow / warm-highlight split, gentle contrast, light grain,
+// faint edge chromatic aberration).
 import * as THREE from "three";
-import { BokehPass } from "three/examples/jsm/postprocessing/BokehPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { FullScreenQuad, Pass } from "three/examples/jsm/postprocessing/Pass.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
@@ -45,38 +46,133 @@ const GradeShader = {
     }`,
 };
 
+const DOF_FRAGMENT = /* glsl */ `
+  uniform sampler2D tDiffuse;
+  uniform sampler2D tDepth;
+  uniform float uNear;
+  uniform float uFar;
+  uniform float uFocus;
+  uniform float uAperture;
+  uniform float uMaxBlur;
+  uniform vec2 uTexel;
+  varying vec2 vUv;
+  float linDepth(vec2 uv) {
+    float z = texture2D(tDepth, uv).x;
+    // perspective depth -> view distance
+    return (uNear * uFar) / ((uFar - uNear) * z - uFar) * -1.0;
+  }
+  float coc(float d) { return clamp(abs(d - uFocus) / max(d, 1e-3) * uAperture * uMaxBlur * 4.0, 0.0, uMaxBlur); }
+  void main() {
+    float d0 = linDepth(vUv);
+    float c0 = coc(d0);
+    vec4 base = texture2D(tDiffuse, vUv);
+    if (c0 < 0.5) { gl_FragColor = base; return; }
+    vec3 acc = base.rgb;
+    float wsum = 1.0;
+    for (int i = 0; i < 24; i++) {
+      float fi = float(i) + 0.5;
+      float r = sqrt(fi / 24.0) * c0;
+      float a = fi * 2.39996;
+      vec2 uv = vUv + vec2(cos(a), sin(a)) * r * uTexel;
+      float ds = linDepth(uv);
+      // a sharp foreground does not bleed into the blurred background behind it
+      float w = ds < d0 - 0.5 ? clamp(coc(ds) / max(c0, 1e-3), 0.0, 1.0) : 1.0;
+      acc += texture2D(tDiffuse, uv).rgb * w;
+      wsum += w;
+    }
+    gl_FragColor = vec4(acc / wsum, base.a);
+  }`;
+
+/**
+ * Depth of field from the main render's own depth texture (BokehPass renders the whole scene a second time):
+ * circle of confusion from view distance vs the focus distance, gathered with a 24-tap golden-angle disc.
+ */
+class DofPass extends Pass {
+  readonly uniforms = {
+    tDiffuse: { value: null as THREE.Texture | null },
+    tDepth: { value: null as THREE.Texture | null },
+    uNear: { value: 0.3 },
+    uFar: { value: 4000 },
+    uFocus: { value: 30 },
+    uAperture: { value: 0.6 },
+    uMaxBlur: { value: 9 },
+    uTexel: { value: new THREE.Vector2(1 / 1920, 1 / 1080) },
+  };
+  private readonly quad: FullScreenQuad;
+  private readonly camera: THREE.PerspectiveCamera;
+
+  constructor(camera: THREE.PerspectiveCamera) {
+    super();
+    this.camera = camera;
+    this.quad = new FullScreenQuad(
+      new THREE.ShaderMaterial({
+        uniforms: this.uniforms,
+        vertexShader: GradeShader.vertexShader,
+        fragmentShader: DOF_FRAGMENT,
+      }),
+    );
+  }
+
+  setSize(w: number, h: number): void {
+    this.uniforms.uTexel.value.set(1 / w, 1 / h);
+  }
+
+  render(renderer: THREE.WebGLRenderer, writeBuffer: THREE.WebGLRenderTarget, readBuffer: THREE.WebGLRenderTarget): void {
+    this.uniforms.tDiffuse.value = readBuffer.texture;
+    this.uniforms.tDepth.value = readBuffer.depthTexture;
+    this.uniforms.uNear.value = this.camera.near;
+    this.uniforms.uFar.value = this.camera.far;
+    renderer.setRenderTarget(this.renderToScreen ? null : writeBuffer);
+    this.quad.render(renderer);
+  }
+}
+
 export class Post {
   readonly composer: EffectComposer;
   readonly bloom: UnrealBloomPass;
-  readonly bokeh: BokehPass;
+  readonly dof: DofPass;
   readonly grade: ShaderPass;
   private readonly renderPass: RenderPass;
 
   constructor(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.PerspectiveCamera, w: number, h: number, samples = 4) {
-    const rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples });
+    const depthTexture = new THREE.DepthTexture(w, h);
+    depthTexture.type = THREE.UnsignedIntType;
+    const rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples, depthTexture });
     this.composer = new EffectComposer(renderer, rt);
     this.composer.setPixelRatio(1);
     this.renderPass = new RenderPass(scene, camera);
-    this.bokeh = new BokehPass(scene, camera, { focus: 30, aperture: 0.0008, maxblur: 0.006 });
-    this.bokeh.enabled = false;
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.42, 0.42, 1.0);
+    this.dof = new DofPass(camera);
+    this.dof.enabled = false;
+    // bloom runs at half resolution: a quarter of the fill cost, and the glow is soft anyway
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(w / 2, h / 2), 0.42, 0.42, 1.0);
     this.grade = new ShaderPass(GradeShader);
     this.composer.addPass(this.renderPass);
-    this.composer.addPass(this.bokeh);
+    this.composer.addPass(this.dof);
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
     this.composer.addPass(this.grade);
+    this.setSize(w, h);
   }
 
   setSize(w: number, h: number): void {
     this.composer.setSize(w, h);
+    this.bloom.setSize(Math.round(w / 2), Math.round(h / 2));
+    this.dof.setSize(w, h);
   }
 
-  setDof(enabled: boolean, focus = 30, aperture = 0.0008): void {
-    this.bokeh.enabled = enabled;
-    const u = this.bokeh.uniforms as Record<string, THREE.IUniform>;
-    u.focus!.value = focus;
-    u.aperture!.value = aperture;
+  /**
+   * Start from the same ping-pong buffer every time: the number of swaps per frame depends on which passes are
+   * enabled (DOF), and the two buffers are not bit-identical, so the parity would leak history into frames.
+   */
+  resetBuffers(): void {
+    if (this.composer.readBuffer !== this.composer.renderTarget1) this.composer.swapBuffers();
+  }
+
+  /** Depth of field (replays): focus distance in metres; aperture scales the blur. */
+  setDof(enabled: boolean, focus = 30, aperture = 0.6): void {
+    this.dof.enabled = enabled;
+    this.dof.uniforms.uFocus.value = focus;
+    this.dof.uniforms.uAperture.value = aperture;
   }
 
   render(frame: number, dt?: number): void {

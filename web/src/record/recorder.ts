@@ -10,6 +10,8 @@ export interface RecordOptions {
   start?: number;
   end?: number;
   camera?: CameraMode;
+  /** Player the replay camera follows (camera: "replay"). */
+  target?: string | null;
   warm?: number;
   format?: "jpeg" | "png";
   quality?: number;
@@ -24,7 +26,7 @@ export interface RecordedFrame {
 export class Recorder {
   private readonly app: App;
   private readonly labeler: Labeler;
-  private opts: Required<RecordOptions> | null = null;
+  private opts: Required<Omit<RecordOptions, "target">> | null = null;
   private next = 0;
 
   constructor(app: App) {
@@ -44,7 +46,7 @@ export class Recorder {
     this.opts = { fps, start, end, camera: o.camera ?? "broadcast", warm: o.warm ?? 2.0, format: o.format ?? "jpeg", quality: o.quality ?? 0.92 };
     app.stop();
     app.source.pause();
-    app.director.replayTarget = null;
+    app.director.replayTarget = o.target ?? null;
     app.setCamera(this.opts.camera, 0);
     // settle the camera on the opening state (the warm-up never runs before the clip start)
     const warmStart = Math.max(t0, start - this.opts.warm);

@@ -78,7 +78,7 @@ export function blobShadow(size: number, opacity: number): THREE.Mesh {
 }
 
 const TRAIL_N = 28;
-const TRAIL_LIFE = 0.2;
+const TRAIL_LIFE = 0.24;
 
 export interface Ball {
   mesh: THREE.Mesh;
@@ -124,7 +124,7 @@ export function createBall(): Ball {
         void main() { vA = aAlpha; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
       fragmentShader: /* glsl */ `
         varying float vA;
-        void main() { gl_FragColor = vec4(mix(vec3(0.35, 0.85, 1.0), vec3(1.0), vA) * vA * vA * 0.28, 1.0); }`,
+        void main() { gl_FragColor = vec4(mix(vec3(0.35, 0.85, 1.0), vec3(1.0), vA) * vA * 0.6, 1.0); }`,
     }),
   );
   trail.frustumCulled = false;
@@ -146,6 +146,7 @@ export function createBall(): Ball {
     reset() {
       hist.length = 0;
       lastSpinT = -1;
+      mesh.quaternion.identity();
     },
     update(pos, vel, spin, t, dt, camera) {
       mesh.position.set(pos[0], pos[2], -pos[1]);
@@ -157,8 +158,11 @@ export function createBall(): Ball {
         w = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), v).divideScalar(BALL_RADIUS);
         if (pos[2] > 0.25) w.multiplyScalar(0.3);
       }
-      const ang = w.length() * dt;
-      if (ang > 0 && t !== lastSpinT) {
+      // rotate by the match-time step: frozen while paused, independent of the display frame rate
+      const dtm = lastSpinT < 0 ? 0 : Math.min(0.2, Math.max(0, t - lastSpinT));
+      void dt;
+      const ang = w.length() * dtm;
+      if (ang > 0) {
         axis.copy(w).normalize();
         q.setFromAxisAngle(axis, ang);
         mesh.quaternion.premultiply(q);
@@ -188,7 +192,8 @@ export function createBall(): Ball {
         if (!Number.isFinite(side.x)) side.set(0, 0, 0);
         const age = (t - h.t) / TRAIL_LIFE;
         const k = i / (TRAIL_N - 1);
-        const fast = THREE.MathUtils.smoothstep(h.s, 21, 30);
+        // strike trail from ~12 m/s, full by ~20 m/s
+        const fast = THREE.MathUtils.smoothstep(h.s, 11, 20);
         const alpha = n < 3 ? 0 : Math.max(0, 1 - age) * k * fast;
         const width = BALL_RADIUS * (0.15 + 0.55 * k);
         side.multiplyScalar(width);

@@ -157,7 +157,8 @@ export class Labeler {
     let m = this.idMats.get(id);
     if (!m) {
       m = new THREE.MeshBasicMaterial({ fog: false, side: THREE.DoubleSide });
-      m.color.setRGB((id * 10) / 255, 0, 0, THREE.LinearSRGBColorSpace);
+      // 16-bit id in red + green; the ID target has no MSAA, blending or tone mapping, so values read back exactly
+      m.color.setRGB((id & 255) / 255, (id >> 8) / 255, 0, THREE.LinearSRGBColorSpace);
       this.idMats.set(id, m);
     }
     return m;
@@ -313,7 +314,7 @@ export class Labeler {
       const buf = new Uint8Array(w * h * 4);
       renderer.readRenderTargetPixels(rt, 0, 0, w, h, buf);
       for (let i = 0; i < w * h; i++) {
-        const id = Math.round(buf[i * 4]! / 10);
+        const id = buf[i * 4]! + buf[i * 4 + 1]! * 256;
         if (id > 0) visible.set(id, (visible.get(id) ?? 0) + 1);
       }
       // solo passes, scissored to each box
@@ -341,7 +342,8 @@ export class Labeler {
         let y1 = -Infinity;
         for (let yy = 0; yy < shh; yy++) {
           for (let xx = 0; xx < sw; xx++) {
-            if (Math.round(sb[(yy * sw + xx) * 4]! / 10) === t.id) {
+            const k = (yy * sw + xx) * 4;
+            if (sb[k]! + sb[k + 1]! * 256 === t.id) {
               n++;
               const fx = (sx + xx) / ID_SCALE;
               const fy = (h - (sy + yy) - 1) / ID_SCALE;

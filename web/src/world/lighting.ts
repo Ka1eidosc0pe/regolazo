@@ -26,7 +26,9 @@ export function createLighting(scene: THREE.Scene, mapSize: number): Lighting {
   corners.forEach((c, i) => {
     const l = new THREE.DirectionalLight(new THREE.Color("#eef3ff"), i < 2 ? 1.05 : 0.85);
     l.position.set(...c);
-    l.castShadow = true;
+    // the two near-side banks cast shadows (each player gets a two-way shadow, thrown away from the main
+    // camera); the far banks only light. Four shadow maps cost ~20 % of the frame (p95 over budget).
+    l.castShadow = i < 2;
     l.shadow.mapSize.set(mapSize, mapSize);
     l.shadow.bias = -0.0004;
     l.shadow.normalBias = 0.03;
@@ -42,22 +44,32 @@ export function createLighting(scene: THREE.Scene, mapSize: number): Lighting {
     lights.push(l);
   });
   scene.add(group);
+  const offsets = lights.map((l) => l.position.clone().sub(l.target.position));
 
   return {
     group,
     lights,
     focus(center, half) {
-      for (const l of lights) {
-        const offset = l.position.clone().sub(l.target.position);
-        l.target.position.copy(center);
-        l.position.copy(center).add(offset);
+      lights.forEach((l, i) => {
+        // fixed per-light offsets (no accumulated floating-point drift: results depend only on the focus)
+        const offset = offsets[i]!;
+        // snap the focus to whole shadow-map texels in the light's view plane, so shadow edges do not crawl
+        // while the camera pans
+        const texel = (2 * half) / l.shadow.mapSize.x;
+        const q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(offset, new THREE.Vector3(), new THREE.Vector3(0, 1, 0)));
+        const local = center.clone().applyQuaternion(q.clone().invert());
+        local.x = Math.round(local.x / texel) * texel;
+        local.y = Math.round(local.y / texel) * texel;
+        const snapped = local.applyQuaternion(q);
+        l.target.position.copy(snapped);
+        l.position.copy(snapped).add(offset);
         const cam = l.shadow.camera;
         cam.left = -half;
         cam.right = half;
         cam.top = half;
         cam.bottom = -half;
         cam.updateProjectionMatrix();
-      }
+      });
     },
   };
 }

@@ -24,6 +24,11 @@ export interface AnimSpec {
   offset?: number;
   /** The clip already contains vertical body motion: ignore PlayerState.z for it. */
   ownsHeight?: boolean;
+  /**
+   * Upper-body gesture (celebrations, reactions): when the player is moving, the legs and hips come from
+   * locomotion and only the spine, arms and head from the clip, so the feet never skate.
+   */
+  upperBody?: boolean;
 }
 
 export const ANIMS: Record<PlayerAnim, AnimSpec> = {
@@ -61,8 +66,8 @@ export const ANIMS: Record<PlayerAnim, AnimSpec> = {
   gk_scoop: { kind: "oneshot", clips: ["Goalkeeper_Scoop"] },
   gk_throw: { kind: "oneshot", clips: ["Goalkeeper_Overhand_Throw"] },
   gk_drop_kick: { kind: "strike", clips: ["Goalkeeper_Drop_Kick"] },
-  celebrate: { kind: "oneshot", clips: ["celebration_Cheering", "celebration_Fist_Pump", "celebration_Victory"] },
-  disappointed: { kind: "oneshot", clips: ["Disappointed"] },
+  celebrate: { kind: "oneshot", clips: ["celebration_Cheering", "celebration_Fist_Pump", "celebration_Victory"], upperBody: true },
+  disappointed: { kind: "oneshot", clips: ["Disappointed"], upperBody: true },
 };
 
 export interface ClipInfo {
@@ -71,6 +76,8 @@ export interface ClipInfo {
   contact_s?: number;
   natural_speed_mps?: number;
   phase0_s?: number;
+  /** Dives: first frame lying on the ground; the clip is held there (the sim chains get_up). */
+  lie_s?: number;
 }
 
 export function clipFor(anim: PlayerAnim, variant: number): string {
@@ -95,7 +102,23 @@ export function oneShotTime(anim: PlayerAnim, clip: ClipInfo, animT: number): nu
   } else {
     t = (spec.offset ?? 0) + animT * (spec.rate ?? 1);
   }
-  return Math.min(Math.max(0, t), dur - 1e-3);
+  // dives hold on the lying frame instead of playing the clip's own recovery
+  const end = clip.lie_s ?? dur - 1e-3;
+  return Math.min(Math.max(0, t), end);
+}
+
+/** Seconds of a one-shot state until the clip reaches its last (or held lying) frame. */
+export function oneShotLength(anim: PlayerAnim, clip: ClipInfo): number {
+  const spec = ANIMS[anim];
+  const end = clip.lie_s ?? clip.duration_s;
+  if (spec.kind === "strike" && clip.contact_s !== undefined) return CONTACT_S + (end - clip.contact_s) / (spec.rate ?? 1);
+  return (end - (spec.offset ?? 0)) / (spec.rate ?? 1);
+}
+
+/** Playback rate of a loop clip moving at `speed`: matches the ground speed, no floor (walks stay walks). */
+export function loopRate(speed: number, natural: number | undefined): number {
+  if (!natural) return 1;
+  return Math.min(1.35, speed / Math.max(0.1, natural));
 }
 
 /** Forward locomotion blend: speed (m/s) -> weights of idle, jog, run, sprint. */
@@ -137,8 +160,7 @@ export function locomotionCadence(speed: number, info: Record<string, ClipInfo |
     if (i === 0 || wi === 0) return;
     const c = info[name];
     if (!c) return;
-    const nat = c.natural_speed_mps ?? speed;
-    const rate = Math.min(1.35, Math.max(0.7, speed / Math.max(0.1, nat)));
+    const rate = loopRate(speed, c.natural_speed_mps ?? speed);
     num += wi * (rate / c.duration_s);
     den += wi;
   });

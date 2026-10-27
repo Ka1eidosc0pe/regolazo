@@ -1,5 +1,6 @@
 // Lantern Park: two-tier bowl, hospitality glass, LED fascia, cantilevered roof with a floodlight ring, haze cones.
 import * as THREE from "three";
+import { fitText } from "../brand/fonts.ts";
 import { mulberry32 } from "../coords.ts";
 import { roundedRectPath, sweep, type PathPoint, type ProfileSeg } from "./bowl.ts";
 
@@ -46,10 +47,21 @@ function stripMesh(path: PathPoint[], d: number, h0: number, h1: number, mat: TH
   const pos: number[] = [];
   const uv: number[] = [];
   const idx: number[] = [];
-  const total = path[n - 1]!.s + Math.hypot(path[0]!.x - path[n - 1]!.x, path[0]!.y - path[n - 1]!.y);
+  // arc length along the offset path itself (corners are longer than on the stand-front path)
+  const at = (i: number) => {
+    const p = path[i % n]!;
+    return [p.x + p.nx * d, p.y + p.ny * d] as const;
+  };
+  const arc: number[] = [0];
+  for (let i = 1; i <= n; i++) {
+    const [ax, ay] = at(i - 1);
+    const [bx, by] = at(i);
+    arc.push(arc[i - 1]! + Math.hypot(bx - ax, by - ay));
+  }
+  const total = arc[n]!;
   for (let i = 0; i <= n; i++) {
     const p = path[i % n]!;
-    const s = i === n ? total : p.s;
+    const s = arc[i]!;
     pos.push(p.x + p.nx * d, h0, -(p.y + p.ny * d), p.x + p.nx * d, h1, -(p.y + p.ny * d));
     uv.push(total - s, 0, total - s, 1);
     if (i < n) {
@@ -63,6 +75,7 @@ function stripMesh(path: PathPoint[], d: number, h0: number, h1: number, mat: TH
   g.setIndex(idx);
   g.computeVertexNormals();
   const m = new THREE.Mesh(g, mat);
+  m.userData.length = total;
   return m;
 }
 
@@ -118,10 +131,7 @@ export function fasciaTexture(): THREE.CanvasTexture {
     ctx.fillStyle = bg;
     ctx.fillRect(i * w, 0, w, 64);
     ctx.fillStyle = fg;
-    ctx.font = `800 40px "Barlow Condensed", "Arial Narrow", Arial, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(label, i * w + w / 2, 34);
+    fitText(ctx, label, i * w + w / 2, 34, w - 28, 800, 42);
   });
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
@@ -186,7 +196,9 @@ export function createStadium(): Stadium {
     ...tierSegs(LOWER, seat, riser),
     // concourse lip under the LED fascia
     { d0: LOWER.d0 + LOWER.rows * LOWER.tread, h0: LOWER.h0 + LOWER.rows * LOWER.riser, d1: 18.2, h1: 10.6, color: concrete },
-    { d0: 18.2, h0: 13.8, d1: 19.3, h1: 15.6, color: C("#141922") },
+    // parapet below the fascia: the band sits clear of the back-row crowd (heads reach ~12 m)
+    { d0: 18.2, h0: 10.6, d1: 18.2, h1: 12.5, color: C("#0d1117") },
+    { d0: 18.2, h0: 15.3, d1: 19.3, h1: 15.6, color: C("#141922") },
     { d0: 19.3, h0: 15.6, d1: 19.3, h1: 16.6, color: C("#20262f") },
     { d0: 19.3, h0: 16.6, d1: UPPER.d0, h1: UPPER.h0, color: concrete },
     ...tierSegs(UPPER, seat, riser),
@@ -207,17 +219,20 @@ export function createStadium(): Stadium {
 
   // ---- LED fascia between tiers, hospitality glass
   const fasciaTex = fasciaTexture();
-  fasciaTex.repeat.set(1 / 60, 1);
   const fascia = stripMesh(
     path,
-    18.2,
-    10.6,
-    11.9,
-    new THREE.MeshBasicMaterial({ map: fasciaTex, color: new THREE.Color(1.6, 1.6, 1.6), side: THREE.DoubleSide }),
+    18.15,
+    12.5,
+    13.7,
+    // just under the bloom threshold: the LEDs glow without the whites blowing out
+    new THREE.MeshBasicMaterial({ map: fasciaTex, color: new THREE.Color(0.95, 0.95, 0.95), side: THREE.DoubleSide }),
   );
   fascia.name = "fascia";
+  // a whole number of texture repeats around the loop, so there is no seam
+  const len = fascia.userData.length as number;
+  fasciaTex.repeat.set(Math.round(len / 60) / len, 1);
   group.add(fascia);
-  const glass = stripMesh(path, 18.6, 11.9, 13.8, glassMaterial());
+  const glass = stripMesh(path, 18.6, 13.7, 15.3, glassMaterial());
   group.add(glass);
 
   // ---- roof (underside + inner fascia) and floodlight ring

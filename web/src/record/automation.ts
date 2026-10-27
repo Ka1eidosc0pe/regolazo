@@ -17,7 +17,7 @@ export interface Automation {
   setFreePose(pos: V3, look: V3, fov: number): void;
   setClean(clean: boolean): void;
   /** Performance experiments: hide named objects, toggle shadows / bloom. */
-  debug(flags: { hide?: string[]; shadows?: boolean; bloom?: boolean }): void;
+  debug(flags: { hide?: string[]; shadows?: boolean; bloom?: boolean; shadowLights?: number }): void;
   info(): { t: number; start: number; end: number; fps: number; mode: CameraMode; width: number; height: number; renderer: string };
 }
 
@@ -51,6 +51,7 @@ export function installAutomation(app: App, ready: Promise<void>, THREE: typeof 
       }
       if (flags.shadows !== undefined) app.renderer.shadowMap.enabled = flags.shadows;
       if (flags.bloom !== undefined) app.post.bloom.enabled = flags.bloom;
+      if (flags.shadowLights !== undefined) app.lighting.lights.forEach((l, i) => (l.castShadow = i < flags.shadowLights!));
     },
     setClean(clean) {
       document.body.dataset.clean = clean ? "1" : "0";

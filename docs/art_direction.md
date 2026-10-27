@@ -9,7 +9,7 @@ Reference screenshots live in [`docs/art/`](art/) and are regenerated with `npm 
 - **Night, under floodlights.** The sky is close to black. A ring of LED floodlights along the roof edge is the only strong light source. The pitch is the brightest surface in the frame and the stands fall off into shadow.
 - **Light haze.** A thin blue-grey haze hangs over the bowl: the far stand and roof read softer and cooler than the pitch, and the floodlight heads bloom into soft stars. The haze also hides the low detail of the background, so the eye stays on the pitch.
 - **Wet pitch.** The grass has been watered before kick-off. It is not a mirror, but it has a soft sheen: broad floodlight highlights slide across the stripes as the camera pans, and the stripes swap brightness depending on the camera's angle to the mowing direction (as real grass does).
-- **Four-way shadows.** Floodlights at four corners give every player a faint four-pointed shadow star, the signature of a night match. A tight contact shadow grounds the feet and the ball.
+- **Floodlight shadows.** Floodlights at four corners light the pitch; the two near-side banks cast shadows, so every player throws a faint two-way shadow away from the main camera, the signature of a night match. A tight contact shadow grounds the feet and the ball.
 - **Colour temperature.** Cool white floodlights (about 5,600 K), cooler shadows, slightly warm hospitality glass and LED boards. Kits stay saturated; the world stays restrained.
 
 ## 2. Palette
@@ -84,7 +84,7 @@ Flat, two-colour, geometric. One outer shape from `CrestSpec.shape` (shield, cir
 
 ## 6. Lighting
 
-- Four shadow-casting directional lights from the four corners at about 50 degrees elevation (the floodlight banks), plus a dim cool hemisphere light (sky versus grass bounce).
+- Four directional lights from the four corners at about 50 degrees elevation (the floodlight banks); the two near-side banks cast shadows (four shadow maps cost about 20 % of the frame budget), plus a dim cool hemisphere light (sky versus grass bounce).
 - An environment map built in code from a dark dome with a bright ring of lamp heads: it gives the grass its wet sheen and the athletes' skin, boots and hair their highlights.
 - ACES filmic tone mapping, bloom on HDR emissives only (floodlights, LED boards, hospitality glass), a subtle vignette, gentle cool-shadow / warm-highlight grade, very light film grain. Depth of field only on replays.
 

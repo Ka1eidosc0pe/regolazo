@@ -70,7 +70,10 @@ export function interpolate(a: SimState, b: SimState, alpha: number): RenderStat
   const vel: [number, number, number] = [lerp(av[0], bv[0], s), lerp(av[1], bv[1], s), lerp(av[2], bv[2], s)];
 
   const byId = new Map(b.players.map((p) => [p.id, p]));
-  const players: RenderPlayer[] = a.players.map((pa) => {
+  const inA = new Set(a.players.map((p) => p.id));
+  // players present only in the later tick (substitutes coming on) are shown from that tick
+  const onlyB = b.players.filter((p) => !inA.has(p.id));
+  const players: RenderPlayer[] = [...a.players, ...onlyB].map((pa) => {
     const pb = byId.get(pa.id) ?? pa;
     const vx = lerp(pa.vel[0], pb.vel[0], s);
     const vy = lerp(pa.vel[1], pb.vel[1], s);

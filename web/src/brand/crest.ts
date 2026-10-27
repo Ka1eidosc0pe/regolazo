@@ -1,7 +1,7 @@
 // Generated club crests from CrestSpec: flat, two-colour, geometric (docs/art_direction.md section 3).
 import type { CrestSpec } from "../types.ts";
 
-export const DISPLAY_FONT = `"Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif`;
+export const DISPLAY_FONT = `"Barlow Condensed", sans-serif`;
 
 function shapePath(shape: CrestSpec["shape"], s: number): Path2D {
   const p = new Path2D();

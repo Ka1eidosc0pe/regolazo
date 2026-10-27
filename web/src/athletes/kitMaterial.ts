@@ -30,13 +30,16 @@ export interface KitLook {
 }
 
 const VERT_PARS = /* glsl */ `
+attribute float aPlate;
 varying vec3 vBind;
 varying vec3 vBindN;
+varying float vPlate;
 `;
 
 const FRAG_PARS = /* glsl */ `
 varying vec3 vBind;
 varying vec3 vBindN;
+varying float vPlate;
 uniform vec3 uShirt;
 uniform vec3 uSecondary;
 uniform vec3 uShorts;
@@ -143,19 +146,26 @@ void kitSurface(out vec3 albedo, out float rough, out float sheenK, out float cc
         if (v > 0.0 && v < 0.085) albedo = uSecondary;
         if (abs(v) < 0.007 || abs(v - 0.085) < 0.007) albedo = uAccent;
       }
-      if (back && uHasNumber > 0.5) {
-        vec2 uv = vec2(0.5 - dx / 0.30, (1.405 - p.y) / 0.355);
+      // decals sit on the rib-cage plate only (one rigid piece), so they never break across torso segments
+      bool plate = vPlate > 0.5 && vPlate < 1.5;
+      bool yoke = vPlate > 1.5;
+      if (back && (plate || yoke) && uHasNumber > 0.5) {
+        // number on the rib plate, name on the shoulder yoke (texture: name in the top 20 %, number below)
+        float u = 0.5 - dx / 0.28;
+        vec2 uv = plate ? vec2(u, 0.22 + 0.78 * (1.36 - p.y) / 0.17) : vec2(u, 0.2 * (1.452 - p.y) / 0.062);
+        if (plate && uv.y < 0.22) uv.y = -1.0;
+        if (yoke && uv.y > 0.2) uv.y = -1.0;
         vec4 d = decal(uBackTex, uv);
         albedo = mix(albedo, d.rgb, d.a);
         rough = mix(rough, 0.45, d.a); sheenK *= 1.0 - 0.7 * d.a; knit *= 1.0 - d.a;
       }
-      if (front && uHasFront > 0.5) {
+      if (front && plate && uHasFront > 0.5) {
         // crest on the left chest (character's left = +x)
-        vec2 cuv = vec2((dx - 0.045) / 0.07, (1.375 - p.y) / 0.07);
+        vec2 cuv = vec2((dx - 0.045) / 0.065, (1.395 - p.y) / 0.065);
         vec4 c = decal(uFrontTex, vec2(cuv.x * 0.25, cuv.y));
         if (cuv.x >= 0.0 && cuv.x <= 1.0) albedo = mix(albedo, c.rgb, c.a);
         // sponsor across the chest
-        vec2 suv = vec2((dx + 0.125) / 0.25, (1.262 - p.y) / 0.083);
+        vec2 suv = vec2((dx + 0.12) / 0.24, (1.3 - p.y) / 0.08);
         if (suv.x >= 0.0 && suv.x <= 1.0) {
           vec4 s = decal(uFrontTex, vec2(0.25 + suv.x * 0.75, suv.y));
           albedo = mix(albedo, s.rgb, s.a);
@@ -205,7 +215,7 @@ let shared: { vertexShader: string; fragmentShader: string } | null = null;
 function patch(shader: THREE.WebGLProgramParametersWithUniforms): void {
   shader.vertexShader = VERT_PARS + shader.vertexShader.replace(
     "#include <begin_vertex>",
-    "#include <begin_vertex>\n  vBind = position;\n  vBindN = normal;",
+    "#include <begin_vertex>\n  vBind = position;\n  vBindN = normal;\n  vPlate = aPlate;",
   );
   shader.fragmentShader = FRAG_PARS + shader.fragmentShader
     .replace(

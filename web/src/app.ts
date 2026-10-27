@@ -4,6 +4,7 @@ import { Athlete, AthleteFactory } from "./athletes/athletes.ts";
 import { backTexture, blankTexture, frontTexture, SPONSORS } from "./athletes/kitTextures.ts";
 import { kitFor, lookFor, REFEREE_KIT } from "./athletes/roster.ts";
 import { CameraDirector, type CameraMode } from "./camera/director.ts";
+import { loadFonts } from "./brand/fonts.ts";
 import { Post } from "./post/post.ts";
 import type { FrameSource } from "./source/FrameSource.ts";
 import type { RenderState } from "./source/interpolate.ts";
@@ -49,7 +50,7 @@ export class App {
   private stadium!: Stadium;
   private crowd!: Crowd;
   private boards!: AdBoards;
-  private lighting!: Lighting;
+  lighting!: Lighting;
   private frameNo = 0;
   private lastT = 0;
   private goalT = -Infinity;
@@ -116,7 +117,12 @@ export class App {
   }
 
   async init(): Promise<void> {
-    const [meta, factory] = await Promise.all([this.source.connect(), AthleteFactory.load(this.opts.assetBase ?? "/assets/")]);
+    const [meta, factory] = await Promise.all([
+      this.source.connect(),
+      AthleteFactory.load(this.opts.assetBase ?? "/assets/"),
+      // canvas text (kits, boards, fascia, crests) is drawn only once the bundled font is ready
+      loadFonts(),
+    ]);
     this.meta = meta;
     const scene = this.scene;
     scene.fog = new THREE.FogExp2(FOG_COLOR, 0.0042);
@@ -238,7 +244,7 @@ export class App {
     for (const p of state.players) {
       const rig = this.rigs.get(p.id);
       if (!rig) continue;
-      rig.athlete.update(p, t, dt);
+      rig.athlete.update(p, t);
       rig.blob.position.set(p.x, 0.011, -p.y);
       rig.blob.visible = p.onPitch;
     }
@@ -246,9 +252,8 @@ export class App {
       const r = state.referee;
       const sp = Math.hypot(r.vx, r.vy);
       this.referee.athlete.update(
-        { id: "referee", x: r.x, y: r.y, z: 0, vx: r.vx, vy: r.vy, speed: sp, facing: r.facing, anim: "jog", animT: 0, mirror: false, variant: 0, onPitch: true },
+        { id: "referee", x: r.x, y: r.y, z: 0, vx: r.vx, vy: r.vy, speed: sp, facing: r.facing, anim: "jog", animT: t, mirror: false, variant: 0, onPitch: true },
         t,
-        dt,
       );
       this.referee.blob.position.set(r.x, 0.011, -r.y);
     }
@@ -269,7 +274,7 @@ export class App {
     this.director.update(state, dt);
     const focus = this.director.groundFocus();
     this.lighting.focus(focus, this.director.mode === "tactical" ? 70 : 42);
-    this.post.setDof(this.director.mode === "replay", this.director.focusDistance, 0.0006);
+    this.post.setDof(this.director.mode === "replay", this.director.focusDistance, 0.6);
   }
 
   private findGoalTime(total: number): number {
@@ -295,10 +300,26 @@ export class App {
     this.post.render(this.frameNo++);
   }
 
-  /** Jump to t: prime the camera and settle the dynamics over `warm` seconds of fixed steps, then render. */
+  /** Forget every piece of history (animation phases and blends, ball spin and trail, net, camera, grain). */
+  resetDynamics(): void {
+    for (const rig of this.rigs.values()) rig.athlete.resetDynamics();
+    this.referee?.athlete.resetDynamics();
+    this.ball.reset();
+    for (const g of this.goals) g.reset();
+    this.director.reset();
+    this.post.resetBuffers();
+    this.frameNo = 0;
+    this.goalT = -Infinity;
+    this.goalScore = -1;
+  }
+
+  /**
+   * Jump to t: reset all dynamics, prime the camera and settle over `warm` seconds of fixed steps, then render.
+   * The result depends only on (t, warm, fps), never on what was shown before.
+   */
   jumpTo(t: number, warm = 2.5, fps = 25): void {
     this.source.seek(t - warm);
-    this.ball.reset();
+    this.resetDynamics();
     const t0 = Math.max(this.source.clock().t, t - warm);
     const s0 = this.source.sample(t0);
     if (s0) this.director.prime(s0);

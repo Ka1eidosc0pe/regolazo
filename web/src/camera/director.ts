@@ -58,6 +58,13 @@ export class CameraDirector {
   private width = new Damp(40);
   private tacX = new Damp(0);
   private orbit = 0;
+  // replay smoothing: subject weight (player vs ball), look-at centre and camera position
+  private repW = new Damp(0.7);
+  private repX = new Damp(0);
+  private repY = new Damp(0);
+  private repPX = new Damp(0);
+  private repPZ = new Damp(0);
+  private repPrimed = false;
   private transition: { from: Pose; t: number; dur: number } | null = null;
   private free: Pose = { pos: new THREE.Vector3(0, 3, 20), look: new THREE.Vector3(), fov: 30 };
   replayTarget: string | null = null;
@@ -77,6 +84,7 @@ export class CameraDirector {
 
   setMode(mode: CameraMode, transitionS = 1.3): void {
     if (mode === this.mode) return;
+    if (mode === "replay") this.repPrimed = false;
     this.transition = transitionS > 0 ? { from: this.currentPose(), t: 0, dur: transitionS } : null;
     this.mode = mode;
   }
@@ -91,6 +99,14 @@ export class CameraDirector {
   private currentPose(): Pose {
     const look = new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion).multiplyScalar(30).add(this.camera.position);
     return { pos: this.camera.position.clone(), look, fov: this.camera.fov };
+  }
+
+  /** Forget all smoothing state (seek, rewind, recording start). */
+  reset(): void {
+    this.primed = false;
+    this.repPrimed = false;
+    this.orbit = 0;
+    this.transition = null;
   }
 
   /** Snap the broadcast smoothing to the current state (after seeks / at recording start). */
@@ -150,15 +166,32 @@ export class CameraDirector {
     this.orbit += dt * 0.12;
     const tgtPlayer = this.replayTarget ? state.players.find((p) => p.id === this.replayTarget) : undefined;
     const [bx, by] = state.ball.pos;
-    const w = state.ball.inPlay ? 0.7 : 1.0;
-    const cx = tgtPlayer ? tgtPlayer.x * w + bx * (1 - w) : bx;
-    const cy = tgtPlayer ? tgtPlayer.y * w + by * (1 - w) : by;
+    const wTarget = state.ball.inPlay ? 0.7 : 1.0;
+    const sx = tgtPlayer ? (tx: number) => tgtPlayer.x * tx + bx * (1 - tx) : () => bx;
+    const sy = tgtPlayer ? (tx: number) => tgtPlayer.y * tx + by * (1 - tx) : () => by;
+    if (!this.repPrimed) {
+      this.repW.set(wTarget);
+      this.repX.set(sx(wTarget));
+      this.repY.set(sy(wTarget));
+    }
+    // everything is damped: the subject weight changes smoothly (e.g. when the ball goes dead) and so do the
+    // look-at centre and the camera position, so the shot never jumps between frames
+    const w = this.repW.step(wTarget, 0.6, dt);
+    const cx = this.repX.step(sx(w), 0.35, dt, 30);
+    const cy = this.repY.step(sy(w), 0.35, dt, 30);
     const look = new THREE.Vector3(cx, 1.1, -cy);
     const r = 11;
     // stay on the pitch side of the subject, looking outwards towards the stands
     const base = Math.atan2(-cy * 0.6 - 30, -cx * 0.8);
     const a = base + Math.sin(this.orbit) * 0.6;
-    const pos = new THREE.Vector3(cx + Math.cos(a) * r, 2.2, -(cy + Math.sin(a) * r));
+    const px = cx + Math.cos(a) * r;
+    const pz = -(cy + Math.sin(a) * r);
+    if (!this.repPrimed) {
+      this.repPX.set(px);
+      this.repPZ.set(pz);
+      this.repPrimed = true;
+    }
+    const pos = new THREE.Vector3(this.repPX.step(px, 0.5, dt, 25), 2.2, this.repPZ.step(pz, 0.5, dt, 25));
     this.focusDistance = pos.distanceTo(look);
     return { pos, look, fov: 17 };
   }
