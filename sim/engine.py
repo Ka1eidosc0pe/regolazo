@@ -185,6 +185,9 @@ class SimEngine:
             w.carry_start[:] = w.pos[:, int(w.owner[0])]
         w.carry_start_t[:] = w.t
         w.carry_path[:] = 0.0
+        # likewise off-ball runs in progress are measured from the fork
+        w.run_start_t[:] = np.maximum(w.run_start_t, w.t[:, None])
+        w.run_start[:] = w.pos
         m.sign = attack_sign(w, m.home_first)
         m.done[:] = False
         m.phase[:] = 0

@@ -72,7 +72,8 @@ def test_rollout_returns_frames_and_namespaced_events() -> None:
     b = eng.rollout(req)
     assert len(a.frames) == 150
     assert a.events and all(e.rollout_id == a.id and e.id.startswith(f"ev_r_{a.id}_") for e in a.events)
-    assert a.events[0].type == "pass" and a.events[0].player == opt.intent.player
+    on_ball = [e for e in a.events if e.type in ("pass", "shot", "carry", "take_on", "clearance")]
+    assert on_ball[0].type == "pass" and on_ball[0].player == opt.intent.player
     # same seed, same reality
     assert a.outcome.model_dump(exclude={"ended_by_event_id"}) == b.outcome.model_dump(exclude={"ended_by_event_id"})
     assert [f.ball.pos for f in a.frames] == [f.ball.pos for f in b.frames]
