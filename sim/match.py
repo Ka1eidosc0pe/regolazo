@@ -618,7 +618,7 @@ class Match:
         w.carry_speed[b] = 2.0
         press, _, _ = self._pressure(b, i)
         tempo = self.styles[team].tempo
-        w.act_timer[b] = (0.68 + 1.3 * self.rng.random() * (1.0 - 0.6 * press)) / tempo
+        w.act_timer[b] = (0.74 + 1.3 * self.rng.random() * (1.0 - 0.6 * press)) / tempo
         w.ball_vel[b] = 0.0
         w.ball_spin[b] = 0.0
         self._resolve_clearance(b, team)

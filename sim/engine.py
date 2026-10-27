@@ -50,6 +50,7 @@ from sim.decision import (
     Slots,
     build_options,
     common,
+    keeper_pass_target,
     score_table,
 )
 from sim.eventlog import to_match_events
@@ -229,6 +230,8 @@ class SimEngine:
             first = mp + 0.6 * mv
             t_fl = float(np.clip(np.linalg.norm(first - cpos) / 11.0, 0.3, 2.0))
             target[:2] = mp + t_fl * mv
+            if sq.is_gk[receiver]:
+                target[:2] = keeper_pass_target(mp, np.array(s), np.array(cpos[1] * s))
         elif kind == I_PASS_SPACE:
             assert intent.target is not None
             target[:2] = intent.target[:2]

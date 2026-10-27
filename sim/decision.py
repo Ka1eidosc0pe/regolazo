@@ -199,6 +199,15 @@ def build_options(
     return score_table(sq, models, styles, di, cm, slots, rng)
 
 
+def keeper_pass_target(gk_pos: F, s: F, carrier_y_t: F) -> F:
+    """Where a pass back to the keeper is aimed: to his side and a little in front, away from the goal mouth.
+    ``gk_pos`` is (..., 2) in the world frame, ``s`` the attack sign and ``carrier_y_t`` the passer's team-frame y
+    (both broadcastable to ``gk_pos[..., 0]``)."""
+    g_t = gk_pos * s[..., None]
+    side_t = np.where(np.abs(g_t[..., 1]) > 0.3, np.sign(g_t[..., 1]), np.sign(carrier_y_t + 1e-6))
+    return np.asarray(np.stack([g_t[..., 0] + 1.5, g_t[..., 1] + 1.6 * side_t], axis=-1) * s[..., None])
+
+
 def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Generator | None) -> Slots:
     d = len(di.carrier)
     o = N_SLOTS
@@ -225,9 +234,7 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
     lead = mpos + t_fl[..., None] * mvel
     own_gk = sq.is_gk[mates]
     if own_gk.any():
-        g_t = mpos * s[:, None, None]
-        side_t = np.where(np.abs(g_t[..., 1]) > 0.3, np.sign(g_t[..., 1]), np.sign(cpos_t[:, None, 1] + 1e-6))
-        beside = np.stack([g_t[..., 0] + 1.5, g_t[..., 1] + 1.6 * side_t], axis=-1) * s[:, None, None]
+        beside = keeper_pass_target(mpos, s[:, None], cpos_t[:, None, 1])
         lead = np.where(own_gk[..., None], beside, lead)
     target[:, S_PASS0:S_THROUGH0, :2] = lead
     receiver[:, S_PASS0:S_THROUGH0] = mates
