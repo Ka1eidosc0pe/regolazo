@@ -1,10 +1,73 @@
+/* Barlow Condensed (SIL OFL 1.1, public/fonts/OFL.txt) */
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("/fonts/BarlowCondensed-Bold.ttf") format("truetype");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("/fonts/BarlowCondensed-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+}
+
 :root {
-  font-family: system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   color-scheme: dark;
   background: #05070d;
   color: #e8ecf4;
 }
 
+html,
 body {
   margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #05070d;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+#stage-root {
+  position: absolute;
+  inset: 0;
+}
+
+#stage {
+  display: block;
+}
+
+/* Overlay layers (Step 10) mount here, as DOM over the canvas. */
+#overlay-root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.brand-bug {
+  position: absolute;
+  top: 22px;
+  right: 28px;
+  font: 700 15px/1 "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(232, 236, 244, 0.78);
+  padding: 6px 10px 6px 12px;
+  border-left: 2px solid #d7ff3a;
+  background: rgba(5, 7, 13, 0.45);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+body[data-clean="1"] .brand-bug {
+  display: none;
+}
+
+.fatal {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  color: #ff7a1a;
 }
