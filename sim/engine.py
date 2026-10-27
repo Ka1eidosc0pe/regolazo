@@ -452,6 +452,8 @@ class SimEngine:
         if w.ball_state[0] != BS_OWNED or w.owner[0] < 0:
             return out
         ctx = CTX_GK_HANDS if w.hands[0] else CTX_OPEN
+        if abs(w.last_restart_t[0] - w.t[0]) < 1e-6 and w.last_restart_type[0] >= 0:
+            ctx = RESTART_CTX[int(w.last_restart_type[0])]  # a restart is being taken
         di = m.decider_input([0], [ctx])
         table = build_options(sq, self.models, m.styles, di, None)
         opts: list[OptionEvaluation] = []

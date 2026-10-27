@@ -67,6 +67,8 @@ class KickProfile:
     backspin: float = 0.0
 
 
+# Shot dispersion is wide (real shooters hit the target about a third of the time); the save model is calibrated
+# against it per shot, so this changes how chances miss, not how often they go in.
 PROFILES: Final[dict[int, KickProfile]] = {
     K_GROUND: KickProfile(MODE_GROUND, 0.0, 3.0, 24.0, 0.030, 0.0, 0.055),
     K_DRIVEN: KickProfile(MODE_FIXED_SPEED, 3.0, 17.0, 28.0, 0.030, 0.018, 0.045),
@@ -75,14 +77,14 @@ PROFILES: Final[dict[int, KickProfile]] = {
     K_CROSS: KickProfile(MODE_FIXED_ELEV, 17.0, 8.0, 30.0, 0.034, 0.030, 0.050, spin=30.0),
     K_CURLED: KickProfile(MODE_GROUND, 5.0, 3.0, 26.0, 0.034, 0.012, 0.055, spin=60.0),
     K_OUTSIDE: KickProfile(MODE_GROUND, 4.0, 3.0, 26.0, 0.045, 0.015, 0.065, spin=48.0),
-    K_SHOT_DRIVEN: KickProfile(MODE_FIXED_SPEED, 4.0, 24.0, 32.0, 0.040, 0.034, 0.045),
-    K_SHOT_PLACED: KickProfile(MODE_FIXED_SPEED, 3.0, 15.0, 22.0, 0.030, 0.028, 0.045),
-    K_SHOT_FINESSE: KickProfile(MODE_FIXED_SPEED, 5.0, 18.0, 24.0, 0.034, 0.030, 0.045, spin=85.0),
-    K_SHOT_CHIP: KickProfile(MODE_FIXED_ELEV, 36.0, 6.0, 20.0, 0.040, 0.045, 0.060, backspin=14.0),
-    K_VOLLEY: KickProfile(MODE_FIXED_SPEED, 4.0, 20.0, 30.0, 0.070, 0.065, 0.070),
-    K_HALF_VOLLEY: KickProfile(MODE_FIXED_SPEED, 4.0, 19.0, 28.0, 0.060, 0.055, 0.065),
-    K_HEADER: KickProfile(MODE_FIXED_SPEED, -4.0, 9.0, 16.0, 0.060, 0.065, 0.080),
-    K_TOE_POKE: KickProfile(MODE_FIXED_SPEED, 2.0, 12.0, 16.0, 0.075, 0.060, 0.090),
+    K_SHOT_DRIVEN: KickProfile(MODE_FIXED_SPEED, 4.0, 24.0, 32.0, 0.197, 0.111, 0.045),
+    K_SHOT_PLACED: KickProfile(MODE_FIXED_SPEED, 3.0, 15.0, 22.0, 0.148, 0.091, 0.045),
+    K_SHOT_FINESSE: KickProfile(MODE_FIXED_SPEED, 5.0, 18.0, 24.0, 0.168, 0.099, 0.045, spin=85.0),
+    K_SHOT_CHIP: KickProfile(MODE_FIXED_ELEV, 36.0, 6.0, 20.0, 0.197, 0.147, 0.060, backspin=14.0),
+    K_VOLLEY: KickProfile(MODE_FIXED_SPEED, 4.0, 20.0, 30.0, 0.344, 0.213, 0.070),
+    K_HALF_VOLLEY: KickProfile(MODE_FIXED_SPEED, 4.0, 19.0, 28.0, 0.295, 0.181, 0.065),
+    K_HEADER: KickProfile(MODE_FIXED_SPEED, -4.0, 9.0, 16.0, 0.295, 0.213, 0.080),
+    K_TOE_POKE: KickProfile(MODE_FIXED_SPEED, 2.0, 12.0, 16.0, 0.370, 0.196, 0.090),
     K_CLEARANCE: KickProfile(MODE_FIXED_SPEED, 32.0, 20.0, 29.0, 0.140, 0.100, 0.090),
     K_THROW_IN: KickProfile(MODE_FIXED_ELEV, 22.0, 4.0, 17.0, 0.040, 0.040, 0.060),
     K_GK_THROW: KickProfile(MODE_FIXED_ELEV, 10.0, 6.0, 24.0, 0.030, 0.030, 0.050),

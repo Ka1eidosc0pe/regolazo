@@ -388,3 +388,29 @@ def box_marking(w: World, sq: Squad, sign: F, poss: IA, tgt: F, cap: F, n_pairs:
 
 BOX_EDGE = 33.0
 """Attackers this close to goal (team frame x beyond -33) count as box threats."""
+
+
+def lane_blocker(w: World, sq: Squad, sign: F, poss: IA, tgt: F, cap: F) -> tuple[F, F]:
+    """Near their own goal, the defender best placed steps into the shooting lane between ball and goal."""
+    out, cap = tgt.copy(), cap.copy()
+    rows = np.arange(w.b)
+    for t in (0, 1):
+        s = sign[:, t]
+        bx, by = w.ball_pos[:, 0] * s, w.ball_pos[:, 1] * s
+        active = (poss != t) & (bx < -28.0) & (np.abs(by) < 26.0)
+        if not active.any():
+            continue
+        mine = np.arange(t * N_ON, (t + 1) * N_ON)
+        mine = mine[~sq.is_gk[mine]]
+        gx = -HALF_LENGTH
+        vx, vy = gx - bx, -by
+        n = np.maximum(np.hypot(vx, vy), 1e-6)
+        step = np.minimum(3.0, 0.4 * n)
+        lx, ly = bx + vx / n * step, by + vy / n * step
+        lane = np.stack([lx * s, ly * s], axis=1)  # world frame
+        d = np.linalg.norm(w.pos[:, mine] - lane[:, None, :], axis=2)
+        j = mine[np.argmin(d, axis=1)]
+        bi = rows[active]
+        out[bi, j[active]] = lane[active]
+        cap[bi, j[active]] = sq.max_speed[j[active]] * 0.95
+    return out, cap

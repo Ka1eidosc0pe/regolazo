@@ -111,6 +111,13 @@ def _extra(events: list[MatchEvent]) -> dict[str, float]:
         "header_shots": sum(getattr(e.qualifiers, "body_part", None) == "head" for e in shots),
         "shots_in_box": sum(getattr(e.qualifiers, "distance_to_goal_m", 99) < 16.5 for e in shots),
         "carries": sum(e.type == "carry" for e in events),
+        "own_goals": sum(e.type == "own_goal" for e in events),
+        "on_target": sum(bool(getattr(e.qualifiers, "on_target", False)) for e in shots),
+        "long_shots_25": sum(getattr(e.qualifiers, "distance_to_goal_m", 0) >= 25 for e in shots),
+        "goals_from_shots": sum(getattr(e.qualifiers, "outcome", "") == "goal" for e in shots),
+        "shots": len(shots),
+        "xg_sum": float(sum(getattr(e.qualifiers, "xg", 0) or 0 for e in shots)),
+        "psxg_on_target": float(sum(getattr(e.qualifiers, "psxg", 0) or 0 for e in shots)),
         "take_ons": sum(e.type == "take_on" for e in events),
     }
 

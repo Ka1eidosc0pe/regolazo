@@ -271,10 +271,7 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
     kind[:, S_SHOT] = I_SHOT
     power[:, S_SHOT] = 0.75 if rng is None else rng.uniform(0.55, 0.95, d)
     sdist = cm.sdist
-    long_ok = sq.attr["long_shots"][c] >= 72
-    valid[:, S_SHOT] = (
-        ((sdist < 24.0) | ((sdist < 30.0) & long_ok)) & (cpos_t[:, 0] > 18.0) & (np.abs(cpos_t[:, 1]) < 24.0)
-    )
+    valid[:, S_SHOT] = (sdist < 32.0) & (cpos_t[:, 0] > 16.0) & (np.abs(cpos_t[:, 1]) < 24.0)
 
     # carries: ahead, diagonals, shield
     for k, ang in enumerate((0.0, 0.7, -0.7)):
@@ -427,6 +424,7 @@ def score_table(
         rows_n = rep(np.arange(d))[is_pass]
         rec_pos = di.pos[rows_n, np.maximum(rec_f, 0)]
         rec_vel = di.vel[rows_n, np.maximum(rec_f, 0)]
+        box_end = (end_t[is_pass, 0] > 36.0) & (np.abs(end_t[is_pass, 1]) < 20.16)
         race = race_logit(
             sq,
             sub,
@@ -440,10 +438,12 @@ def score_table(
             rec_pos,
             rec_vel,
             models.pitch_control_params,
+            box_end,
         )
         sc = score_passes(
-            models, sq, sub, origin_t[is_pass], end_t[is_pass], opp_t_rep[is_pass], rep(pressure)[is_pass], race
-        )
+            models, sq, sub, origin_t[is_pass], end_t[is_pass], opp_t_rep[is_pass], rep(pressure)[is_pass], race,
+            box_end,
+        )  # fmt: skip
         p[is_pass], p0[is_pass], vs[is_pass], vf[is_pass] = sc.p, sc.p0, sc.value_success, sc.value_fail
         pb[is_pass] = sc.p_base if sc.p_base is not None else sc.p0
     is_shot = kf == I_SHOT
@@ -516,8 +516,10 @@ def score_table(
     util = dv_seen.copy().reshape(d, o)
     arch = np.array([sq.players[i].archetype for i in range(len(sq.players))])
     arch_c = arch[c]
-    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.01
-    util += (cat == S_SHOT) * (shot_bias + 0.012 * (sq.attr["long_shots"][c] - 70) / 20 * (sdist > 20))[:, None]
+    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.025
+    # speculative efforts from distance are part of the game (about a fifth of all shots come from 25 m+)
+    long_try = (sdist > 22.0) * (0.016 + 0.012 * (sq.attr["long_shots"][c] - 70) / 20)
+    util += (cat == S_SHOT) * (shot_bias + long_try)[:, None]
     vision = sq.attr["vision"][c] / 99.0
     directness = np.array([styles[0].directness, styles[1].directness])[c // N_ON]
     util += (cat == S_THROUGH0) * (0.006 * (arch_c == "advanced_playmaker") + 0.003 * directness)[:, None]

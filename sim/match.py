@@ -83,6 +83,7 @@ from sim.tactics import (
     attack_sign,
     box_marking,
     goal_side,
+    lane_blocker,
     last_defender_x,
     offside_lines,
     restart_targets,
@@ -1541,7 +1542,7 @@ class Match:
             return SAVE_TO_POST
         if r < 0.4:
             return SAVE_PARRY_OUT
-        if r < 0.75:
+        if r < 0.93:
             return SAVE_PARRY_SAFE
         return SAVE_PARRY_DANGER
 
@@ -1634,7 +1635,8 @@ class Match:
             self._shape += SHAPE_SMOOTHING * (tgt - self._shape)
         tgt = self._shape.copy()
         tgt, cap = goal_side(w, sq, self.sign, poss, tgt, cap)
-        tgt, cap = box_marking(w, sq, self.sign, poss, tgt, cap)
+        tgt, cap = box_marking(w, sq, self.sign, poss, tgt, cap, n_pairs=6)
+        tgt, cap = lane_blocker(w, sq, self.sign, poss, tgt, cap)
         t_now = w.t[:, None]
         # runs
         running = w.run_until > t_now
@@ -1969,6 +1971,13 @@ class Match:
         if (k < PL.NEVER).any():
             kmin = int(k.min())
             near = np.nonzero(k <= kmin + 3)[0]
+            # in their own box defenders are first to a loose ball (they are goal-side and expecting it)
+            bp = path[0]
+            defend = np.array(
+                [abs(bp[0] - (-HALF_LENGTH * self.sign[b, self.sq.team[i]])) < 18.0 and abs(bp[1]) < 22.0 for i in near]
+            )
+            if defend.any() and not defend.all() and self.rng.random() < 0.75:
+                near = near[defend]
             c = int(self.rng.choice(near))
             self._set_flight(b, c, FM_LOOSE, int(k[c]), path, 0)
             others = np.nonzero((k <= kmin + 8) & (self.sq.team != self.sq.team[c]))[0]
@@ -2319,6 +2328,15 @@ class Match:
         speed = float(np.linalg.norm(v[:2])) * scale + 2.0
         base = np.arctan2(v[1], v[0]) if toward is None else np.arctan2(toward[1], toward[0])
         ang = base + self.rng.normal(0, spread)
+        # a defender's touch near his own goal does not steer the ball into it (it goes wide or back out)
+        team = int(self.sq.team[c])
+        own_x = -HALF_LENGTH * self.sign[b, team]
+        to_goal = np.array([own_x - w.ball_pos[b, 0], -w.ball_pos[b, 1]])
+        dist_goal = float(np.linalg.norm(to_goal))
+        u = np.array([np.cos(ang), np.sin(ang)])
+        if dist_goal < 25.0 and float(u @ to_goal) / max(dist_goal, 1e-6) > 0.3:
+            u[0] = -u[0]
+            ang = float(np.arctan2(u[1], u[0]))
         w.ball_vel[b] = (speed * np.cos(ang), speed * np.sin(ang), abs(self.rng.normal(1.5, 1.5)))
         w.ball_spin[b] = 0.0
         w.ball_pos[b, 2] = max(w.ball_pos[b, 2], BALL_RADIUS + 0.05)
@@ -2561,7 +2579,9 @@ class Match:
             toward = np.array([own * 0.6, np.sign(bp[1] + 1e-6)])
             self._deflect(b, c, scale=0.45, spread=0.3, toward=toward)
         else:
-            self._deflect(b, c, scale=0.35, spread=0.5, toward=np.array([own, 0.0]))
+            # pushed out wide of the goal, not back into the middle
+            wide = np.sign(bp[1] + (1e-6 if self.rng.random() < 0.5 else -1e-6))
+            self._deflect(b, c, scale=0.35, spread=0.35, toward=np.array([own * 0.5, wide]))
 
     def _block(self, b: int, c: int, bp: F) -> None:
         w, sq = self.w, self.sq
@@ -2589,7 +2609,7 @@ class Match:
         if self.rng.random() < 0.035:
             self._foul(b, c, int(w.flight_passer[b]), "handball")
             return
-        self._deflect(b, c, scale=0.4, spread=1.3)
+        self._deflect(b, c, scale=0.4, spread=0.9, toward=-w.ball_vel[b, :2])  # off the body, back out
 
     # --- out of play, goals, offside, fouls ----------------------------------------------------------------
     def _out(self, b: int, line: str) -> None:

@@ -114,6 +114,7 @@ def score_passes(
     opp_t: F,
     pressure: F,
     race: F | None = None,
+    into_box: BA | None = None,
 ) -> Scored:
     """origin_t / end_t (N, 2) and opp_t (N, 11, 2) in the passer's attacking frame.
 
@@ -142,7 +143,9 @@ def score_passes(
     if race is not None:
         # the event-data model is reliable for ordinary passes and weak on crosses / through / lofted balls
         # (Step 2 report): there the time-to-intercept physics carries more of the weight
-        weak_model = (res.pass_type == 1) | (res.pass_type == 3) | (res.pass_height == 2)
+        weak_model = (res.pass_type == 1) | (res.pass_type == 2) | (res.pass_type == 3) | (res.pass_height == 2)
+        if into_box is not None:
+            weak_model = weak_model | into_box
         weight = np.where(weak_model, RACE_WEIGHT_WEAK_MODEL, RACE_WEIGHT)
         race_term = weight * np.clip(race, -6.0, 0.0)
     p = sigmoid(logit(p0) + delta + race_term)
@@ -180,6 +183,7 @@ def race_logit(
     rec_pos: F,
     rec_vel: F,
     pc: PitchControlParams,
+    into_box: BA | None = None,
 ) -> F:
     """Pitch-control style race for each pass (world frame, N rows; opponents (N, 11, 2)).
 
@@ -230,7 +234,9 @@ def race_logit(
     race = np.pi / np.sqrt(3.0) / pc.tti_sigma * (slack_d - np.maximum(slack_r, 0.0))
     # Balls played into space or over the top (where the event model is weak) are also raced with the players'
     # real kinematics: defenders sprinting back can recover what the conservative pitch-control model concedes.
-    weak = (res.pass_type == 1) | (res.pass_type == 3) | (res.pass_height == 2)
+    weak = (res.pass_type == 1) | (res.pass_type == 2) | (res.pass_type == 3) | (res.pass_height == 2)
+    if into_box is not None:
+        weak = weak | into_box  # balls into the box: defenders there will sprint to cut them out
     if weak.any():
         react_p = 0.3
         ahead_p = opp_pos + opp_vel * react_p
