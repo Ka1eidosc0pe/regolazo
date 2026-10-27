@@ -90,6 +90,8 @@ class Scored:
     xg: F
     """xG of the option (shots), else 0."""
     xt_end: F
+    p_base: F | None = None
+    """Same model for an average-attribute player (race term included for passes)."""
 
 
 def pass_kind_code(res: Resolved, switch: BA) -> IA:
@@ -136,17 +138,25 @@ def score_passes(
     p0 = np.asarray(models.xpass(feats), dtype=np.float64)
     wf = np.where(res.weak_foot, (5.0 - sq.weak_foot[p_idx]) / 4.0, 0.0)
     delta = 1.35 * (res.quality - 0.5) + 0.5 * pressure * (sq.attr["composure"][p_idx] / 99.0 - 0.7) - 0.3 * wf
+    race_term = np.zeros(len(p0))
     if race is not None:
         # the event-data model is reliable for ordinary passes and weak on crosses / through / lofted balls
         # (Step 2 report): there the time-to-intercept physics carries more of the weight
         weak_model = (res.pass_type == 1) | (res.pass_type == 3) | (res.pass_height == 2)
         weight = np.where(weak_model, RACE_WEIGHT_WEAK_MODEL, RACE_WEIGHT)
-        delta = delta + weight * np.clip(race, -6.0, 0.0)
-    p = sigmoid(logit(p0) + delta)
+        race_term = weight * np.clip(race, -6.0, 0.0)
+    p = sigmoid(logit(p0) + delta + race_term)
+    p_base = sigmoid(logit(p0) + race_term)
     xt_end = np.asarray(models.xt(end_t[:, 0], end_t[:, 1]), dtype=np.float64)
     xt_opp = np.asarray(models.xt(-end_t[:, 0], -end_t[:, 1]), dtype=np.float64)
     return Scored(
-        p=p, p0=p0, value_success=xt_end, value_fail=-0.6 * xt_opp - 0.004, xg=np.zeros(len(p)), xt_end=xt_end
+        p=p,
+        p0=p0,
+        value_success=xt_end,
+        value_fail=-0.6 * xt_opp - 0.004,
+        xg=np.zeros(len(p)),
+        xt_end=xt_end,
+        p_base=p_base,
     )
 
 
@@ -250,7 +260,9 @@ def score_shots(
     )
     x0 = np.asarray(models.xg(feats), dtype=np.float64)
     p = shot_adjust(sq, res, keeper, x0, pressure, situation)
-    return Scored(p=p, p0=x0, value_success=np.ones(len(p)), value_fail=np.full(len(p), -0.01), xg=x0, xt_end=x0)
+    return Scored(
+        p=p, p0=x0, value_success=np.ones(len(p)), value_fail=np.full(len(p), -0.01), xg=x0, xt_end=x0, p_base=x0
+    )
 
 
 def shot_adjust(sq: Squad, res: Resolved, keeper: IA, x0: F, pressure: F, situation: IA) -> F:

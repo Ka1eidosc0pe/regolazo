@@ -116,6 +116,8 @@ class OptionTable:
     utility: F
     prob: F
     """(D, O) softmax choice probabilities (0 for invalid)."""
+    p_base: F
+    """(D, O) success probability for an average-attribute player."""
     pressure: F
     """(D,)"""
     receiver_offside: BA
@@ -238,10 +240,14 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
         p_j = di.pos[rows, j]
         run = di.running[rows, j]
         p_t = p_j * s[:, None]
+        v_t = di.vel[rows, j] * s[:, None]
+        # into the runner's stride: where he will be when the ball arrives, plus a couple of metres
+        t_fl = np.clip(np.linalg.norm(p_t - cpos_t, axis=1) / 11.0, 0.6, 2.2)
+        stride = p_t + v_t * t_fl[:, None] + np.array([2.5, 0.0])
         tgt_t = np.where(
             run[:, None],
-            di.run_target[rows, j] * s[:, None] + np.array([3.0, 0.0]),
-            p_t + np.column_stack([np.full(d, 9.0), -0.15 * p_t[:, 1]]),
+            np.maximum(stride, di.run_target[rows, j] * s[:, None]),
+            p_t + np.column_stack([np.full(d, 8.0), -0.15 * p_t[:, 1]]),
         )
         tgt_t[:, 0] = np.minimum(tgt_t[:, 0], HALF_LENGTH - 3.0)
         tgt_t[:, 1] = np.clip(tgt_t[:, 1], -HALF_WIDTH + 2.0, HALF_WIDTH - 2.0)
@@ -251,7 +257,7 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
         receiver[:, slot] = j
         valid[:, slot] = (tgt_t[:, 0] > cpos_t[:, 0] + 6.0) & (p_t[:, 0] > -10.0)
         receiver_offside[:, slot] = (p_t[:, 0] > di.offside_line + 0.05) & (p_t[:, 0] > 0)
-        power[:, slot] = 0.5
+        power[:, slot] = 0.25  # weighted to die near the runner
 
     # shot
     aim = default_shot_aim(s, di.ball, gk_pos, rng)
@@ -396,6 +402,7 @@ def score_table(
     # --- score --------------------------------------------------------------------------------------------
     p = np.zeros(n)
     p0 = np.zeros(n)
+    pb = np.zeros(n)
     vs = np.zeros(n)
     vf = np.zeros(n)
     xg = np.zeros(n)
@@ -429,6 +436,7 @@ def score_table(
             models, sq, sub, origin_t[is_pass], end_t[is_pass], opp_t_rep[is_pass], rep(pressure)[is_pass], race
         )
         p[is_pass], p0[is_pass], vs[is_pass], vf[is_pass] = sc.p, sc.p0, sc.value_success, sc.value_fail
+        pb[is_pass] = sc.p_base if sc.p_base is not None else sc.p0
     is_shot = kf == I_SHOT
     if is_shot.any():
         sub = _subset(res, is_shot)
@@ -447,6 +455,7 @@ def score_table(
             rep(di.situation)[is_shot],
             np.zeros(int(is_shot.sum()), dtype=bool),
         )
+        pb[is_shot] = sc.p0
         p[is_shot], p0[is_shot], vs[is_shot], vf[is_shot], xg[is_shot] = (
             sc.p,
             sc.p0,
@@ -467,14 +476,20 @@ def score_table(
         pr = carry_retention(sq, rep(c)[is_carry], n_close + 1.3 * in_path, rep(pressure)[is_carry], dribble[is_carry])
         p[is_carry] = pr
         p0[is_carry] = pr
+        pb[is_carry] = pr
         vs[is_carry] = np.asarray(models.xt(end_t[is_carry, 0], end_t[is_carry, 1]))
         vf[is_carry] = -0.6 * xt_opp_here[is_carry] - 0.004
     is_clear = kf == I_CLEARANCE
     if is_clear.any():
         p[is_clear] = 0.9
         p0[is_clear] = 0.9
+        pb[is_clear] = 0.9
         vs[is_clear] = 0.002
         vf[is_clear] = -0.3 * xt_opp_here[is_clear]
+    # a pass to a receiver standing offside at release is called back if it reaches him: it cannot succeed
+    off = flat(receiver_offside)
+    p = np.where(off, 0.0, p)
+    pb = np.where(off, 0.0, pb)
     dv = decision_value(p, vs, vf)
 
     # --- utility: decision value plus tendencies ------------------------------------------------------------
@@ -522,6 +537,7 @@ def score_table(
         res=res,
         p=p.reshape(d, o),
         p0=p0.reshape(d, o),
+        p_base=pb.reshape(d, o),
         value_success=vs.reshape(d, o),
         value_fail=vf.reshape(d, o),
         dv=dv.reshape(d, o),

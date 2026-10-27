@@ -64,8 +64,11 @@ class StepFlags:
 
 def _air_accel(vel: F, spin: F, p: BallParams) -> F:
     speed = np.linalg.norm(vel, axis=1, keepdims=True)
-    acc = -p.drag_k * speed * vel + p.magnus_k * np.cross(spin, vel)
-    acc[:, 2] -= p.gravity
+    # omega x v written out (np.cross is slow on small arrays)
+    acc = -p.drag_k * speed * vel
+    acc[:, 0] += p.magnus_k * (spin[:, 1] * vel[:, 2] - spin[:, 2] * vel[:, 1])
+    acc[:, 1] += p.magnus_k * (spin[:, 2] * vel[:, 0] - spin[:, 0] * vel[:, 2])
+    acc[:, 2] += p.magnus_k * (spin[:, 0] * vel[:, 1] - spin[:, 1] * vel[:, 0]) - p.gravity
     return acc
 
 
@@ -228,6 +231,7 @@ def collide_goal_frame(prev: F, pos: F, vel: F, dt: float = DT) -> B:
     # net: inside the goal volume the ball is caught by the netting
     inside = (np.abs(x[:, 0]) > HALF_LENGTH) & (np.abs(x[:, 1]) < HALF_GOAL) & (x[:, 2] < GOAL_HEIGHT)
     inside &= np.abs(x0[:, 1]) < HALF_GOAL + 0.5
+    inside &= np.abs(x0[:, 0]) <= HALF_LENGTH + GOAL_DEPTH  # it came in through the mouth, not round the back
     if inside.any():
         v[inside] *= np.exp(-NET_DAMPING * dt)
         back = side[inside] * (HALF_LENGTH + GOAL_DEPTH - BALL_RADIUS)

@@ -399,7 +399,10 @@ def refine(plan: KickPlan, horizon_s: float = 3.5, p: BallParams = DEFAULT) -> K
     n = len(plan.kick)
     if n == 0:
         return plan
-    steps = int(horizon_s * 25)
+    dist0 = np.linalg.norm(plan.target[:, :2] - plan.origin[:, :2], axis=1)
+    h_speed = np.maximum(plan.launch.speed * np.cos(plan.launch.elev), 3.0)
+    need = float(np.max(dist0 / (0.55 * h_speed))) + 0.3  # long enough to get past the target
+    steps = int(min(horizon_s, need) * 25) + 2
     pos0 = plan.origin.copy()
     xs, _ = predict(pos0, plan.launch.velocity(), plan.launch.spin, steps, p=p)
     d_vec = plan.target[:, :2] - plan.origin[:, :2]

@@ -31,6 +31,7 @@ BA = npt.NDArray[np.bool_]
 I_PASS_PLAYER, I_PASS_SPACE, I_SHOT, I_CARRY, I_CLEARANCE = range(5)
 INTENT_NAMES: Final = ("pass_player", "pass_space", "shot", "carry", "clearance")
 
+PASS_HEIGHTS: Final = ("ground", "low", "high")
 PASS_TECHNIQUES: Final = ("standard", "driven", "lofted", "chipped", "curled", "outside_of_boot", "backheel")
 PASS_TYPES: Final = ("standard", "cross", "cutback", "through_ball", "layoff", "flick_on", "back_pass")
 SHOT_TECHNIQUES: Final = (

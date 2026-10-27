@@ -51,6 +51,13 @@ def predict_paths(pos: F, vel: F, spin: F, steps: int) -> Paths:
     for k in range(1, steps + 1):
         f = step_ball(x, v, w)
         xs[k], vs[k], wood[k] = x, v, f.woodwork
+        if k % 10 == 0:
+            # stop early once every ball has come to rest or left the field by a margin
+            gone = (np.abs(x[:, 0]) > HALF_LENGTH + 3.0) | (np.abs(x[:, 1]) > HALF_WIDTH + 3.0)
+            still = np.linalg.norm(v, axis=1) < 0.05
+            if (gone | still).all():
+                xs[k + 1 :], vs[k + 1 :] = x, v
+                break
     over_goal = np.abs(xs[..., 0]) > HALF_LENGTH + BALL_RADIUS
     in_mouth = (np.abs(xs[..., 1]) < HALF_GOAL) & (xs[..., 2] < GOAL_HEIGHT)
     goal = over_goal & in_mouth
@@ -95,6 +102,11 @@ def reach_ticks(
         need = react[None, :] + np.maximum(d, 0.0) / vmax[None, :]
     else:
         need = react[None, :] + kinematic_time(np.maximum(d, 0.0), vmax[None, :], amax[None, :])
+        # a player running the wrong way has to brake and turn first
+        to = path[:, None, :2] - pos[None, :, :]
+        u = to / np.maximum(np.linalg.norm(to, axis=2, keepdims=True), 1e-6)
+        away = np.maximum(-np.sum(u * vel[None, :, :], axis=2), 0.0)
+        need = need + 1.5 * away / amax[None, :]
     ok = need <= t_k[:, None] + 1e-9
     ok &= path[:, None, 2] <= reach_z[None, :]
     ok &= np.linalg.norm(vel_path, axis=1)[:, None] <= MAX_CONTROL_SPEED

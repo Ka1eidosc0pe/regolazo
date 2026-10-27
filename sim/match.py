@@ -260,7 +260,7 @@ class Pending:
     res: Resolved
     row: int
     plan: K.KickPlan
-    noisy: K.Launch
+    noisy: K.Launch | None
     receiver: int
     p_success: float
     p0: float
@@ -334,6 +334,12 @@ class Match:
         self.diag: Counter[str] = Counter()
         """Engine diagnostics (how plans resolved), for tuning and tests."""
         self._wood_shot = np.full(batch, -1, dtype=np.int64)
+        self._replan_queue: dict[int, int] = {}
+        self._carry_safe_until = np.full(batch, -np.inf)
+        self._carry_fail_t = np.full(batch, np.inf)
+        self._carry_who = np.full(batch, -1, dtype=np.int64)
+        self.forced_carry_kept = np.ones(batch, dtype=bool)
+        """Outcome drawn for an injected (fan) carry: the physics then plays it out."""
 
     # ------------------------------------------------------------------------------------------------------
     # set-up
@@ -384,12 +390,15 @@ class Match:
         self.keyframe[:] = False
         self.backfill.clear()
         self._clock()
+        self._forced_actions()  # a forked reality's injected action happens before anything else
+        self._plan_pending()
         # touches are judged on the state at the start of the tick (the previous frame)
         self._interactions()
+        self._flush_replans()
         self._restarts()
-        self._forced_actions()
         self._decisions()
         self._plan_pending()
+        self._flush_replans()
         self._move_players()
         self._move_ball()
         self._update_phase()
@@ -874,6 +883,50 @@ class Match:
         w.act_timer[b] = 0.6 + 0.9 * self.rng.random()
         if slot == S_DRIBBLE:
             self._take_on(b, c, p_success)
+            return
+        # the carry keeps the ball with the displayed retention probability: drawn now, played out by the physics
+        kept = self.rng.random() < p_success
+        if info.get("forced"):
+            self.forced_carry_kept[b] = kept
+        if kept:
+            self._carry_safe_until[b] = w.t[b] + w.act_timer[b]
+            self._carry_fail_t[b] = np.inf
+        else:
+            self._carry_safe_until[b] = -np.inf
+            self._carry_fail_t[b] = w.t[b] + w.act_timer[b] * self.rng.uniform(0.3, 0.9)
+        self._carry_who[b] = c
+
+    def _carry_lost(self, b: int) -> None:
+        """A carry drawn to fail: the nearest opponent nicks it, or a heavy touch runs away from the carrier."""
+        w, sq = self.w, self.sq
+        c = int(w.owner[b])
+        self._carry_fail_t[b] = np.inf
+        team = int(sq.team[c])
+        opp = np.arange((1 - team) * N_ON, (2 - team) * N_ON)
+        d = np.linalg.norm(w.pos[b, opp] - w.ball_pos[b, :2], axis=1)
+        j = int(opp[int(np.argmin(d))])
+        loc = w.ball_pos[b].copy()
+        if float(d.min()) <= CONTROL_RADIUS and w.stun[b, j] <= 0:
+            e1 = self._ev(
+                b,
+                "duel",
+                j,
+                1 - team,
+                loc,
+                {"opponent": sq.ids[c], "duel_type": "tackle", "outcome": "won", "possession_after": "tackler"},
+            )
+            e2 = self._ev(b, "dispossessed", c, team, loc, {"opponent": sq.ids[j]})
+            self.logs[b].link(e1, e2)
+            self._close_open_carry(b, lost=True)
+            self._set_anim(b, j, "tackle")
+            self._gain(b, j)
+        else:
+            self._ev(b, "miscontrol", c, team, loc, {"aerial_won": False})
+            self._close_open_carry(b, lost=True)
+            # the heavy touch runs toward the closest opponent, who is first to it
+            gap = w.pos[b, j] - w.ball_pos[b, :2]
+            self._deflect(b, c, scale=0.0, spread=0.25, toward=gap)
+            w.ball_vel[b, :2] *= max(1.0, float(np.sqrt(2 * 0.8 * np.linalg.norm(gap))) / 2.0)
 
     def _take_on(self, b: int, c: int, p_success: float) -> None:
         w, sq = self.w, self.sq
@@ -993,17 +1046,14 @@ class Match:
         origin = w.ball_pos[b : b + 1].copy()  # the flight starts where the ball is on the contact tick
         tgt = res.target[row : row + 1].copy()
         power = np.array([float(np.clip(info.get("power", 0.5), 0, 1))])
-        plan = K.plan_kicks(origin, tgt, np.array([kick]), power, res.curve_applied[row : row + 1])
-        needs_refine = kick not in (K.K_GROUND,) or abs(float(res.curve_applied[row])) > 0.05
-        if needs_refine:
-            plan = K.refine(plan)
-        noisy = K.perturb(plan.launch, np.array([kick]), res.noise_mult[row : row + 1], self.rng)
-        if kick == K.K_GROUND and abs(float(res.curve_applied[row])) < 0.05:
-            noisy.elev[:] = 0.0
-            noisy.spin[:] = 0.0
+        pre = info.pop("plan", None)
+        if pre is not None:  # an injected (fan) action resolved once for every reality
+            plan, needs_refine = K.KickPlan(origin, tgt, np.array([kick]), pre), False
+        else:
+            plan = K.plan_kicks(origin, tgt, np.array([kick]), power, res.curve_applied[row : row + 1])
+            needs_refine = kick not in (K.K_GROUND,) or abs(float(res.curve_applied[row])) > 0.05
         w.ball_pos[b] = origin[0]
-        w.ball_vel[b] = noisy.velocity()[0]
-        w.ball_spin[b] = noisy.spin[0]
+        w.ball_vel[b] = 0.0  # set in _plan_pending once all of this tick's kicks are refined together
         w.ball_state[b] = BS_FLIGHT
         w.owner[b] = -1
         w.hands[b] = False
@@ -1024,10 +1074,46 @@ class Match:
             w.vz[b, c] = jump_speed(sq.attr["jumping"][c : c + 1])[0]
         flight = {I_SHOT: FLIGHT_SHOT, I_CLEARANCE: FLIGHT_CLEAR}.get(kind, FLIGHT_PASS)
         w.flight_kind[b] = flight
-        ev = self._kick_event(b, c, kind, res, row, target, receiver, p0, info, noisy)
-        self.logs[b].records[ev]["_p"] = p_success  # displayed (player-adjusted) probability, engine-private
-        w.flight_event[b] = ev
-        self.pending.append(Pending(b, c, kind, flight, res, row, plan, noisy, receiver, p_success, p0, ev, info))
+        info["_target"] = target
+        info["_refine"] = needs_refine
+        self.pending.append(Pending(b, c, kind, flight, res, row, plan, None, receiver, p_success, p0, -1, info))
+
+    def _launch_pending(self, pend: list["Pending"]) -> None:
+        """Refine this tick's kicks in one batch, add execution noise, launch the balls and log the events."""
+        w = self.w
+        ref = [p for p in pend if p.info.get("_refine")]
+        if ref:
+            plans = [p.plan for p in ref]
+            batch = K.refine(
+                K.KickPlan(
+                    np.concatenate([q.origin for q in plans]),
+                    np.concatenate([q.target for q in plans]),
+                    np.concatenate([q.kick for q in plans]),
+                    K.Launch(
+                        np.concatenate([q.launch.speed for q in plans]),
+                        np.concatenate([q.launch.elev for q in plans]),
+                        np.concatenate([q.launch.azimuth for q in plans]),
+                        np.concatenate([q.launch.spin for q in plans]),
+                    ),
+                )
+            )
+            for k, p in enumerate(ref):
+                sel = np.array([k])
+                p.plan = K.KickPlan(batch.origin[sel], batch.target[sel], batch.kick[sel], batch.launch.take(sel))
+        for p in pend:
+            b, row, res = p.b, p.row, p.res
+            kick = int(res.kick[row])
+            noisy = K.perturb(p.plan.launch, np.array([kick]), res.noise_mult[row : row + 1], self.rng)
+            if kick == K.K_GROUND and abs(float(res.curve_applied[row])) < 0.05:
+                noisy.elev[:] = 0.0
+                noisy.spin[:] = 0.0
+            w.ball_vel[b] = noisy.velocity()[0]
+            w.ball_spin[b] = noisy.spin[0]
+            p.noisy = noisy
+            ev = self._kick_event(b, p.kicker, p.kind, res, row, p.info["_target"], p.receiver, p.p0, p.info, noisy)
+            self.logs[b].records[ev]["_p"] = p.p_success  # displayed (player-adjusted) probability, engine-private
+            w.flight_event[b] = ev
+            p.event = ev
 
     def _kick_event(
         self,
@@ -1168,6 +1254,7 @@ class Match:
             return
         pend, self.pending = self.pending, []
         w = self.w
+        self._launch_pending(pend)
         shots = [p for p in pend if p.flight == FLIGHT_SHOT]
         n_mc = 24
         pos = np.stack([w.ball_pos[p.b] for p in pend])
@@ -1194,7 +1281,7 @@ class Match:
             pos = np.concatenate([pos, *extra_pos])
             vel = np.concatenate([vel, *extra_vel])
             spin = np.concatenate([spin, *extra_spin])
-        steps = 125 if any(p.flight != FLIGHT_SHOT for p in pend) else 60
+        steps = 100 if any(p.flight != FLIGHT_SHOT for p in pend) else 60
         paths = PL.predict_paths(pos, vel, spin, steps)
         for j, p in enumerate(pend):
             if p.flight == FLIGHT_SHOT:
@@ -1228,6 +1315,17 @@ class Match:
                     k[g] = PL.NEVER
         return k
 
+    def _reach_physical(self, b: int, path: F, vpath: F, who: IA, stop_k: int) -> IA:
+        """Earliest reachable path index for players ``who`` with their own speed, acceleration and a short
+        reaction (they are expecting the ball)."""
+        w, sq = self.w, self.sq
+        vmax = effective_max_speed(sq.max_speed[who], w.stamina[b, who])
+        earliest = np.ceil(w.stun[b, who] / DT).astype(np.int64)
+        return PL.reach_ticks(
+            path, vpath, w.pos[b, who], w.vel[b, who], np.full(len(who), 0.3), vmax, sq.max_accel[who],
+            sq.jump_reach[who], earliest, stop_k=stop_k,
+        )  # fmt: skip
+
     def _plan_pass(self, p: Pending, paths: PL.Paths, j: int) -> None:
         w, sq = self.w, self.sq
         b = p.b
@@ -1246,7 +1344,13 @@ class Match:
             success = False
         if p.flight == FLIGHT_PASS:
             self.diag["pass_success_drawn" if success else "pass_fail_drawn"] += 1
-            if success and not (k_m < PL.NEVER).any():
+        if success:
+            # interceptions follow the pitch-control time-to-intercept (0.7 s, 5 m/s); for the pass that does
+            # arrive, a teammate's real kinematics decide where he meets it
+            k_phys = self._reach_physical(b, path, vpath, mates, out_k)
+            k[mates] = k_phys
+            k_m = k_phys
+            if not (k_m < PL.NEVER).any():
                 self.diag["pass_success_unreachable"] += 1
         if success and (k_m < PL.NEVER).any():
             best = int(mates[int(np.argmin(k_m))])
@@ -1521,7 +1625,15 @@ class Match:
         if coll.any():
             bi = np.nonzero(coll)[0]
             c = w.collector[bi]
-            tgt[bi, c] = w.collect_point[bi, :2]
+            cp = w.collect_point[bi, :2]
+            tgt[bi, c] = cp
+            # tight on time: run through the meeting point instead of braking into it
+            to_cp = cp - w.pos[bi, c]
+            dist = np.linalg.norm(to_cp, axis=1)
+            t_left = (w.collect_tick[bi] - w.tick[bi]) * DT
+            tight = (dist / np.maximum(sq.max_speed[c], 1.0) + 0.4 > t_left) & (dist > 1.0)
+            through = cp + 2.5 * to_cp / np.maximum(dist, 1e-6)[:, None]
+            tgt[bi, c] = np.where(tight[:, None], through, tgt[bi, c])
             # once the meeting tick has come, chase the ball itself (with a little lead)
             overdue = w.tick[bi] >= w.collect_tick[bi]
             chase = w.ball_pos[bi, :2] + 0.25 * w.ball_vel[bi, :2]
@@ -1714,7 +1826,12 @@ class Match:
             team = sq.team[np.maximum(w.owner, 0)]
             db = np.linalg.norm(w.pos - w.ball_pos[:, None, :2], axis=2)
             opp = sq.team[None, :] != team[:, None]
+            fail_due = owned & (w.t >= self._carry_fail_t) & (w.owner == self._carry_who)
+            for b in np.nonzero(fail_due)[0]:
+                self._carry_lost(int(b))
             contest = owned & (opp & (db < CONTROL_RADIUS)).any(axis=1)
+            contest &= ~((w.t < self._carry_safe_until) & (w.owner == self._carry_who))
+            contest &= w.ball_state == BS_OWNED
             if contest.any():
                 self._tackles(np.nonzero(contest)[0])
             for b in np.nonzero(owned & (w.ball_state == BS_OWNED))[0]:
@@ -1771,8 +1888,6 @@ class Match:
             return  # goal / out decides it
         if (speed < 9.0 or (since > 0.6 and tick % 6 == 0)) and w.t[b] >= self._replan_after[b]:
             self._replan_loose(b, exclude=int(w.last_touch[b]) if since < 0.4 else -1)
-            if w.collector[b] < 0:
-                self._replan_after[b] = w.t[b] + 0.4  # nobody can get there yet: look again shortly
 
     def _miss_save(self, b: int) -> None:
         """The keeper could not get to a shot he was meant to save: it goes on under physics."""
@@ -1781,10 +1896,27 @@ class Match:
         w.flight_mode[b] = FM_FREE
 
     def _replan_loose(self, b: int, exclude: int) -> None:
+        """Queue a loose-ball re-plan; all of a tick's re-plans share one batched path prediction."""
+        self._replan_queue[b] = exclude
+
+    def _flush_replans(self) -> None:
+        if not self._replan_queue:
+            return
+        queue, self._replan_queue = self._replan_queue, {}
         w = self.w
-        paths = PL.predict_paths(w.ball_pos[b : b + 1], w.ball_vel[b : b + 1], w.ball_spin[b : b + 1], 75)
-        path, vpath = paths.xs[:, 0], paths.vs[:, 0]
-        out_k = int(min(paths.out_k[0], paths.goal_k[0]))
+        bs = np.array(list(queue), dtype=np.int64)
+        paths = PL.predict_paths(w.ball_pos[bs], w.ball_vel[bs], w.ball_spin[bs], 60)
+        for j, b in enumerate(bs):
+            self._replan_one(int(b), queue[int(b)], paths, j)
+            if w.collector[b] < 0:
+                self._replan_after[b] = w.t[b] + 0.4  # nobody can get there yet: look again shortly
+
+    def _replan_one(self, b: int, exclude: int, paths: PL.Paths, j: int) -> None:
+        w = self.w
+        if w.ball_state[b] != BS_FLIGHT:
+            return
+        path, vpath = paths.xs[:, j], paths.vs[:, j]
+        out_k = int(min(paths.out_k[j], paths.goal_k[j]))
         k = self._reach(b, path, vpath, exclude=exclude, exclude_until=10 if exclude >= 0 else 0, stop_k=out_k)
         if (k < PL.NEVER).any():
             kmin = int(k.min())
