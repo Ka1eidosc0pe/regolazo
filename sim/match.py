@@ -1666,8 +1666,8 @@ class Match:
             to_cp = cp - w.pos[bi, c]
             dist = np.linalg.norm(to_cp, axis=1)
             t_left = (w.collect_tick[bi] - w.tick[bi]) * DT
-            tight = (dist / np.maximum(sq.max_speed[c], 1.0) + 0.4 > t_left) & (dist > 1.0)
-            through = cp + 2.5 * to_cp / np.maximum(dist, 1e-6)[:, None]
+            tight = (dist / np.maximum(sq.max_speed[c], 1.0) + 0.4 > t_left) & (dist > 3.0)
+            through = cp + 1.0 * to_cp / np.maximum(dist, 1e-6)[:, None]
             tgt[bi, c] = np.where(tight[:, None], through, tgt[bi, c])
             # once the meeting tick has come, chase the ball itself (with a little lead)
             overdue = w.tick[bi] >= w.collect_tick[bi]
