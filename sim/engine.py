@@ -71,6 +71,7 @@ from sim.resolver import (
     SHOT_TECHNIQUES,
     available_pass_mask,
     available_shot_mask,
+    effective_power,
 )
 from sim.tactics import attack_sign, restart_targets
 from sim.world import BS_OWNED, N_ON, World, world_field_names
@@ -307,9 +308,8 @@ class SimEngine:
             )
         else:
             origin = w.ball_pos[0:1].copy()
-            plan = K.plan_kicks(
-                origin, res.target[0:1], np.array([kick]), np.array([intent.power]), res.curve_applied[0:1]
-            )
+            pw = effective_power(sq, np.array([c]), np.array([kick]), np.array([intent.power]))
+            plan = K.plan_kicks(origin, res.target[0:1], np.array([kick]), pw, res.curve_applied[0:1])
             if kick != K.K_GROUND or abs(float(res.curve_applied[0])) > 0.05:
                 plan = K.refine(plan)
             la = plan.launch

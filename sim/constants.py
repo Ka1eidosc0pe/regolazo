@@ -35,7 +35,7 @@ DRAG_COEFF: Final = 0.25
 BALL_AREA: Final = 3.14159265 * BALL_RADIUS**2
 DRAG_K: Final = 0.5 * AIR_DENSITY * DRAG_COEFF * BALL_AREA / BALL_MASS
 """Quadratic drag: a = -DRAG_K * |v| * v (1/m)."""
-MAGNUS_K: Final = 0.005
+MAGNUS_K: Final = 0.0066
 """Magnus acceleration a = MAGNUS_K * (omega x v)."""
 RESTITUTION: Final = 0.62
 """Vertical coefficient of restitution on grass."""

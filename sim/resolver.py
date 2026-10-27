@@ -404,6 +404,13 @@ def available_shot_mask(sq: Squad, p: IA, dist: F, z: F, bounced: BA, gk_off_lin
     return m
 
 
+def effective_power(sq: Squad, player: IA, kick: IA, power: F) -> F:
+    """Shot Power scales how hard a player can strike (shots and clearances); 0..1 like ``power``."""
+    hard = np.isin(kick, [K.K_SHOT_DRIVEN, K.K_SHOT_PLACED, K.K_VOLLEY, K.K_HALF_VOLLEY, K.K_CLEARANCE])
+    scale = 0.55 + 0.6 * sq.attr["shot_power"][player] / 99.0
+    return np.asarray(np.where(hard, np.clip(power * scale, 0.0, 1.0), power))
+
+
 def goal_target(sign: F, y: F, z: F) -> F:
     """Goal-mouth point (world frame) on the attacked goal line."""
     return np.column_stack([HALF_LENGTH * sign, y * sign, z])

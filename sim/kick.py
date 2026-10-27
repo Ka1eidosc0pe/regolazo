@@ -73,11 +73,11 @@ PROFILES: Final[dict[int, KickProfile]] = {
     K_LOFTED: KickProfile(MODE_FIXED_ELEV, 27.0, 5.0, 33.0, 0.030, 0.025, 0.045, backspin=6.0),
     K_CHIPPED: KickProfile(MODE_FIXED_ELEV, 47.0, 5.0, 22.0, 0.040, 0.040, 0.060, backspin=22.0),
     K_CROSS: KickProfile(MODE_FIXED_ELEV, 17.0, 8.0, 30.0, 0.034, 0.030, 0.050, spin=30.0),
-    K_CURLED: KickProfile(MODE_GROUND, 5.0, 3.0, 26.0, 0.034, 0.012, 0.055, spin=42.0),
-    K_OUTSIDE: KickProfile(MODE_GROUND, 4.0, 3.0, 26.0, 0.045, 0.015, 0.065, spin=34.0),
+    K_CURLED: KickProfile(MODE_GROUND, 5.0, 3.0, 26.0, 0.034, 0.012, 0.055, spin=60.0),
+    K_OUTSIDE: KickProfile(MODE_GROUND, 4.0, 3.0, 26.0, 0.045, 0.015, 0.065, spin=48.0),
     K_SHOT_DRIVEN: KickProfile(MODE_FIXED_SPEED, 4.0, 24.0, 32.0, 0.040, 0.034, 0.045),
     K_SHOT_PLACED: KickProfile(MODE_FIXED_SPEED, 3.0, 15.0, 22.0, 0.030, 0.028, 0.045),
-    K_SHOT_FINESSE: KickProfile(MODE_FIXED_SPEED, 5.0, 18.0, 24.0, 0.034, 0.030, 0.045, spin=55.0),
+    K_SHOT_FINESSE: KickProfile(MODE_FIXED_SPEED, 5.0, 18.0, 24.0, 0.034, 0.030, 0.045, spin=85.0),
     K_SHOT_CHIP: KickProfile(MODE_FIXED_ELEV, 36.0, 6.0, 20.0, 0.040, 0.045, 0.060, backspin=14.0),
     K_VOLLEY: KickProfile(MODE_FIXED_SPEED, 4.0, 20.0, 30.0, 0.070, 0.065, 0.070),
     K_HALF_VOLLEY: KickProfile(MODE_FIXED_SPEED, 4.0, 19.0, 28.0, 0.060, 0.055, 0.065),
@@ -383,6 +383,9 @@ def plan_kicks(origin: F, target: F, kick: IA, power: F, curve: F, arrive_speed:
         fallback = np.radians(profile_array("elev_deg", kick[fixed_s]))
         speed[fixed_s] = sp
         elev[fixed_s] = np.where(np.isfinite(e), e, fallback)
+        # a driven pass is hit flat and skids on: it is not aimed to land on the target
+        drv = kick[fixed_s] == K_DRIVEN
+        elev[np.nonzero(fixed_s)[0][drv]] = fallback[drv]
     side = -np.clip(curve, -1.0, 1.0) * profile_array("spin", kick)
     back = profile_array("backspin", kick)
     spin = launch_spin(az, side, back)
@@ -394,8 +397,14 @@ def plan_kicks(origin: F, target: F, kick: IA, power: F, curve: F, arrive_speed:
     return KickPlan(origin=origin, target=target, kick=kick, launch=Launch(speed, elev, az, spin))
 
 
-def refine(plan: KickPlan, horizon_s: float = 3.5, p: BallParams = DEFAULT) -> KickPlan:
-    """One correction against exact physics: rescale speed for range and rotate azimuth for lateral error."""
+def refine(plan: KickPlan, horizon_s: float = 3.5, p: BallParams = DEFAULT, iterations: int = 2) -> KickPlan:
+    """Corrections against exact physics: rescale speed for range and rotate azimuth for lateral error."""
+    for _ in range(iterations - 1):
+        plan = _refine_once(plan, horizon_s, p)
+    return _refine_once(plan, horizon_s, p)
+
+
+def _refine_once(plan: KickPlan, horizon_s: float, p: BallParams) -> KickPlan:
     n = len(plan.kick)
     if n == 0:
         return plan

@@ -77,6 +77,7 @@ from sim.resolver import (
     PASS_TYPES,
     SHOT_TECHNIQUES,
     Resolved,
+    effective_power,
 )
 from sim.tactics import attack_sign, last_defender_x, offside_lines, restart_targets, shape_targets, styles_for
 from sim.world import (
@@ -425,7 +426,7 @@ class Match:
     def _clock(self) -> None:
         w = self.w
         live = (w.status == ST["first_half"]) | (w.status == ST["second_half"])
-        over = live & (w.t >= w.period_end_t) & (w.ball_state != BS_FLIGHT)
+        over = live & (w.t >= w.period_end_t) & ((w.ball_state != BS_FLIGHT) | (w.t >= w.period_end_t + 60.0))
         if not over.any():
             ht = w.status == ST["half_time"]
             if ht.any():
@@ -1045,7 +1046,8 @@ class Match:
         kick = int(res.kick[row])
         origin = w.ball_pos[b : b + 1].copy()  # the flight starts where the ball is on the contact tick
         tgt = res.target[row : row + 1].copy()
-        power = np.array([float(np.clip(info.get("power", 0.5), 0, 1))])
+        raw = np.array([float(np.clip(info.get("power", 0.5), 0, 1))])
+        power = effective_power(sq, np.array([c]), np.array([kick]), raw)
         pre = info.pop("plan", None)
         if pre is not None:  # an injected (fan) action resolved once for every reality
             plan, needs_refine = K.KickPlan(origin, tgt, np.array([kick]), pre), False
@@ -1815,7 +1817,8 @@ class Match:
             late = has_c & (w.tick - w.collect_tick > 10)
             speed = np.linalg.norm(w.ball_vel, axis=1)
             since = w.t - w.flight_t0
-            shot_free = (w.flight_mode == FM_FREE) & (w.flight_kind == FLIGHT_SHOT)
+            speed_all = np.linalg.norm(w.ball_vel, axis=1)
+            shot_free = (w.flight_mode == FM_FREE) & (w.flight_kind == FLIGHT_SHOT) & (speed_all > 3.0)
             loose = ~has_c & ~shot_free & ((speed < 9.0) | ((since > 0.6) & (w.tick % 6 == 0)))
             loose &= w.t >= self._replan_after
             flagged = fl & (out | self._wood | near | late | loose)
@@ -1885,7 +1888,11 @@ class Match:
         speed = float(np.linalg.norm(w.ball_vel[b]))
         since = w.t[b] - w.flight_t0[b]
         if w.flight_mode[b] == FM_FREE and w.flight_kind[b] == FLIGHT_SHOT:
-            return  # goal / out decides it
+            if speed > 3.0:
+                return  # goal / out decides it
+            # a shot that died before reaching the goal line: it missed, and the ball is there for anyone
+            self._shot_end(b, "off_target", self._extrapolate_goal_plane(b))
+            w.flight_kind[b] = FLIGHT_LOOSE
         if (speed < 9.0 or (since > 0.6 and tick % 6 == 0)) and w.t[b] >= self._replan_after[b]:
             self._replan_loose(b, exclude=int(w.last_touch[b]) if since < 0.4 else -1)
 

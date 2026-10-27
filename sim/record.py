@@ -164,7 +164,7 @@ def simulate(
     rec = FrameRecorder(m) if record else None
     m.on_frame = rec
     m.start()
-    m.run(until_t=until_t)
+    m.run(until_t=until_t if until_t is not None else 2 * (meta.period_duration_s + 900.0))  # hard safety cap
     if rec is not None:
         # a final frame at full time
         rec(m)

@@ -35,9 +35,11 @@ F = npt.NDArray[np.float64]
 B = npt.NDArray[np.bool_]
 
 ROLL_VZ = 0.45
-ROLL_MAGNUS = 0.6
+BOUNCE_MU = 0.55
+"""Grass friction coefficient for the Coulomb cap on bounce friction."""
+ROLL_MAGNUS = 1.0
 """Side-spin turning rate of a rolling ball, as a fraction of the airborne Magnus effect."""
-SPIN_DECAY_GROUND_SIDE = 1.0
+SPIN_DECAY_GROUND_SIDE = 0.5
 """Bounces slower than this (m/s, vertical) turn into rolling."""
 
 
@@ -108,7 +110,8 @@ def step_ball(pos: F, vel: F, spin: F, dt: float = DT, p: BallParams = DEFAULT, 
         if hit.any():
             h = np.nonzero(hit)[0]
             x1[h], v1[h] = _bounce(x0[h], v0[h], v1[h], w[h], dt, p)
-            w[h] *= 0.55
+            w[h, :2] *= 0.55  # back / top spin is mostly spent on the bounce; side-spin survives it
+            w[h, 2] *= 0.9
             bounced[idx[h]] = True
         pos[idx], vel[idx] = x1, v1
         spin[idx] = w * np.exp(-SPIN_DECAY_AIR * dt)
@@ -151,8 +154,14 @@ def _bounce(x0: F, v0: F, v1: F, w: F, dt: float, p: BallParams) -> tuple[F, F]:
     slip_x = vi[:, 0] - BALL_RADIUS * w[:, 1]
     slip_y = vi[:, 1] + BALL_RADIUS * w[:, 0]
     vo = vi.copy()
-    vo[:, 0] -= p.bounce_friction * slip_x
-    vo[:, 1] -= p.bounce_friction * slip_y
+    # Coulomb limit: a grazing bounce (small normal impulse) cannot remove much horizontal speed
+    slip = np.hypot(slip_x, slip_y)
+    cap = BOUNCE_MU * (1.0 + p.restitution) * np.abs(np.minimum(vi[:, 2], 0.0))
+    scale = np.minimum(
+        p.bounce_friction, np.divide(cap, slip, out=np.full_like(slip, p.bounce_friction), where=slip > 1e-9)
+    )
+    vo[:, 0] -= scale * slip_x
+    vo[:, 1] -= scale * slip_y
     vo[:, 2] = vz_out
     rest = dt - tau
     rolling = vz_out < ROLL_VZ

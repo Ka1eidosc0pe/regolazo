@@ -27,14 +27,28 @@ DEFAULT_TARGETS: dict[str, tuple[float, float]] = {
 
 def targets() -> dict[str, tuple[float, float]]:
     """Target bands; Step 2's realism_targets.json replaces the defaults when it exists."""
-    if TARGETS_FILE.exists():
-        data = json.loads(TARGETS_FILE.read_text())
-        out = dict(DEFAULT_TARGETS)
-        for k, v in data.items():
-            if isinstance(v, list | tuple) and len(v) == 2:
-                out[k] = (float(v[0]), float(v[1]))
+    out = dict(DEFAULT_TARGETS)
+    if not TARGETS_FILE.exists():
         return out
-    return dict(DEFAULT_TARGETS)
+    data = json.loads(TARGETS_FILE.read_text())
+    # file key -> (our key, unit factor)
+    mapping = {
+        "goals_per_match": ("goals_per_match", 1.0),
+        "shots_per_team": ("shots_per_team", 1.0),
+        "pass_completion_pct": ("pass_completion", 0.01),
+        "passes_per_team": ("passes_per_team", 1.0),
+        "header_share_of_shots": ("header_share_of_shots", 1.0),
+        "mean_shot_distance_m": ("mean_shot_distance_m", 1.0),
+        "distance_per_outfield_player_m": ("distance_per_outfield_player_km", 0.001),
+    }
+    for src, (dst, f) in mapping.items():
+        band = data.get(src, {}).get("band") if isinstance(data.get(src), dict) else None
+        if band and len(band) == 2:
+            out[dst] = (float(band[0]) * f, float(band[1]) * f)
+    poss = data.get("possession_share_by_passes_pct", {})
+    if isinstance(poss, dict) and poss.get("std_band"):
+        out["possession_share_sd"] = (float(poss["std_band"][0]), float(poss["std_band"][1]))
+    return out
 
 
 @dataclass
@@ -61,7 +75,7 @@ class MatchStats:
 
 def match_stats(events: list[MatchEvent], arrays: dict[str, npt.NDArray[Any]] | None) -> MatchStats:
     shots = [e for e in events if e.type == "shot"]
-    passes = [e for e in events if e.type == "pass"]
+    passes = [e for e in events if e.type == "pass" and getattr(e.qualifiers, "restart", None) != "throw_in"]
     goals = sum(1 for e in shots if e.qualifiers is not None and getattr(e.qualifiers, "outcome", None) == "goal")
     goals += sum(1 for e in events if e.type == "own_goal")
     headers = sum(1 for e in shots if getattr(e.qualifiers, "body_part", None) == "head")
