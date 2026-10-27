@@ -33,3 +33,8 @@ assets/third_party/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Agent worktrees
+.claude/worktrees/
+.claude/launch.json
+data/matches/

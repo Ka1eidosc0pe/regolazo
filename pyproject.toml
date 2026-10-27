@@ -5,19 +5,24 @@ description = "ReGolazo: an AI broadcast crew for synthetic football matches"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "fastapi>=0.162.0",
     "httpx>=0.27",
     "numpy>=2.1",
     "openai>=1.60",
     "pydantic>=2.9",
     "python-dotenv>=1.0",
+    "uvicorn[standard]>=0.54.0",
+    "websockets>=17.3",
 ]
 
 [dependency-groups]
 dev = [
     "jsonschema>=4.23",
+    "matplotlib>=3.11.2",
     "mypy>=1.13",
     "pytest>=8.3",
     "ruff>=0.8",
+    "scikit-learn>=1.9.1",
     "types-jsonschema>=4.26.0.20261006",
 ]
 
@@ -31,7 +36,7 @@ packages = ["shared", "sim", "analytics", "vision", "agents", "server"]
 [tool.ruff]
 line-length = 120
 target-version = "py312"
-extend-exclude = ["web", "data", "assets", "runs"]
+extend-exclude = ["web", "data", "assets", "runs", "docs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
@@ -41,7 +46,7 @@ ignore = ["RUF012"]  # Pydantic copies mutable defaults per instance
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-exclude = ["^web/", "^data/", "^assets/", "^runs/"]
+exclude = ["^web/", "^data/", "^assets/", "^runs/", "^\\.claude/"]
 
 [[tool.mypy.overrides]]
 module = ["*.tests.*"]
