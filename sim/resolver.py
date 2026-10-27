@@ -417,7 +417,7 @@ def default_shot_aim(sign: F, ball: F, gk_pos: F, rng: np.random.Generator | Non
         y = side * (HALF_GOAL - 0.7)
         z = np.full(n, 0.5)
     else:
-        y = side * rng.uniform(HALF_GOAL - 1.4, HALF_GOAL - 0.45, n)
+        y = side * rng.uniform(HALF_GOAL - 2.2, HALF_GOAL - 0.8, n)
         z = np.where(rng.random(n) < 0.6, rng.uniform(0.2, 0.7, n), rng.uniform(1.0, 2.1, n))
     return goal_target(sign, y, z)
 

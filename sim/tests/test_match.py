@@ -114,7 +114,7 @@ def test_events_validate_and_cover_the_basics(sim: Any) -> None:
     types = {e.type for e in events}
     for t in ("pass", "ball_receipt", "shot", "duel", "restart", "period_start"):
         assert t in types
-    passes = [e for e in events if e.type == "pass"]
+    passes = [e for e in events if e.type == "pass" and e.t < SECONDS - 6.0]  # the last one may still be in flight
     assert all(e.qualifiers is not None and e.end_location is not None for e in passes)
     # every completed pass has a receipt
     complete = [e for e in passes if getattr(e.qualifiers, "outcome", "") == "complete"]

@@ -137,7 +137,11 @@ def score_passes(
     wf = np.where(res.weak_foot, (5.0 - sq.weak_foot[p_idx]) / 4.0, 0.0)
     delta = 1.35 * (res.quality - 0.5) + 0.5 * pressure * (sq.attr["composure"][p_idx] / 99.0 - 0.7) - 0.3 * wf
     if race is not None:
-        delta = delta + RACE_WEIGHT * np.clip(race, -6.0, 0.0)
+        # the event-data model is reliable for ordinary passes and weak on crosses / through / lofted balls
+        # (Step 2 report): there the time-to-intercept physics carries more of the weight
+        weak_model = (res.pass_type == 1) | (res.pass_type == 3) | (res.pass_height == 2)
+        weight = np.where(weak_model, RACE_WEIGHT_WEAK_MODEL, RACE_WEIGHT)
+        delta = delta + weight * np.clip(race, -6.0, 0.0)
     p = sigmoid(logit(p0) + delta)
     xt_end = np.asarray(models.xt(end_t[:, 0], end_t[:, 1]), dtype=np.float64)
     xt_opp = np.asarray(models.xt(-end_t[:, 0], -end_t[:, 1]), dtype=np.float64)
@@ -146,7 +150,8 @@ def score_passes(
     )
 
 
-RACE_WEIGHT = 1.0
+RACE_WEIGHT = 0.35
+RACE_WEIGHT_WEAK_MODEL = 0.9
 RACE_SAMPLES = np.linspace(0.1, 1.0, 10)
 _GROUND_KICKS = (K.K_GROUND, K.K_CURLED, K.K_OUTSIDE)
 _LOW_KICKS = (K.K_DRIVEN, K.K_CROSS_LOW, K.K_GK_THROW)

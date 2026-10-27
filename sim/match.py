@@ -6,6 +6,7 @@ events (a touch, a tackle, the ball going out) are handled per element when they
 in the same tick are scored together by the decision model.
 """
 
+from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Final
@@ -330,6 +331,9 @@ class Match:
         """(b, tick, player, anim, mirror, variant, n_frames): clips that started before the current tick."""
         self._dead_since = np.full(batch, -1e9)
         self._replan_after = np.full(batch, -1e9)
+        self.diag: Counter[str] = Counter()
+        """Engine diagnostics (how plans resolved), for tuning and tests."""
+        self._wood_shot = np.full(batch, -1, dtype=np.int64)
 
     # ------------------------------------------------------------------------------------------------------
     # set-up
@@ -573,6 +577,7 @@ class Match:
             if pattern == "from_keeper":
                 w.play_pattern[b] = PP["from_keeper"]
         w.owner[b] = i
+        self._wood_shot[b] = -1
         w.ball_state[b] = BS_OWNED
         w.last_touch[b] = i
         w.last_touch_team[b] = team
@@ -628,6 +633,7 @@ class Match:
     def _set_restart(self, b: int, r: int, team: int, pos: F, delay: float, cause: int = -1) -> None:
         w, sq = self.w, self.sq
         self._dead_since[b] = w.t[b]
+        self._wood_shot[b] = -1
         self._close_open_carry(b)
         w.ball_state[b] = BS_DEAD
         w.owner[b] = -1
@@ -1019,6 +1025,7 @@ class Match:
         flight = {I_SHOT: FLIGHT_SHOT, I_CLEARANCE: FLIGHT_CLEAR}.get(kind, FLIGHT_PASS)
         w.flight_kind[b] = flight
         ev = self._kick_event(b, c, kind, res, row, target, receiver, p0, info, noisy)
+        self.logs[b].records[ev]["_p"] = p_success  # displayed (player-adjusted) probability, engine-private
         w.flight_event[b] = ev
         self.pending.append(Pending(b, c, kind, flight, res, row, plan, noisy, receiver, p_success, p0, ev, info))
 
@@ -1237,6 +1244,10 @@ class Match:
         sub = SUB_WON
         if p.flight == FLIGHT_CLEAR:
             success = False
+        if p.flight == FLIGHT_PASS:
+            self.diag["pass_success_drawn" if success else "pass_fail_drawn"] += 1
+            if success and not (k_m < PL.NEVER).any():
+                self.diag["pass_success_unreachable"] += 1
         if success and (k_m < PL.NEVER).any():
             best = int(mates[int(np.argmin(k_m))])
             coll = rec if rec >= 0 and k[rec] < PL.NEVER and k[rec] <= k[best] + 15 else best
@@ -1346,8 +1357,10 @@ class Match:
         y = xs[k, c, 1] * s
         z = xs[k, c, 2]
         spd = np.linalg.norm(vs[k, c], axis=1)
-        wood = np.array([paths.wood[: max(int(kk), 1) + 1, cols[i]].any() for i, kk in enumerate(k)])
-        on = has & (np.abs(y) < HALF_GOAL - BALL_RADIUS) & (z < GOAL_HEIGHT - BALL_RADIUS) & ~wood
+        # "on target" = the ball ends up in the net on its own (post-and-in included)
+        on = has & (paths.goal_k[cols] < PL.NEVER) & (paths.goal_side[cols] * s > 0)
+        y = np.clip(y, -(HALF_GOAL - 0.15), HALF_GOAL - 0.15)
+        z = np.clip(z, BALL_RADIUS, GOAL_HEIGHT - 0.1)
         _ = gx
         return on, y, z, spd
 
@@ -1509,6 +1522,10 @@ class Match:
             bi = np.nonzero(coll)[0]
             c = w.collector[bi]
             tgt[bi, c] = w.collect_point[bi, :2]
+            # once the meeting tick has come, chase the ball itself (with a little lead)
+            overdue = w.tick[bi] >= w.collect_tick[bi]
+            chase = w.ball_pos[bi, :2] + 0.25 * w.ball_vel[bi, :2]
+            tgt[bi, c] = np.where(overdue[:, None], chase, tgt[bi, c])
             cap[bi, c] = sq.max_speed[c]
         # loose balls without a planned collector: nearest of each team chases
         loose = (w.ball_state == BS_FLIGHT) & (w.collector < 0)
@@ -1606,7 +1623,8 @@ class Match:
                     np.where(w.hands[bi], 1.0, BALL_RADIUS),
                 ]
             )
-            limit = (np.linalg.norm(w.vel[bi, o], axis=1) + 4.0) * DT
+            first_touch = w.t[bi] - w.receive_t[bi] < 0.5 * DT
+            limit = (np.linalg.norm(w.vel[bi, o], axis=1) + np.where(first_touch, 20.0, 9.0)) * DT
             self._glide(bi, want, limit)
             poss = w.poss_team[bi]
             ok = poss >= 0
@@ -1731,12 +1749,16 @@ class Match:
             due = tick >= int(w.collect_tick[b]) - 2
             # a running player takes the ball in front of him, not after overrunning it
             v = w.vel[b, c]
-            in_front = float(np.dot(bp[:2] - w.pos[b, c], v)) > 0.0 or float(np.linalg.norm(v)) < 1.5 or save
+            sp = float(np.linalg.norm(v))
+            # projection of the ball on his running direction: the first touch can take it across his body
+            ahead = float(np.dot(bp[:2] - w.pos[b, c], v)) / max(sp, 1e-6) > -0.35
+            in_front = ahead or sp < 1.5 or save
             if due and d <= reach and bp[2] <= reach_z and in_front:
                 self._collect(b, c)
                 return
             late = tick - int(w.collect_tick[b])
-            if late > 10:
+            if late > (10 if save else 25):
+                self.diag[f"late_mode_{int(w.flight_mode[b])}"] += 1
                 if save:
                     self._miss_save(b)
                 else:
@@ -1782,7 +1804,11 @@ class Match:
 
     def _woodwork(self, b: int) -> None:
         w = self.w
+        fr = self.flight_res[b]
+        if w.flight_kind[b] == FLIGHT_SHOT and fr is not None and fr["info"].get("planned") == "goal":
+            return  # off the post and in: the physics already says so
         if w.flight_kind[b] == FLIGHT_SHOT and w.shot_ev[b] >= 0:
+            self._wood_shot[b] = int(w.shot_ev[b])
             q = self.logs[b].q(int(w.shot_ev[b]))
             q["outcome"] = "woodwork"
             q["on_target"] = False
@@ -1863,6 +1889,7 @@ class Match:
     # --- collection ---------------------------------------------------------------------------------------
     def _collect(self, b: int, c: int) -> None:
         w, sq = self.w, self.sq
+        self._wood_shot[b] = -1
         mode = int(w.flight_mode[b])
         team = int(sq.team[c])
         bp = w.ball_pos[b].copy()
@@ -1871,8 +1898,8 @@ class Match:
         passer = int(w.flight_passer[b])
         pass_ev = int(w.flight_event[b]) if kind == FLIGHT_PASS else -1
         aerial = bp[2] > 1.0
-        if aerial:
-            self._aerial_duel(b, c)
+        if aerial and self._aerial_duel(b, c):
+            return
         if mode == FM_RECEIVE:
             if w.flight_offside[b]:
                 self._offside(b, c, passer, pass_ev)
@@ -1904,7 +1931,8 @@ class Match:
         # loose ball
         self._loose_collect(b, c, bp, aerial)
 
-    def _aerial_duel(self, b: int, c: int) -> None:
+    def _aerial_duel(self, b: int, c: int) -> bool:
+        """Header contest around the collector. Returns True if it ended in a foul (play stops)."""
         w, sq = self.w, self.sq
         team = int(sq.team[c])
         opp = np.arange((1 - team) * N_ON, (2 - team) * N_ON)
@@ -1912,7 +1940,7 @@ class Match:
         d = np.where(sq.is_gk[opp], 99.0, d)
         j = int(opp[int(np.argmin(d))])
         if d.min() > 2.2:
-            return
+            return False
         loc = w.ball_pos[b]
         e1 = self._ev(b, "duel", c, team, loc, {"opponent": sq.ids[j], "duel_type": "aerial", "outcome": "won"})
         e2 = self._ev(b, "duel", j, 1 - team, loc, {"opponent": sq.ids[c], "duel_type": "aerial", "outcome": "lost"})
@@ -1924,6 +1952,8 @@ class Match:
         self._set_anim(b, j, "header_jumping")
         if self.rng.random() < 0.025:
             self._foul(b, j, c, "foul")
+            return True
+        return False
 
     def _receipt(
         self, b: int, c: int, bp: F, aerial: bool, pass_ev: int, passer: int, outcome: str, quality: str
@@ -2434,6 +2464,11 @@ class Match:
             kp = self.logs[b].q(shot_ev).get("key_pass_id")
             if kp is not None:
                 self.logs[b].q(int(kp))["is_assist"] = True
+        elif self._wood_shot[b] >= 0 and not own_goal:
+            # it came back off the woodwork and went in untouched: the shot scored
+            q = self.logs[b].q(int(self._wood_shot[b]))
+            q["outcome"] = "goal"
+            q["on_target"] = True
         else:
             if w.shot_ev[b] >= 0:
                 self._shot_end(b, "goal", (np.sign(bp[0]) * HALF_LENGTH, bp[1], bp[2]))
