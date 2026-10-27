@@ -77,7 +77,7 @@ def test_average_shooter_scores_at_the_model_xg() -> None:
 
 
 def test_finishers_deviate_in_the_expected_direction() -> None:
-    (poor, pe), (avg, ae), (elite, ee) = _shot(40), _shot(70), _shot(95)
+    (poor, pe), (_, ae), (elite, ee) = _shot(40), _shot(70), _shot(95)
     assert pe.p_success < ae.p_success < ee.p_success
     assert pe.p_success < (pe.p_success_baseline or 0) and ee.p_success > (ee.p_success_baseline or 1)
     for d in (poor, elite):

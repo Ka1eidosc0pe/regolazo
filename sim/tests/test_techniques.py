@@ -90,7 +90,8 @@ def test_striker_and_fullback_strike_differently() -> None:
         )
         out[pid] = r
     assert out[st].shot_technique == "driven"
-    assert out[st].launch is not None and out[fb].launch is not None
-    assert out[st].launch.speed_mps > out[fb].launch.speed_mps
-    assert out[st].ellipse is not None and out[fb].ellipse is not None
-    assert out[fb].ellipse.semi_major_m > 1.3 * out[st].ellipse.semi_major_m
+    la_st, la_fb = out[st].launch, out[fb].launch
+    el_st, el_fb = out[st].ellipse, out[fb].ellipse
+    assert la_st is not None and la_fb is not None and el_st is not None and el_fb is not None
+    assert la_st.speed_mps > la_fb.speed_mps
+    assert el_fb.semi_major_m > 1.3 * el_st.semi_major_m
