@@ -86,6 +86,7 @@ from sim.tactics import (
     lane_blocker,
     last_defender_x,
     offside_lines,
+    protect_goal,
     restart_targets,
     shape_targets,
     styles_for,
@@ -617,7 +618,7 @@ class Match:
         w.carry_speed[b] = 2.0
         press, _, _ = self._pressure(b, i)
         tempo = self.styles[team].tempo
-        w.act_timer[b] = (0.5 + 1.3 * self.rng.random() * (1.0 - 0.6 * press)) / tempo
+        w.act_timer[b] = (0.68 + 1.3 * self.rng.random() * (1.0 - 0.6 * press)) / tempo
         w.ball_vel[b] = 0.0
         w.ball_spin[b] = 0.0
         self._resolve_clearance(b, team)
@@ -1120,7 +1121,10 @@ class Match:
         for p in pend:
             b, row, res = p.b, p.row, p.res
             kick = int(res.kick[row])
-            noisy = K.perturb(p.plan.launch, np.array([kick]), res.noise_mult[row : row + 1], self.rng)
+            nm = res.noise_mult[row : row + 1]
+            if p.receiver >= 0 and self.sq.is_gk[p.receiver] and self.sq.team[p.receiver] == self.sq.team[p.kicker]:
+                nm = nm * 0.5  # a simple pass back to the keeper
+            noisy = K.perturb(p.plan.launch, np.array([kick]), nm, self.rng)
             if kick == K.K_GROUND and abs(float(res.curve_applied[row])) < 0.05:
                 noisy.elev[:] = 0.0
                 noisy.spin[:] = 0.0
@@ -1543,7 +1547,7 @@ class Match:
         r = self.rng.random()
         if r < 0.04:
             return SAVE_TO_POST
-        if r < 0.4:
+        if r < 0.55:
             return SAVE_PARRY_OUT
         if r < 0.93:
             return SAVE_PARRY_SAFE
@@ -1638,6 +1642,7 @@ class Match:
             self._shape += SHAPE_SMOOTHING * (tgt - self._shape)
         tgt = self._shape.copy()
         tgt, cap = goal_side(w, sq, self.sign, poss, tgt, cap)
+        tgt = protect_goal(w, sq, self.sign, poss, tgt)
         tgt, cap = box_marking(w, sq, self.sign, poss, tgt, cap, n_pairs=6)
         tgt, cap = lane_blocker(w, sq, self.sign, poss, tgt, cap)
         t_now = w.t[:, None]
@@ -1762,6 +1767,10 @@ class Match:
                 dist2 = d[np.arange(len(bb)), order[:, 1]]
                 sel2 = zone & (dist2 < 14.0) & ~sq.is_gk[second] & ((press > 0.55) | danger)
                 lane = 0.6 * opos + 0.4 * w.pos[bb, second]
+                # near goal the second man drops into the shooting lane instead
+                to_goal = np.column_stack([-HALF_LENGTH * s, np.zeros(len(bb))]) - opos
+                to_goal /= np.maximum(np.linalg.norm(to_goal, axis=1, keepdims=True), 1e-6)
+                lane = np.where(danger[:, None], opos + 2.2 * to_goal, lane)
                 tgt[bb[sel2], second[sel2]] = lane[sel2]
                 cap[bb[sel2], second[sel2]] = sq.max_speed[second[sel2]] * 0.8
 
@@ -2212,8 +2221,8 @@ class Match:
         z = bp[2]
         r = self.rng.random()
         kind = None
-        if z > 1.0 and in_box and dist < 18.0 and z <= sq.jump_reach[c] + 0.1:
-            kind = I_SHOT if r < 0.8 else I_PASS_PLAYER  # attack the cross: head it at goal
+        if z > 0.95 and in_box and dist < 19.0 and z <= sq.jump_reach[c] + 0.1:
+            kind = I_SHOT if r < 0.88 else I_PASS_PLAYER  # attack the cross: head it at goal
         elif z > 1.25:
             if in_box and dist < 15.0:
                 kind = I_SHOT if r < 0.78 else I_PASS_PLAYER
@@ -2325,7 +2334,27 @@ class Match:
         else:
             self._set_anim(b, c, "receive_aerial" if aerial else "receive_ground")
 
-    def _deflect(self, b: int, c: int, scale: float, spread: float, toward: F | None = None) -> None:
+    def _behind(self, b: int, c: int, scale: float, min_speed: float = 7.0) -> None:
+        """Off a defender or keeper and out over his own byline, wide of the posts (a corner)."""
+        w = self.w
+        team = int(self.sq.team[c])
+        gx = -HALF_LENGTH * self.sign[b, team]
+        bp = w.ball_pos[b]
+        side = float(np.sign(bp[1])) if abs(bp[1]) > 0.5 else (1.0 if self.rng.random() < 0.5 else -1.0)
+        ty = side * self.rng.uniform(HALF_GOAL + 1.5, max(HALF_GOAL + 3.0, abs(float(bp[1])) + 8.0))
+        # aimed at a point on the goal line outside the posts: it crosses the line there and never goes in
+        to = np.array([gx - bp[0], ty - bp[1]])
+        if abs(to[0]) < 0.3:
+            to[0] = np.sign(gx) * 0.3
+        u = to / max(float(np.linalg.norm(to)), 1e-6)
+        self._deflect(b, c, scale=scale, spread=0.04, toward=u, behind=True)
+        sp = max(float(np.linalg.norm(w.ball_vel[b, :2])), min_speed)
+        w.ball_vel[b, :2] = u * sp
+        self._replan_loose(b, exclude=c)
+
+    def _deflect(
+        self, b: int, c: int, scale: float, spread: float, toward: F | None = None, behind: bool = False
+    ) -> None:
         w = self.w
         v = w.ball_vel[b].copy()
         speed = float(np.linalg.norm(v[:2])) * scale + 2.0
@@ -2337,7 +2366,7 @@ class Match:
         to_goal = np.array([own_x - w.ball_pos[b, 0], -w.ball_pos[b, 1]])
         dist_goal = float(np.linalg.norm(to_goal))
         u = np.array([np.cos(ang), np.sin(ang)])
-        if dist_goal < 25.0 and float(u @ to_goal) / max(dist_goal, 1e-6) > 0.3:
+        if not behind and dist_goal < 25.0 and float(u @ to_goal) / max(dist_goal, 1e-6) > 0.3:
             u[0] = -u[0]
             ang = float(np.arctan2(u[1], u[0]))
         w.ball_vel[b] = (speed * np.cos(ang), speed * np.sin(ang), abs(self.rng.normal(1.5, 1.5)))
@@ -2352,6 +2381,10 @@ class Match:
         w.flight_event[b] = -1
         w.flight_peak[b] = w.ball_pos[b, 2]
         self._replan_loose(b, exclude=c)
+
+    def _near_own_byline(self, b: int, c: int, bp: F) -> bool:
+        x_t = bp[0] * self.sign[b, int(self.sq.team[c])]
+        return bool(x_t < -HALF_LENGTH + 20.0)
 
     def _intercept(self, b: int, c: int, bp: F, kind: int, pass_ev: int, passer: int) -> None:
         w, sq = self.w, self.sq
@@ -2372,6 +2405,9 @@ class Match:
         if sub == SUB_DEFLECT:
             ev = self._ev(b, "deflection", c, team, bp, {"deflection_target": "cross" if ptype == "cross" else "pass"})
             self.logs[b].link(ev, pass_ev)
+            if self._near_own_byline(b, c, bp) and self.rng.random() < (0.55 if ptype == "cross" else 0.3):
+                self._behind(b, c, scale=0.5)
+                return
             self._deflect(b, c, scale=0.7, spread=0.35)
             return
         if near_passer:
@@ -2390,6 +2426,9 @@ class Match:
             self.logs[b].link(ev, pass_ev)
             if self.rng.random() < 0.03:
                 self._foul(b, c, passer, "handball")
+                return
+            if self._near_own_byline(b, c, bp) and self.rng.random() < (0.55 if ptype == "cross" else 0.3):
+                self._behind(b, c, scale=0.35)
                 return
             self._deflect(b, c, scale=0.35, spread=1.4)
             return
@@ -2412,6 +2451,10 @@ class Match:
                 w.clear_ev[b] = ev
                 self.logs[b].link(ev, pass_ev)
                 self._set_anim(b, c, "header_jumping")
+                if bp[0] * s < -HALF_LENGTH + 18.0 and self.rng.random() < 0.3:
+                    self.logs[b].q(ev)["outcome"] = "out_of_play"
+                    self._behind(b, c, scale=0.4)
+                    return
                 self._deflect(b, c, scale=0.9, spread=0.5, toward=np.array([s, 0.0]))
                 return
         if bp[2] > HEAD_ONLY_Z and not sq.is_gk[c]:
@@ -2524,7 +2567,8 @@ class Match:
         team = int(sq.team[c])
         sub = int(w.flight_sub[b])
         if sub == SAVE_CATCH and float(np.linalg.norm(bp[:2] - w.pos[b, c])) > CONTROL_RADIUS:
-            sub = SAVE_PARRY_SAFE  # only a ball the keeper actually reaches with his body can be held
+            # only a ball the keeper actually reaches with his body can be held: at full stretch it is tipped away
+            sub = SAVE_PARRY_OUT if self.rng.random() < 0.5 else SAVE_PARRY_SAFE
         s = self.sign[b, 1 - team]
         cross_pt = (HALF_LENGTH * s, bp[1], bp[2])
         out = {SAVE_CATCH: "saved", SAVE_TO_POST: "saved_to_post"}.get(sub, "saved")
@@ -2572,10 +2616,8 @@ class Match:
             if technique == "standing":
                 self._set_anim(b, c, "gk_catch_high" if bp[2] > 1.2 else "gk_catch_low")
         elif sub == SAVE_PARRY_OUT:
-            toward = np.array([0.25 * own, np.sign(bp[1] + 1e-6)])
-            self._deflect(b, c, scale=0.5, spread=0.15, toward=toward)
-            w.ball_vel[b, 0] = abs(w.ball_vel[b, 0]) * s * 0.3 + s * 2.0  # over / round the post
-            w.ball_vel[b, 2] = 3.0
+            self._behind(b, c, scale=0.35, min_speed=6.0)  # over the bar / round the post
+            w.ball_vel[b, 2] = 3.0 if bp[2] > 1.4 else 1.0
         elif sub == SAVE_TO_POST:
             self._deflect(b, c, scale=0.4, spread=0.2, toward=np.array([own, 0.0]))
         elif sub == SAVE_PARRY_SAFE:
@@ -2611,6 +2653,9 @@ class Match:
         self.flight_res[b] = None
         if self.rng.random() < 0.035:
             self._foul(b, c, int(w.flight_passer[b]), "handball")
+            return
+        if self.rng.random() < 0.35:
+            self._behind(b, c, scale=0.4)
             return
         self._deflect(b, c, scale=0.4, spread=0.9, toward=-w.ball_vel[b, :2])  # off the body, back out
 
@@ -2787,7 +2832,7 @@ class Match:
         loc = w.ball_pos[b].copy()
         tq = a["tackling"][j] / 99.0
         slide = self.rng.random() < 0.2 and np.linalg.norm(w.vel[b, j]) > 3.0
-        p_foul = (0.07 + 0.18 * (1.0 - tq)) * (1.6 if slide else 1.0)
+        p_foul = (0.038 + 0.098 * (1.0 - tq)) * (1.6 if slide else 1.0)
         if sq.is_gk[j]:
             p_foul = 0.06
         team_j = int(sq.team[j])
@@ -2889,7 +2934,7 @@ class Match:
                 continue
             r = self.rng.random()
             tempo = self.styles[team].tempo
-            if r > 0.32 * tempo:
+            if r > 0.28 * tempo:
                 continue
             i = int(self.rng.choice(free))
             px_t, py_t = w.pos[b, i, 0] * s, w.pos[b, i, 1] * s

@@ -158,7 +158,7 @@ def shape_targets(
     target = np.stack([tx * s_p, ty * s_p], axis=-1)
     dist = np.linalg.norm(target - w.pos, axis=-1)
     urgency = np.where(in_poss, 0.85, 1.1)
-    cap = np.clip(0.25 + 0.18 * dist, 0.4, 3.8) * urgency
+    cap = np.clip(0.2 + 0.13 * dist, 0.35, 2.9) * urgency
     cap = np.where(dist > 15.0, 0.75 * sq.max_speed[None, :], cap)
     return target, np.minimum(cap, sq.max_speed[None, :])
 
@@ -345,6 +345,26 @@ def goal_side(w: World, sq: Squad, sign: F, poss: IA, tgt: F, cap: F) -> tuple[F
     out[..., 0] = new_tx * s_p
     cap = np.where(behind, 0.95 * sq.max_speed[None, :], cap)
     return out, cap
+
+
+def protect_goal(w: World, sq: Squad, sign: F, poss: IA, tgt: F) -> F:
+    """With the ball near their goal, defenders and midfielders narrow onto the line between ball and goal centre, so
+    shots have to go through bodies."""
+    s_p = sign[:, sq.team]
+    bx = w.ball_pos[:, None, 0] * s_p
+    by = w.ball_pos[:, None, 1] * s_p
+    defending = (sq.team[None, :] != poss[:, None]) & ~sq.is_gk[None, :]
+    k = np.clip((-bx - 15.0) / 15.0, 0.0, 1.0) * (np.abs(by) < 30.0)
+    pull = np.where(sq.line[None, :] == 1, 0.5, np.where(sq.line[None, :] == 2, 0.35, 0.0)) * k * defending
+    if not pull.any():
+        return tgt
+    tx, ty = tgt[..., 0] * s_p, tgt[..., 1] * s_p
+    gx = -HALF_LENGTH
+    frac = np.clip((tx - bx) / np.minimum(gx - bx, -1e-3), 0.0, 1.0)
+    y_line = by * (1.0 - frac)
+    out = tgt.copy()
+    out[..., 1] = (ty + pull * (y_line - ty)) * s_p
+    return out
 
 
 def box_marking(w: World, sq: Squad, sign: F, poss: IA, tgt: F, cap: F, n_pairs: int = 4) -> tuple[F, F]:

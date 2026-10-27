@@ -21,6 +21,7 @@ from sim.evaluate import (
     SIT_PENALTY,
     SIT_SET_PIECE,
     carry_retention,
+    cone_count,
     lane_count,
     race_logit,
     score_passes,
@@ -222,10 +223,18 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
     first = mpos + 0.6 * mvel
     t_fl = np.clip(np.linalg.norm(first - cpos[:, None, :], axis=2) / 11.0, 0.3, 2.0)
     lead = mpos + t_fl[..., None] * mvel
+    own_gk = sq.is_gk[mates]
+    if own_gk.any():
+        g_t = mpos * s[:, None, None]
+        side_t = np.where(np.abs(g_t[..., 1]) > 0.3, np.sign(g_t[..., 1]), np.sign(cpos_t[:, None, 1] + 1e-6))
+        beside = np.stack([g_t[..., 0] + 1.5, g_t[..., 1] + 1.6 * side_t], axis=-1) * s[:, None, None]
+        lead = np.where(own_gk[..., None], beside, lead)
     target[:, S_PASS0:S_THROUGH0, :2] = lead
     receiver[:, S_PASS0:S_THROUGH0] = mates
     if rng is not None:
         power[:, S_PASS0:S_THROUGH0] = rng.uniform(0.35, 0.92, (d, N_ON - 1))
+        pw = power[:, S_PASS0:S_THROUGH0]
+        power[:, S_PASS0:S_THROUGH0] = np.where(own_gk, np.minimum(pw, 0.45), pw)
     pass_len = np.linalg.norm(lead - cpos[:, None, :], axis=2)
     valid[:, S_PASS0:S_THROUGH0] &= pass_len > 4.0
     receiver_offside = np.zeros((d, o), dtype=bool)
@@ -298,6 +307,11 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
     # clearance
     side = np.where(cpos_t[:, 1] >= 0, 1.0, -1.0)
     clr_t = np.column_stack([np.minimum(cpos_t[:, 0] + 42.0, 30.0), np.clip(cpos_t[:, 1] + side * 14.0, -30, 30)])
+    if rng is not None:
+        # hemmed in near his own byline a defender often just puts it behind for a corner
+        behind = (cpos_t[:, 0] < -40.0) & (np.abs(cpos_t[:, 1]) > 6.0) & (rng.random(d) < 0.3)
+        clr_t[behind, 0] = -HALF_LENGTH - 4.0
+        clr_t[behind, 1] = side[behind] * np.clip(np.abs(cpos_t[behind, 1]) + 6.0, 9.0, 30.0)
     target[:, S_CLEAR, :2] = clr_t * s[:, None]
     kind[:, S_CLEAR] = I_CLEARANCE
     power[:, S_CLEAR] = 0.8
@@ -446,7 +460,19 @@ def score_table(
         )  # fmt: skip
         p[is_pass], p0[is_pass], vs[is_pass], vf[is_pass] = sc.p, sc.p0, sc.value_success, sc.value_fail
         pb[is_pass] = sc.p_base if sc.p_base is not None else sc.p0
+        # set-piece balls into a marked box are won in the air by whoever attacks them better, not by a footrace
+        # (attackers get first contact on roughly a third of corner deliveries)
+        sp = np.isin(rep(ctx)[is_pass], [CTX_CORNER, CTX_FREE_KICK]) & box_end & (sub.pass_height == 2)
+        if sp.any():
+            r = np.maximum(rec_f[sp], 0)
+            aer = (sq.attr["heading"][r] + sq.attr["jumping"][r]) / 2.0
+            p_air = np.clip(0.36 + 0.1 * (aer - 70.0) / 20.0 + 0.8 * (sq.height[r] - 1.83), 0.15, 0.55)
+            ip = np.nonzero(is_pass)[0][sp]
+            p[ip] = p_air
+            p0[ip] = p_air
+            pb[ip] = 0.36
     is_shot = kf == I_SHOT
+    cone_o = np.zeros(n)
     if is_shot.any():
         sub = _subset(res, is_shot)
         gk_t = rep(gk_pos * s[:, None])[is_shot]
@@ -465,6 +491,7 @@ def score_table(
             np.zeros(int(is_shot.sum()), dtype=bool),
         )
         pb[is_shot] = sc.p0
+        cone_o[is_shot] = np.minimum(cone_count(origin_t[is_shot], outfield_t), 2)
         p[is_shot], p0[is_shot], vs[is_shot], vf[is_shot], xg[is_shot] = (
             sc.p,
             sc.p0,
@@ -516,16 +543,19 @@ def score_table(
     util = dv_seen.copy().reshape(d, o)
     arch = np.array([sq.players[i].archetype for i in range(len(sq.players))])
     arch_c = arch[c]
-    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.022
+    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.035
     # speculative efforts from distance are part of the game (about a fifth of all shots come from 25 m+)
-    long_try = (sdist > 22.0) * (0.022 + 0.012 * (sq.attr["long_shots"][c] - 70) / 20)
-    util += (cat == S_SHOT) * (shot_bias + long_try)[:, None]
+    long_try = (sdist > 22.0) * (0.007 + 0.012 * (sq.attr["long_shots"][c] - 70) / 20)
+    # in the box players shoot through bodies rather than wait for a clear lane
+    box_try = 0.026 * ((cpos_t[:, 0] > 36.0) & (np.abs(cpos_t[:, 1]) < 20.16))
+    util += (cat == S_SHOT) * (shot_bias + long_try + box_try)[:, None]
+    util += (cat == S_SHOT) * (0.02 * (box_try > 0))[:, None] * cone_o.reshape(d, o)
     vision = sq.attr["vision"][c] / 99.0
     directness = np.array([styles[0].directness, styles[1].directness])[c // N_ON]
     util += (cat == S_THROUGH0) * (0.006 * (arch_c == "advanced_playmaker") + 0.003 * directness)[:, None]
     ptype = res.pass_type.reshape(d, o)
     winger = np.isin(arch_c, ["touchline_winger", "overlapping_fullback"])
-    util += (ptype == 1) * (0.012 + 0.02 * winger[:, None])
+    util += (ptype == 1) * (0.026 + 0.025 * winger[:, None])
     dribbler = np.isin(arch_c, ["inside_forward", "touchline_winger", "advanced_playmaker"])
     util += (cat == S_CARRY0) * (0.004 + 0.006 * dribbler - 0.006 * (sq.line[c] == 1))[:, None]
     # in the box players look to finish or set up, rather than dribble at the keeper
@@ -536,7 +566,7 @@ def score_table(
     util += (cat == S_CLEAR) * (0.02 * pressure)[:, None]
     # forward progress tendency
     fwd = (end_t[:, 0] - origin_t[:, 0]).reshape(d, o)
-    util += 0.0008 * (directness[:, None] - 0.3) * np.clip(fwd, -20, 30)  # direct sides go forward, others keep it
+    util += 0.0013 * (directness[:, None] - 0.35) * np.clip(fwd, -20, 30)  # direct sides go forward, others keep it
     # perception: long balls and through balls are only seen by players with vision
     if rng is not None:
         long_ = (np.linalg.norm(end_t - origin_t, axis=1) > 30.0).reshape(d, o)
