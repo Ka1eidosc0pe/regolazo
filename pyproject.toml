@@ -18,9 +18,11 @@ dependencies = [
 [dependency-groups]
 dev = [
     "jsonschema>=4.23",
+    "matplotlib>=3.11.2",
     "mypy>=1.13",
     "pytest>=8.3",
     "ruff>=0.8",
+    "scikit-learn>=1.9.1",
     "types-jsonschema>=4.26.0.20261006",
 ]
 

@@ -1,0 +1,15 @@
+{
+  "max_speed_mean": 8.280643238908091,
+  "max_speed_std": 0.5869929497470595,
+  "max_accel_mean": 4.371560519036107,
+  "max_accel_std": 1.33050023289501,
+  "reaction_time_s": 0.72,
+  "reaction_time_definition": "Decision + reaction time measured in hindsight, not a pure reflex: median delay from a Metrica pass (>= 10 m, >= 0.8 s flight) being struck until the defender nearest its target accelerates towards the target at > 1.5 m/s^2, over the passes in games 1-2 where that defender was not already accelerating towards it. The shared field name is reaction_time_s.",
+  "source": "metrica-sample-games-1-2",
+  "n_players": 50,
+  "n_reaction_samples": 106,
+  "reaction_time_iqr_s": [
+    0.45,
+    0.91
+  ]
+}
