@@ -180,6 +180,11 @@ class SimEngine:
         w = m.w
         for name in ("last_pass_ev", "shot_ev", "clear_ev", "receipt_ev", "flight_event"):
             getattr(w, name)[:] = -1
+        # a reality's carries start at the fork, not before it
+        if w.owner[0] >= 0:
+            w.carry_start[:] = w.pos[:, int(w.owner[0])]
+        w.carry_start_t[:] = w.t
+        w.carry_path[:] = 0.0
         m.sign = attack_sign(w, m.home_first)
         m.done[:] = False
         m.phase[:] = 0

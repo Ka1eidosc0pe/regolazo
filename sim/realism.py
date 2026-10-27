@@ -34,6 +34,7 @@ class MatchSummary:
     """(displayed p, model xPass, completed, passing rating) per open-play pass."""
     score: tuple[int, int] = (0, 0)
     possession_share_home: float = 0.5
+    extra: dict[str, float] = field(default_factory=dict)
 
 
 def _values(events: list[MatchEvent]) -> set[str]:
@@ -95,7 +96,23 @@ def run_one(seed: int) -> MatchSummary:
         passes=passes,
         score=(int(sc[0]), int(sc[1])),
         possession_share_home=_pass_share(res.events),
+        extra=_extra(res.events),
     )
+
+
+def _extra(events: list[MatchEvent]) -> dict[str, float]:
+    passes = [e for e in events if e.type == "pass"]
+    crosses = [e for e in passes if getattr(e.qualifiers, "pass_type", None) == "cross"]
+    shots = [e for e in events if e.type == "shot"]
+    return {
+        "crosses": len(crosses),
+        "crosses_complete": sum(getattr(e.qualifiers, "outcome", "") == "complete" for e in crosses),
+        "through_balls": sum(getattr(e.qualifiers, "pass_type", None) == "through_ball" for e in passes),
+        "header_shots": sum(getattr(e.qualifiers, "body_part", None) == "head" for e in shots),
+        "shots_in_box": sum(getattr(e.qualifiers, "distance_to_goal_m", 99) < 16.5 for e in shots),
+        "carries": sum(e.type == "carry" for e in events),
+        "take_ons": sum(e.type == "take_on" for e in events),
+    }
 
 
 def _pass_share(events: list[MatchEvent]) -> float:
@@ -162,6 +179,9 @@ def core_values() -> set[str]:
                                                  "other")}  # fmt: skip
     out -= {f"gk_action.body_part:{v}" for v in ("hands", "other", "no_touch", "head")}
     out -= {f"pass.restart:{v}" for v in ("penalty", "drop_ball")}
+    # a ball that crosses a line is restarted with a throw-in, goal kick or corner: never a free kick or penalty
+    out -= {f"ball_out_of_play.result_restart_type:{v}" for v in ("free_kick_direct", "free_kick_indirect", "kick_off",
+                                                                  "penalty", "drop_ball")}  # fmt: skip
     return out
 
 

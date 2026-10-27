@@ -406,7 +406,7 @@ def _team(
     shape: CrestShape = rng.choice(get_args(CrestShape))
     emblem: CrestEmblem = rng.choice(get_args(CrestEmblem))
     crest = CrestSpec(shape=shape, monogram=monogram[:3], primary=primary, secondary=secondary, emblem=emblem)
-    level = rng.uniform(68, 76)
+    level = rng.uniform(68, 78)
     used_names: set[str] = set()
     slots = FORMATIONS[formation]
     archetypes: list[Archetype] = [_pick(rng, ARCHETYPES_BY_POSITION[POSITION_GROUP[s.position]]) for s in slots]

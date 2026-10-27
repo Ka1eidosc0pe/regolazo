@@ -153,14 +153,14 @@ def score_passes(
         p=p,
         p0=p0,
         value_success=xt_end,
-        value_fail=-0.6 * xt_opp - 0.004,
+        value_fail=-1.0 * xt_opp - 0.025,
         xg=np.zeros(len(p)),
         xt_end=xt_end,
         p_base=p_base,
     )
 
 
-RACE_WEIGHT = 0.35
+RACE_WEIGHT = 0.25
 RACE_WEIGHT_WEAK_MODEL = 0.9
 RACE_SAMPLES = np.linspace(0.1, 1.0, 10)
 _GROUND_KICKS = (K.K_GROUND, K.K_CURLED, K.K_OUTSIDE)
@@ -215,6 +215,8 @@ def race_logit(
     reachable = np.ones((n, len(sk)), dtype=bool)
     reachable[air] = (sk[None, :] <= 0.12) | (sk[None, :] >= 0.8)
     pts = origin[:, None, :] + d_vec[:, None, :] * sk[None, :, None]  # (N, K, 2)
+    from sim.planner import kinematic_time
+
     react, vmax = pc.reaction_time_s, pc.max_player_speed_mps
     ahead = opp_pos + opp_vel * react
     dd = np.linalg.norm(pts[:, :, None, :] - ahead[:, None, :, :], axis=3) - 0.9  # (N, K, 11)
@@ -225,7 +227,25 @@ def race_logit(
     dr = np.maximum(np.linalg.norm(end - ra, axis=1) - 0.9, 0.0)
     slack_r = react + dr / vmax - t_ball[:, -1]
     slack_r = np.where(rec_idx >= 0, slack_r, 0.0)
-    return np.asarray(np.pi / np.sqrt(3.0) / pc.tti_sigma * (slack_d - np.maximum(slack_r, 0.0)))
+    race = np.pi / np.sqrt(3.0) / pc.tti_sigma * (slack_d - np.maximum(slack_r, 0.0))
+    # Balls played into space or over the top (where the event model is weak) are also raced with the players'
+    # real kinematics: defenders sprinting back can recover what the conservative pitch-control model concedes.
+    weak = (res.pass_type == 1) | (res.pass_type == 3) | (res.pass_height == 2)
+    if weak.any():
+        react_p = 0.3
+        ahead_p = opp_pos + opp_vel * react_p
+        dp = np.maximum(np.linalg.norm(pts[:, :, None, :] - ahead_p[:, None, :, :], axis=3) - 0.9, 0.0)
+        vmx, amx = sq.max_speed[opp_idx][:, None, :], sq.max_accel[opp_idx][:, None, :]
+        tti_p = react_p + kinematic_time(dp, vmx, amx)
+        slack_dp = np.where(reachable[..., None], tti_p - t_ball[..., None], 99.0).reshape(n, -1).min(axis=1)
+        r = np.maximum(rec_idx, 0)
+        rap = rec_pos + rec_vel * react_p
+        drp = np.maximum(np.linalg.norm(end - rap, axis=1) - 0.9, 0.0)
+        slack_rp = react_p + kinematic_time(drp, sq.max_speed[r], sq.max_accel[r]) - t_ball[:, -1]
+        slack_rp = np.where(rec_idx >= 0, slack_rp, 0.0)
+        race_p = np.pi / np.sqrt(3.0) / pc.tti_sigma * (slack_dp - np.maximum(slack_rp, 0.0))
+        race = np.where(weak, np.minimum(race, race_p), race)
+    return np.asarray(race)
 
 
 def score_shots(
@@ -278,7 +298,7 @@ def shot_adjust(sq: Squad, res: Resolved, keeper: IA, x0: F, pressure: F, situat
 
 def carry_retention(sq: Squad, carrier: IA, n_close: F, pressure: F, dribble: BA) -> F:
     a = sq.attr
-    z = 2.6 - 1.1 * n_close - 0.8 * pressure + 0.035 * (a["dribbling"][carrier] - ATTR_REF)
+    z = 2.3 - 1.2 * n_close - 0.9 * pressure + 0.035 * (a["dribbling"][carrier] - ATTR_REF)
     z = z + 0.02 * (a["strength"][carrier] - ATTR_REF) * (~dribble)
     z = np.where(dribble, z - 1.6, z)
     return sigmoid(z)

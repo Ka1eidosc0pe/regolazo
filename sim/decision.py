@@ -225,7 +225,7 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
     target[:, S_PASS0:S_THROUGH0, :2] = lead
     receiver[:, S_PASS0:S_THROUGH0] = mates
     if rng is not None:
-        power[:, S_PASS0:S_THROUGH0] = rng.uniform(0.35, 0.75, (d, N_ON - 1))
+        power[:, S_PASS0:S_THROUGH0] = rng.uniform(0.35, 0.92, (d, N_ON - 1))
     pass_len = np.linalg.norm(lead - cpos[:, None, :], axis=2)
     valid[:, S_PASS0:S_THROUGH0] &= pass_len > 4.0
     receiver_offside = np.zeros((d, o), dtype=bool)
@@ -258,6 +258,12 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
         valid[:, slot] = (tgt_t[:, 0] > cpos_t[:, 0] + 6.0) & (p_t[:, 0] > -10.0)
         receiver_offside[:, slot] = (p_t[:, 0] > di.offside_line + 0.05) & (p_t[:, 0] > 0)
         power[:, slot] = 0.25  # weighted to die near the runner
+        # technicians bend it round the last man
+        bender = sq.attr["curve"][c] >= 66
+        bend_sign = np.where(sq.left_foot[c], 1.0, -1.0)
+        if rng is not None:
+            bend_sign = np.where(rng.random(d) < 0.35, -bend_sign, bend_sign)
+        curve[:, slot] = np.where(bender, 0.6 * bend_sign, 0.0)
 
     # shot
     aim = default_shot_aim(s, di.ball, gk_pos, rng)
@@ -265,7 +271,10 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
     kind[:, S_SHOT] = I_SHOT
     power[:, S_SHOT] = 0.75 if rng is None else rng.uniform(0.55, 0.95, d)
     sdist = cm.sdist
-    valid[:, S_SHOT] = (sdist < 33.0) & (cpos_t[:, 0] > 18.0) & (np.abs(cpos_t[:, 1]) < 26.0)
+    long_ok = sq.attr["long_shots"][c] >= 72
+    valid[:, S_SHOT] = (
+        ((sdist < 24.0) | ((sdist < 30.0) & long_ok)) & (cpos_t[:, 0] > 18.0) & (np.abs(cpos_t[:, 1]) < 24.0)
+    )
 
     # carries: ahead, diagonals, shield
     for k, ang in enumerate((0.0, 0.7, -0.7)):
@@ -473,7 +482,10 @@ def score_table(
         seg_e = flat(target)[is_carry, :2]
         in_path = lane_count(seg_o, seg_e, rep(opp_pos)[is_carry], width=3.0).astype(float)
         in_path = np.where(dribble[is_carry], np.maximum(in_path - 1.0, 0.0), in_path)
-        pr = carry_retention(sq, rep(c)[is_carry], n_close + 1.3 * in_path, rep(pressure)[is_carry], dribble[is_carry])
+        # and opponents waiting where the carry ends (a run into a packed box rarely survives)
+        near_end = (np.linalg.norm(rep(opp_pos)[is_carry] - seg_e[:, None, :], axis=2) < 3.5).sum(axis=1)
+        crowd = n_close + 1.3 * in_path + 0.8 * near_end
+        pr = carry_retention(sq, rep(c)[is_carry], crowd, rep(pressure)[is_carry], dribble[is_carry])
         p[is_carry] = pr
         p0[is_carry] = pr
         pb[is_carry] = pr
@@ -488,29 +500,37 @@ def score_table(
         vf[is_clear] = -0.3 * xt_opp_here[is_clear]
     # a pass to a receiver standing offside at release is called back if it reaches him: it cannot succeed
     off = flat(receiver_offside)
+    p_seen = p.copy()
     p = np.where(off, 0.0, p)
     pb = np.where(off, 0.0, pb)
     dv = decision_value(p, vs, vf)
+    # the AI sometimes misreads the line and plays the pass anyway (that is where offsides come from)
+    dv_seen = dv
+    if rng is not None:
+        vis_rep = np.repeat(sq.attr["vision"][c] / 99.0, o)
+        misread = off & (rng.random(n) < 0.18 * (1.25 - vis_rep))
+        dv_seen = np.where(misread, decision_value(p_seen, vs, vf), dv)
 
     # --- utility: decision value plus tendencies ------------------------------------------------------------
-    util = dv.copy().reshape(d, o)
+    util = dv_seen.copy().reshape(d, o)
     arch = np.array([sq.players[i].archetype for i in range(len(sq.players))])
     arch_c = arch[c]
-    shot_bias = np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) + 0.026
+    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.01
     util += (cat == S_SHOT) * (shot_bias + 0.012 * (sq.attr["long_shots"][c] - 70) / 20 * (sdist > 20))[:, None]
     vision = sq.attr["vision"][c] / 99.0
     directness = np.array([styles[0].directness, styles[1].directness])[c // N_ON]
-    util += (cat == S_THROUGH0) * (0.004 + 0.012 * (arch_c == "advanced_playmaker") + 0.006 * directness)[:, None]
+    util += (cat == S_THROUGH0) * (0.006 * (arch_c == "advanced_playmaker") + 0.003 * directness)[:, None]
     ptype = res.pass_type.reshape(d, o)
     winger = np.isin(arch_c, ["touchline_winger", "overlapping_fullback"])
-    util += (ptype == 1) * (0.006 + 0.012 * winger[:, None])
+    util += (ptype == 1) * (0.012 + 0.02 * winger[:, None])
     dribbler = np.isin(arch_c, ["inside_forward", "touchline_winger", "advanced_playmaker"])
     util += (cat == S_CARRY0) * (0.004 + 0.006 * dribbler - 0.006 * (sq.line[c] == 1))[:, None]
+    # in the box players look to finish or set up, rather than dribble at the keeper
+    in_box_now = (cpos_t[:, 0] > 36.0) & (np.abs(cpos_t[:, 1]) < 20.16)
+    util -= ((cat == S_CARRY0) | (cat == S_DRIBBLE)) * (0.012 * in_box_now)[:, None]
     util += (cat == S_DRIBBLE) * (0.006 * dribbler - 0.012)[:, None]
     util -= (cat == S_HOLD) * 0.012
     util += (cat == S_CLEAR) * (0.02 * pressure)[:, None]
-    # offside receivers: low-vision players still try sometimes
-    util -= receiver_offside * (0.05 + 0.15 * vision[:, None])
     # forward progress tendency
     fwd = (end_t[:, 0] - origin_t[:, 0]).reshape(d, o)
     util += 0.0004 * directness[:, None] * np.clip(fwd, -20, 30)
@@ -521,7 +541,7 @@ def score_table(
         seen = rng.random((d, o)) < (0.3 + 0.7 * vision[:, None] ** 1.3)
         valid &= ~long_ | seen
     composure = sq.attr["composure"][c] / 99.0
-    tau = 0.016 * (1.25 - 0.5 * vision) * (1.0 + 0.8 * pressure * (1.0 - composure))
+    tau = 0.011 * (1.25 - 0.5 * vision) * (1.0 + 0.8 * pressure * (1.0 - composure))
     z = np.where(valid, util / tau[:, None], -np.inf)
     zmax = np.where(valid.any(axis=1, keepdims=True), np.max(np.where(valid, z, -1e300), axis=1, keepdims=True), 0.0)
     z = z - zmax

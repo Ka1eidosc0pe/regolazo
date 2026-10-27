@@ -190,7 +190,7 @@ def resolve(
         curled & (a["technique"][p] >= 80) & (a["curve"][p] >= 72) & (np.sign(curve_applied) == _natural_out(sq, p))
     )
     pk = np.where(outside & ~long_ball & ~blocked, K.K_OUTSIDE, pk)
-    low_cross = (power > 0.7) | ((ex > 44.0) & (np.abs(ey) < 9.0) & (ox > 38.0))
+    low_cross = (power > 0.85) | ((ex > 46.0) & (np.abs(ey) < 6.0) & (ox > 42.0))
     pk = np.where(cross_zone, np.where(low_cross & ~corner, K.K_CROSS_LOW, K.K_CROSS), pk)
     pk = np.where(cutback & ~cross_zone, K.K_GROUND, pk)
     pk = np.where(through & ~blocked & ~curled & ~cross_zone, K.K_GROUND, pk)
@@ -287,7 +287,8 @@ def resolve(
     curve_applied = np.where(is_shot & ~np.isin(st, [2, 0, 1]), 0.0, curve_applied)
     if (is_pass & cross_zone).any():
         # whipped crosses get the kicking foot's natural curl
-        curve_applied = np.where(is_pass & cross_zone, natural * np.maximum(0.45, np.minimum(mc, 0.7)), curve_applied)
+        whip = natural if rng is None else np.where(corner & (rng.random(n) < 0.5), -natural, natural)
+        curve_applied = np.where(is_pass & cross_zone, whip * np.maximum(0.45, np.minimum(mc, 0.7)), curve_applied)
 
     kick = np.where(is_clear, np.where(head_high, K.K_HEADER_PASS, K.K_CLEARANCE), kick)
     kick = np.where(kind == I_CARRY, -1, kick)

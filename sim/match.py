@@ -79,7 +79,16 @@ from sim.resolver import (
     Resolved,
     effective_power,
 )
-from sim.tactics import attack_sign, last_defender_x, offside_lines, restart_targets, shape_targets, styles_for
+from sim.tactics import (
+    attack_sign,
+    box_marking,
+    goal_side,
+    last_defender_x,
+    offside_lines,
+    restart_targets,
+    shape_targets,
+    styles_for,
+)
 from sim.world import (
     BS_DEAD,
     BS_FLIGHT,
@@ -306,6 +315,8 @@ class Match:
         self.logs = [EventLog() for _ in range(batch)]
         self.record = record
         self.take_snapshots = snapshots
+        self.record_decisions = snapshots
+        """Keep per-decision option summaries (seed search, Moment Scout)."""
         self.snapshots: list[tuple[int, dict[str, npt.NDArray[Any]]]] = []
         self.decisions: list[DecisionRecord] = []
         self.home_first = meta.home_attacks_positive_x_first_half
@@ -602,7 +613,7 @@ class Match:
         w.carry_speed[b] = 2.0
         press, _, _ = self._pressure(b, i)
         tempo = self.styles[team].tempo
-        w.act_timer[b] = (0.35 + 0.9 * self.rng.random() * (1.0 - 0.7 * press)) / tempo
+        w.act_timer[b] = (0.5 + 1.3 * self.rng.random() * (1.0 - 0.6 * press)) / tempo
         w.ball_vel[b] = 0.0
         w.ball_spin[b] = 0.0
         self._resolve_clearance(b, team)
@@ -783,7 +794,7 @@ class Match:
             self._execute_option(b, k, slot, table, di, ctxs[k], (restart_event or {}).get(b))
 
     def _record_decision(self, b: int, k: int, slot: int, table: OptionTable, di: DeciderInput) -> None:
-        if b != 0 or not self.take_snapshots:
+        if b != 0 or not (self.take_snapshots or self.record_decisions):
             return
         w = self.w
         c = int(di.carrier[k])
@@ -881,7 +892,7 @@ class Match:
         drib = sq.attr["dribbling"][c] / 99.0
         w.carry_target[b] = target[:2]
         w.carry_speed[b] = sq.max_speed[c] * (0.42 + 0.2 * drib) * (0.55 if slot == S_HOLD else 1.0)
-        w.act_timer[b] = 0.6 + 0.9 * self.rng.random()
+        w.act_timer[b] = 0.8 + 1.2 * self.rng.random()
         if slot == S_DRIBBLE:
             self._take_on(b, c, p_success)
             return
@@ -1169,6 +1180,7 @@ class Match:
                 "outcome": "off_target",
                 "body_part": body if body in ("right_foot", "left_foot", "head") else "other",
                 "technique": SHOT_TECHNIQUES[int(res.shot_tech[row])],
+                **({"body_part": "other"} if _scramble(res, row, self.rng) else {}),
                 "situation": sit,
                 "ball_speed_mps": float(noisy.speed[0]),
                 "distance_to_goal_m": dist,
@@ -1338,7 +1350,9 @@ class Match:
         mates = np.arange(team * N_ON, (team + 1) * N_ON)
         opps = np.arange((1 - team) * N_ON, (2 - team) * N_ON)
         k_m, k_o = k[mates], k[opps]
-        success = self.rng.random() < p.p_success
+        # a receiver standing offside cannot complete the pass (displayed p = 0), but the ball can still reach him
+        p_draw = 0.75 if p.info.get("receiver_offside") else p.p_success
+        success = self.rng.random() < p_draw
         rec = p.receiver
         mode, coll = FM_FREE, -1
         sub = SUB_WON
@@ -1363,6 +1377,17 @@ class Match:
             sigma = PL.interception_time_sigma(self.models.pitch_control_params.tti_sigma)
             icp = PL.choose_interceptor(k_o, opps, self.rng, sigma)
             k_rec = int(k[rec]) if rec >= 0 else PL.NEVER
+            # a body in the lane right in front of the passer blocks it (no reaction time needed)
+            if p.flight == FLIGHT_PASS and self.rng.random() < 0.6:
+                seg = path[2:9]
+                dl = np.linalg.norm(seg[None, :, :2] - w.pos[b, opps][:, None, :], axis=2)
+                kb = np.argmin(dl, axis=1)
+                lat = dl[np.arange(len(opps)), kb]
+                cand = (lat < 0.9) & (seg[kb, 2] < 1.6) & ~sq.is_gk[opps]
+                if cand.any():
+                    jb = int(np.argmin(np.where(cand, lat, 99.0)))
+                    icp = int(opps[jb])
+                    k[icp] = int(kb[jb]) + 2
             if p.flight == FLIGHT_CLEAR:
                 # clearances: first to reach it, either side
                 cand = int(np.argmin(k))
@@ -1414,11 +1439,15 @@ class Match:
         opps = np.arange((1 - team) * N_ON, (2 - team) * N_ON)
         outfield = opps[~sq.is_gk[opps]]
         k_all = self._reach(b, path, vpath, exclude=p.kicker, exclude_until=99)
-        near = np.linalg.norm(path[None, :25, :2] - w.pos[b, outfield][:, None, :], axis=2)
-        lateral = near.min(axis=1)
-        ahead = (path[:25, 0] * s).max() > w.pos[b, outfield, 0] * s
-        p_each = np.where(ahead & (k_all[outfield] < 25), 0.5 * np.exp(-lateral / 0.7), 0.0)
+        # blockers: outfield defenders whose body is already (nearly) in the shot's path - no reaction needed
+        seg = path[2:22]
+        near = np.linalg.norm(seg[None, :, :2] - w.pos[b, outfield][:, None, :], axis=2)
+        kk = np.argmin(near, axis=1)
+        lateral = near[np.arange(len(outfield)), kk]
+        low = seg[kk, 2] < 1.9
+        p_each = np.where((lateral < 1.3) & low, 0.7 * np.exp(-lateral / 0.7), 0.0)
         p_block = 1.0 - float(np.prod(1.0 - p_each))
+        k_all[outfield] = np.where(p_each > 0, kk + 2, k_all[outfield])
         # on-target / psxg calibration over the execution noise (Monte Carlo on the same physics)
         cross = self._goal_crossings(paths, np.concatenate([[j], mc]), s)
         on, ey, ez, spd = cross
@@ -1546,7 +1575,9 @@ class Match:
         stunned = w.stun > 0
         cap = np.where(stunned, np.minimum(cap, 0.8), cap)
         vmax = effective_max_speed(sq.max_speed[None, :], w.stamina)
-        new_pos, new_vel = steer(w.pos, w.vel, tgt, cap, vmax, sq.max_accel[None, :], sq.max_decel[None, :])
+        # urgent movers (ball, pressing, runs) respond fast; shape players ease into position
+        tau = np.where(cap >= 4.5, 0.3, 0.7)
+        new_pos, new_vel = steer(w.pos, w.vel, tgt, cap, vmax, sq.max_accel[None, :], sq.max_decel[None, :], tau=tau)
         diving = w.dive_until > w.t[:, None]
         if diving.any():
             new_vel = np.where(diving[..., None], w.dive_vel, new_vel)
@@ -1602,6 +1633,8 @@ class Match:
         else:
             self._shape += SHAPE_SMOOTHING * (tgt - self._shape)
         tgt = self._shape.copy()
+        tgt, cap = goal_side(w, sq, self.sign, poss, tgt, cap)
+        tgt, cap = box_marking(w, sq, self.sign, poss, tgt, cap)
         t_now = w.t[:, None]
         # runs
         running = w.run_until > t_now
@@ -1698,6 +1731,12 @@ class Match:
             s = self.sign[bb, t]
             o_x_t = opos[:, 0] * s
             gk_ok = (o_x_t < -36.0) & (np.abs(opos[:, 1]) < 16)
+            # through on goal: the keeper comes out to meet the carrier whoever else is near
+            gk = idx[sq.is_gk[idx]][0]
+            rush = (o_x_t < -38.0) & (np.abs(opos[:, 1]) < 12.0)
+            if rush.any():
+                tgt[bb[rush], gk] = opos[rush] + 0.2 * w.vel[bb[rush], oo[rush]]
+                cap[bb[rush], gk] = sq.max_speed[gk]
             d = np.where(sq.is_gk[idx][None, :] & ~gk_ok[:, None], 99.0, d)
             order = np.argsort(d, axis=1)
             first = idx[order[:, 0]]
@@ -1707,14 +1746,16 @@ class Match:
             approach = opos + 0.35 * w.vel[bb, oo]
             dirv = approach - w.pos[bb, first]
             dn = np.maximum(np.linalg.norm(dirv, axis=1, keepdims=True), 1e-6)
-            stand = approach - dirv / dn * 0.9
+            # close enough to challenge (keepers go straight for it)
+            stand = approach - dirv / dn * np.where(sq.is_gk[first], 0.0, 0.45)[:, None]
             sel = zone & (dist1 < 22.0)
             tgt[bb[sel], first[sel]] = stand[sel]
             cap[bb[sel], first[sel]] = np.where(dist1[sel] > 4.0, sq.max_speed[first[sel]] * 0.95, 3.0)
-            if press > 0.55:
+            danger = o_x_t < -22.0  # near our goal everybody gets tight to the ball
+            if press > 0.55 or danger.any():
                 second = idx[order[:, 1]]
                 dist2 = d[np.arange(len(bb)), order[:, 1]]
-                sel2 = zone & (dist2 < 14.0) & ~sq.is_gk[second]
+                sel2 = zone & (dist2 < 14.0) & ~sq.is_gk[second] & ((press > 0.55) | danger)
                 lane = 0.6 * opos + 0.4 * w.pos[bb, second]
                 tgt[bb[sel2], second[sel2]] = lane[sel2]
                 cap[bb[sel2], second[sel2]] = sq.max_speed[second[sel2]] * 0.8
@@ -1991,6 +2032,9 @@ class Match:
         q["is_line_breaking"] = q["lines_broken"] > 0 and outcome == "complete"
         if q.get("restart") == "corner":
             q["corner_delivery"] = self._corner_delivery(b, team, start)
+            for ri in rec["related"]:
+                if self.logs[b].records[ri]["type"] == "restart":
+                    self.logs[b].q(ri)["corner_delivery"] = q["corner_delivery"]
         w.flight_event[b] = -1
 
     def _lines_broken(self, b: int, team: int, sx: float, ex: float) -> int:
@@ -2156,7 +2200,9 @@ class Match:
         z = bp[2]
         r = self.rng.random()
         kind = None
-        if z > 1.25:
+        if z > 1.0 and in_box and dist < 18.0 and z <= sq.jump_reach[c] + 0.1:
+            kind = I_SHOT if r < 0.8 else I_PASS_PLAYER  # attack the cross: head it at goal
+        elif z > 1.25:
             if in_box and dist < 15.0:
                 kind = I_SHOT if r < 0.78 else I_PASS_PLAYER
             elif x_t < -20.0:
@@ -2182,7 +2228,7 @@ class Match:
         w.receive_t[b] = w.t[b]
         w.receipt_ev[b] = rq
         w.ball_pos[b] = bp
-        bounced = bool(bp[2] < 0.6 and w.ball_vel[b, 2] > 0.5)
+        bounced = bool(0.12 < bp[2] < 0.7 and w.ball_vel[b, 2] > 0.3)  # rising off a bounce
         self._one_touch(b, c, kind, bp, bounced)
         return True
 
@@ -2477,6 +2523,8 @@ class Match:
             SAVE_TO_POST: "to_post",
         }[sub]
         pos_before = "moving" if np.linalg.norm(w.vel[b, c]) > 1.2 else "set"
+        if shot_ev >= 0:
+            pos_before = self.logs[b].q(shot_ev).get("gk_position") or pos_before
         q = {
             "action": "save",
             "outcome": gk_out,
@@ -2696,7 +2744,10 @@ class Match:
                 continue
             for j in opp[close]:
                 j = int(j)
-                rate = 0.3 + 0.6 * sq.attr["tackling"][j] / 99.0
+                rate = 0.5 + 0.8 * sq.attr["tackling"][j] / 99.0
+                # near their own goal defenders commit
+                if w.ball_pos[b, 0] * self.sign[b, 1 - team[k]] > 20.0:
+                    rate *= 1.8
                 # a carrier running straight at a defender gets challenged at once
                 rel = w.pos[b, j] - w.pos[b, c]
                 if float(np.dot(rel, w.vel[b, c])) > 0:
@@ -2713,13 +2764,13 @@ class Match:
         loc = w.ball_pos[b].copy()
         tq = a["tackling"][j] / 99.0
         slide = self.rng.random() < 0.2 and np.linalg.norm(w.vel[b, j]) > 3.0
-        p_foul = (0.05 + 0.12 * (1.0 - tq)) * (1.6 if slide else 1.0)
+        p_foul = (0.07 + 0.18 * (1.0 - tq)) * (1.6 if slide else 1.0)
         if sq.is_gk[j]:
             p_foul = 0.06
         team_j = int(sq.team[j])
         x_t = w.pos[b, c, 0] * self.sign[b, 1 - team_j]
         if x_t >= BOX_X and abs(w.pos[b, c, 1]) <= BOX_HALF_WIDTH:
-            p_foul *= 0.3  # defenders are careful in their own box
+            p_foul *= 0.45  # defenders are careful in their own box
         if self.rng.random() < p_foul:
             self._set_anim(b, j, "slide_tackle" if slide else "tackle")
             self._close_open_carry(b, lost=True)
@@ -2972,6 +3023,11 @@ class Match:
         w.anim_t = np.where(changed, 0.0, w.anim_t)
         w.anim_mirror = np.where(free, False, w.anim_mirror)
         w.anim_lock = np.where(free, 0.0, w.anim_lock)
+
+
+def _scramble(res: Resolved, row: int, rng: np.random.Generator) -> bool:
+    """A few volleys in a goalmouth scramble go in off a knee or the chest (body part "other")."""
+    return int(res.shot_tech[row]) in (4, 5) and rng.random() < 0.1
 
 
 def _progressive(sx: float, ex: float, d0: float, d1: float, ey: float) -> bool:

@@ -155,12 +155,14 @@ def simulate(
     record: bool = True,
     snapshots: bool = True,
     until_t: float | None = None,
+    decisions: bool = False,
 ) -> MatchResult:
     """Play a full match (B = 1) and return frames, ground-truth events and the engine (snapshots, decisions)."""
     from sim.tier_b import derive_tier_b
 
     t0 = time.perf_counter()
     m = Match(meta, models or load_models(), batch=1, record=record, snapshots=snapshots)
+    m.record_decisions = m.record_decisions or decisions
     rec = FrameRecorder(m) if record else None
     m.on_frame = rec
     m.start()

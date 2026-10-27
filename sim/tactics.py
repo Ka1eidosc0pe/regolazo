@@ -158,7 +158,7 @@ def shape_targets(
     target = np.stack([tx * s_p, ty * s_p], axis=-1)
     dist = np.linalg.norm(target - w.pos, axis=-1)
     urgency = np.where(in_poss, 1.0, 1.15)
-    cap = np.clip(0.4 + 0.3 * dist, 0.6, 5.0) * urgency
+    cap = np.clip(0.25 + 0.18 * dist, 0.4, 3.8) * urgency
     cap = np.where(dist > 15.0, 0.75 * sq.max_speed[None, :], cap)
     return target, np.minimum(cap, sq.max_speed[None, :])
 
@@ -323,3 +323,68 @@ def _single(w: World, b: int) -> World:
     sub = World(**kw)
     sub.ball_state[:] = BS_OWNED
     return sub
+
+
+def goal_side(w: World, sq: Squad, sign: F, poss: IA, tgt: F, cap: F) -> tuple[F, F]:
+    """Hard defensive constraints, applied after the (smoothed) shape: the back line stays goal-side of the ball
+    and of the deepest attacker, midfielders stay goal-side of the ball in their own third, and anybody caught on
+    the wrong side sprints back."""
+    s_p = sign[:, sq.team]
+    in_poss = sq.team[None, :] == poss[:, None]
+    bx = w.ball_pos[:, None, 0] * s_p
+    tx = tgt[..., 0] * s_p
+    deepest = _deepest_opponent(w, sq, s_p)
+    back = ~in_poss & (sq.line[None, :] == 1)
+    mid = ~in_poss & (sq.line[None, :] == 2) & (bx < -15.0)
+    limit = np.where(back, np.minimum(bx - 1.5, deepest - 1.0), np.where(mid, bx - 1.0, np.inf))
+    limit = np.maximum(limit, -HALF_LENGTH + 1.5)
+    new_tx = np.minimum(tx, limit)
+    px = w.pos[..., 0] * s_p
+    behind = (back | mid) & (px > limit + 2.0)
+    out = tgt.copy()
+    out[..., 0] = new_tx * s_p
+    cap = np.where(behind, 0.95 * sq.max_speed[None, :], cap)
+    return out, cap
+
+
+def box_marking(w: World, sq: Squad, sign: F, poss: IA, tgt: F, cap: F, n_pairs: int = 4) -> tuple[F, F]:
+    """Attackers inside (or arriving at) the box are picked up tightly, goal-side, by the nearest free defenders."""
+    out, cap = tgt.copy(), cap.copy()
+    rows = np.arange(w.b)
+    for t in (0, 1):
+        defending = poss != t
+        if not defending.any():
+            continue
+        mine = np.arange(t * N_ON, (t + 1) * N_ON)
+        mine = mine[~sq.is_gk[mine] & (sq.line[mine] <= 2)]
+        opp = np.arange((1 - t) * N_ON, (2 - t) * N_ON)
+        opp = opp[~sq.is_gk[opp]]
+        s = sign[:, t][:, None]
+        ox, oy = w.pos[:, opp, 0] * s, w.pos[:, opp, 1] * s
+        danger = (ox < -BOX_EDGE) & (np.abs(oy) < 22.0) & defending[:, None]
+        if not danger.any():
+            continue
+        d = np.linalg.norm(w.pos[:, mine][:, :, None, :] - w.pos[:, opp][:, None, :, :], axis=3)
+        d = np.where(danger[:, None, :], d, np.inf)
+        for _ in range(n_pairs):
+            flat = d.reshape(w.b, -1)
+            k = np.argmin(flat, axis=1)
+            ok = np.isfinite(flat[rows, k]) & (flat[rows, k] < 14.0)
+            if not ok.any():
+                break
+            i, j = np.unravel_index(k, d.shape[1:])
+            bi = rows[ok]
+            di, aj = mine[i[ok]], opp[j[ok]]
+            a_pos = w.pos[bi, aj]
+            goal = np.column_stack([-HALF_LENGTH * sign[bi, t], np.zeros(len(bi))])
+            to_goal = goal - a_pos
+            to_goal /= np.maximum(np.linalg.norm(to_goal, axis=1, keepdims=True), 1e-6)
+            out[bi, di] = a_pos + 1.2 * to_goal + 0.3 * w.vel[bi, aj]
+            cap[bi, di] = np.maximum(cap[bi, di], 0.9 * sq.max_speed[di])
+            d[bi, i[ok], :] = np.inf
+            d[bi, :, j[ok]] = np.inf
+    return out, cap
+
+
+BOX_EDGE = 33.0
+"""Attackers this close to goal (team frame x beyond -33) count as box threats."""

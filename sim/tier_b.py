@@ -128,8 +128,11 @@ def _physical(c: _Ctx) -> None:
     pos = a["player_pos"].astype(np.float64)
     live = a["status"] != 2  # skip half-time re-positioning
     n_min = round(SPEED_EVENT_MIN_S / DT)
+    k = int(0.5 / DT)
+    kernel = np.ones(k) / k
     for j in c.on:
-        speed = np.linalg.norm(vel[:, j], axis=1)
+        # taxonomy 4.5: speeds from tracking are smoothed over 0.5 s before applying the zone thresholds
+        speed = np.convolve(np.linalg.norm(vel[:, j], axis=1), kernel, mode="same")
         speed = np.where(live, speed, 0.0)
         step = np.linalg.norm(np.diff(pos[:, j], axis=0), axis=1)
         step = np.concatenate([[0.0], np.where(step < 1.0, step, 0.0)])
@@ -355,7 +358,7 @@ def _step_ups(c: _Ctx) -> None:
         live = a["ball_in_play"].astype(bool)
         while k < n:
             adv = line[k] - line[k - win]
-            moving = (vx[k] >= 1.5).sum() >= 3 and np.std(vx[k]) < 1.0
+            moving = (vx[k] >= 1.5).sum() >= 3 and np.std(vx[k]) < 0.8
             if adv >= STEP_UP_ADVANCE_M and moving and live[k] and live[k - win]:
                 s = k - win
                 t_end = float(c.t[k])
@@ -371,7 +374,7 @@ def _step_ups(c: _Ctx) -> None:
                     "outcome": outcome,
                 }
                 c.add("line_step_up", s, k, None, team, None, q)
-                k += win * 2
+                k += int(8.0 / DT)  # one step-up per 8 s at most
             else:
                 k += 5
 
