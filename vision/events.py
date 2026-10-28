@@ -196,7 +196,8 @@ def detect(
     teams = track_teams(tracks, period, home_pos_first)
     ball = kinematics(tracks.ball, t, max_gap_s=0.5, win_s=0.12)
     kin = {k: kinematics(v, t) for k, v in tracks.players.items() if k in teams}
-    runs = controls(owners(ball.pos, {k: v.pos for k, v in kin.items()}, teams), teams)
+    owner = owners(ball.pos, {k: v.pos for k, v in kin.items()}, teams)
+    runs = controls(owner, teams)
     raw: list[Raw] = []
     poss_ids = possession_ids(runs, t)
     for r_i, r in enumerate(runs):
@@ -204,9 +205,17 @@ def detect(
         nxt = runs[r_i + 1] if r_i + 1 < len(runs) else None
         start = ball.pos[r.i1]
         tr = float(t[r.i1])
-        shot_v = _shot_after(r.i1, r.team, ball, t, period, home_pos_first)
-        if shot_v is not None:
-            raw.append(Raw("shot", tr, r.team, r.track, start, poss=possession, speed=shot_v))
+        # a run can span several touches (no one else came within reach in between): try each release
+        releases = [
+            i for i in range(r.i0, r.i1 + 1) if owner[i] == r.track and (i + 1 >= len(owner) or owner[i + 1] != r.track)
+        ]
+        shot = next(
+            ((i, v) for i in releases if (v := _shot_after(i, r.team, ball, t, period, home_pos_first)) is not None),
+            None,
+        )
+        if shot is not None:
+            i, v = shot
+            raw.append(Raw("shot", float(t[i]), r.team, r.track, ball.pos[i], poss=possession, speed=v))
             continue
         if nxt is None or nxt.track == r.track:
             continue
