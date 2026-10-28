@@ -26,4 +26,5 @@ def test_gate_ball_rejects_implausible_jumps() -> None:
     out = gate_ball(res)
     assert out[:, 0].tolist()[:2] == [0.0, 0.5]
     assert np.isnan(out[2, 0])  # 30 m in 0.04 s
-    assert out[3, 0] == 1.5 and out[4, 0] == 2.0
+    assert out[3, 0] == 1.5
+    assert np.isnan(out[4, 0])  # below the minimum gate confidence

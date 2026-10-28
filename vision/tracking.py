@@ -84,7 +84,10 @@ class Tracks:
     """track id -> home | away | goalkeeper | referee."""
 
 
+BALL_STORE_CONF = 0.05
+"""Ball candidates kept per frame (the gate decides which to use)."""
 BALL_MIN_CONF = 0.3
+BALL_REACQUIRE_CONF = 0.5
 BALL_MAX_MPS = 40.0
 
 
@@ -150,30 +153,41 @@ class Spotter:
                 )
         balls = []
         for xyxy, conf in zip(boxes.xyxy[cls == BALL_CLS], boxes.conf[cls == BALL_CLS], strict=True):
-            if conf < BALL_MIN_CONF:
+            if conf < BALL_STORE_CONF:
                 continue
             x0, y0, x1, y1 = (float(v) for v in xyxy)
             p = image_to_pitch(fm.camera, np.array([[(x0 + x1) / 2, (y0 + y1) / 2]]), BALL_RADIUS_M)[0]
             balls.append(Detection(-1, BALL_CLS, float(conf), (x0, y0, x1, y1), (float(p[0]), float(p[1]))))
         balls.sort(key=lambda d: -d.conf)
-        return FrameResult(fm.t, players, balls[0] if balls else None, balls)
+        shown = balls[0] if balls and balls[0].conf >= BALL_MIN_CONF else None
+        return FrameResult(fm.t, players, shown, balls)
 
 
-def gate_ball(results: list[FrameResult]) -> F64:
-    """Ball track: per frame the candidate consistent with the last accepted position (<= BALL_MAX_MPS),
-    re-acquiring on a confident detection after 0.5 s without one."""
+def gate_ball(
+    results: list[FrameResult],
+    min_conf: float | None = None,
+    reacquire_conf: float | None = None,
+    max_mps: float | None = None,
+) -> F64:
+    """Ball track: per frame the candidate (conf >= min_conf) consistent with the last accepted position
+    (<= max_mps), re-acquiring on a confident detection (>= reacquire_conf) after 0.5 s without one."""
+    min_conf = BALL_MIN_CONF if min_conf is None else min_conf
+    reacquire_conf = BALL_REACQUIRE_CONF if reacquire_conf is None else reacquire_conf
+    max_mps = BALL_MAX_MPS if max_mps is None else max_mps
     out = np.full((len(results), 2), np.nan)
     last: tuple[float, np.ndarray] | None = None
     for i, r in enumerate(results):
         cands = r.balls or ([r.ball] if r.ball is not None else [])
         best = None
         for d in cands:
+            if d.conf < min_conf:
+                continue
             p = np.asarray(d.pitch)
             if last is None or r.t - last[0] > 0.5:
-                if d.conf >= 0.5:
+                if d.conf >= reacquire_conf:
                     best = p
                     break
-            elif np.linalg.norm(p - last[1]) <= BALL_MAX_MPS * (r.t - last[0]) + 1.0:
+            elif np.linalg.norm(p - last[1]) <= max_mps * (r.t - last[0]) + 1.0:
                 best = p
                 break
         if best is not None:
