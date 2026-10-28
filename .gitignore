@@ -38,3 +38,4 @@ assets/third_party/
 .claude/worktrees/
 .claude/launch.json
 data/matches/
+web/public/spotter/
