@@ -1,0 +1,72 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"Barlow Condensed";src:url("../../web/public/fonts/BarlowCondensed-Bold.ttf");font-weight:700}
+@font-face{font-family:"Barlow Condensed";src:url("../../web/public/fonts/BarlowCondensed-ExtraBold.ttf");font-weight:800}
+:root{--ink:#05070d;--text:#e8ecf4;--text2:#9aa6bd;--volt:#d7ff3a;--flare:#ff7a1a;--cyan:#38e1ff}
+*{box-sizing:border-box;margin:0}
+html,body{width:1920px;height:1080px;background:var(--ink);color:var(--text);font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;overflow:hidden}
+.card{position:relative;width:1920px;height:1080px;display:none;align-items:center;justify-content:center;flex-direction:column;
+  background:radial-gradient(1200px 700px at 50% 55%,#0d1424 0%,var(--ink) 70%)}
+.card.on{display:flex}
+.lines{position:absolute;inset:0;opacity:.10;background:
+  linear-gradient(var(--text) 0 0) 50% 0/2px 100% no-repeat,
+  radial-gradient(circle at 50% 50%,transparent 218px,var(--text) 219px,var(--text) 221px,transparent 222px)}
+.rule{position:absolute;left:0;right:0;bottom:0;height:10px;background:var(--volt)}
+h1{font-weight:800;text-transform:uppercase;letter-spacing:.01em;text-align:center;line-height:.98}
+.big{font-size:150px;max-width:1500px}
+.big em{font-style:normal;color:var(--volt)}
+.mark{font-size:300px;letter-spacing:.04em}
+.mark b{color:var(--volt);font-weight:800}
+.sub{font-weight:700;font-size:44px;letter-spacing:.22em;text-transform:uppercase;color:var(--text2);margin-top:26px;text-align:center}
+.url{font-weight:700;font-size:64px;letter-spacing:.06em;color:var(--volt);margin-top:60px}
+/* architecture */
+.arch{justify-content:flex-start;padding:60px 90px}
+.arch h2{font-weight:800;font-size:76px;text-transform:uppercase;letter-spacing:.03em;align-self:flex-start}
+.arch h2 span{color:var(--volt)}
+.flow{display:flex;align-items:stretch;gap:0;margin-top:34px;width:100%}
+.box{flex:1;background:rgba(255,255,255,.04);border:2px solid rgba(232,236,244,.18);border-radius:14px;padding:26px 28px;min-height:268px}
+.box h3{font-weight:800;font-size:46px;text-transform:uppercase;letter-spacing:.03em;color:var(--text)}
+.box .path{font-weight:700;font-size:26px;color:var(--text2);letter-spacing:.08em;margin-top:2px}
+.box p{font-weight:700;font-size:33px;line-height:1.15;color:#c9d1e2;margin-top:14px}
+.box.az{border-color:var(--volt)}
+.arrow{width:64px;display:flex;align-items:center;justify-content:center;color:var(--volt);font-size:54px;font-weight:800}
+.under{width:100%;margin-top:22px;border:2px dashed rgba(215,255,58,.45);border-radius:14px;padding:18px 28px;font-weight:700;font-size:34px;color:#c9d1e2;display:flex;gap:18px;align-items:baseline}
+.under b{color:var(--volt);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:30px}
+.ms{display:flex;gap:22px;width:100%;margin-top:26px}
+.chip{flex:1;border-radius:14px;background:rgba(215,255,58,.08);border:2px solid var(--volt);padding:20px 26px}
+.chip .k{font-weight:700;font-size:26px;letter-spacing:.2em;text-transform:uppercase;color:var(--volt)}
+.chip .n{font-weight:800;font-size:46px;margin-top:2px;text-transform:uppercase}
+.chip .d{font-weight:700;font-size:30px;color:#c9d1e2;margin-top:2px}
+.recap{margin-top:auto;font-weight:800;font-size:52px;letter-spacing:.06em;text-transform:uppercase;color:var(--volt);align-self:center;padding-bottom:8px}
+</style></head>
+<body>
+<div class="card" id="hook1"><div class="lines"></div><h1 class="big">Every fan has<br>yelled at the <em>screen.</em></h1><div class="rule"></div></div>
+<div class="card" id="hook2"><div class="lines"></div><h1 class="big">Now the screen<br><em>answers back.</em></h1><div class="rule"></div></div>
+<div class="card" id="wordmark"><div class="lines"></div><h1 class="mark">Re<b>Golazo</b></h1><div class="sub">An AI broadcast crew for synthetic football</div><div class="rule"></div></div>
+<div class="card" id="close"><div class="lines"></div><h1 class="mark" style="font-size:260px">Re<b>Golazo</b></h1><div class="sub">Rewind. Rewrite. Run 1,000 realities.</div><div class="url">github.com/Ka1eidosc0pe/regolazo</div><div class="rule"></div></div>
+<div class="card arch" id="arch">
+  <h2>How it fits <span>together</span></h2>
+  <div class="flow">
+    <div class="box"><h3>Match engine</h3><div class="path">sim/</div><p>Synthetic 90-minute match. 3D ball physics, player attributes, ground-truth events.</p></div>
+    <div class="arrow">&rsaquo;</div>
+    <div class="box"><h3>Spotter</h3><div class="path">vision/</div><p>YOLO and tracking read the rendered feed, then log events. Scored against ground truth.</p></div>
+    <div class="arrow">&rsaquo;</div>
+    <div class="box"><h3>Agents</h3><div class="path">agents/</div><p>Storyteller writes. Fact-Checker verifies every number. Translator does ES and FR.</p></div>
+    <div class="arrow">&rsaquo;</div>
+    <div class="box"><h3>Broadcast</h3><div class="path">web/</div><p>Three.js overlays, captions and voice. Rewind &amp; Rewrite with 1,000 realities.</p></div>
+  </div>
+  <div class="under"><b>Analytics models</b> xG &middot; post-shot xG &middot; xPass &middot; pitch control &middot; xT, trained on StatsBomb open data</div>
+  <div class="ms">
+    <div class="chip"><div class="k">Microsoft</div><div class="n">Azure AI Foundry</div><div class="d">gpt-5-mini &middot; gpt-4.1-mini</div></div>
+    <div class="chip"><div class="k">Microsoft</div><div class="n">Agent Framework</div><div class="d">Agent orchestration and tool calling</div></div>
+    <div class="chip"><div class="k">Microsoft</div><div class="n">Azure AI Speech</div><div class="d">Neural voices in EN, ES and FR</div></div>
+  </div>
+  <div class="recap">Synthetic match engine &middot; Vision auto-eventing &middot; Fact-checked agents &middot; EN / ES / FR</div>
+  <div class="rule"></div>
+</div>
+<script>
+const id=new URLSearchParams(location.search).get("card");
+document.getElementById(id).classList.add("on");
+</script>
+</body></html>
