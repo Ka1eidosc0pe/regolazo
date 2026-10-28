@@ -504,8 +504,8 @@ export class Rewind {
     this.setPhase("verdict");
     this.hud.hideCard();
     const real = realOption(m);
-    const framing = verdictFraming(r.evaluation, real, r.outcome);
     const realOut = this.realOutcomeOverride ?? realOutcome(m);
+    const framing = verdictFraming(r.evaluation, real, r.outcome, realOut);
     this.card.replaceChildren();
     this.card.dataset.framing = framing;
     const head = el("div", "vd-head");

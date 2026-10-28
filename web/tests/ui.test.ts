@@ -145,6 +145,8 @@ describe("rewind logic", () => {
     expect(verdictFraming(longshot, real, { primary_success: true, label: "goal" })).toBe("beat_the_odds");
     expect(verdictFraming(hernandez, real, { primary_success: false, label: "turnover" })).toBe("unlucky");
     expect(verdictFraming(real, real, { primary_success: true, label: "goal" })).toBe("same_call_as_reality");
+    expect(verdictFraming(barnes, real, { primary_success: true, label: "possession_retained" }, "goal")).toBe("worked_but_reality_scored");
+    expect(verdictFraming(longshot, real, { primary_success: true, label: "goal" }, "goal")).toBe("beat_the_odds");
   });
   it("maps the Scout consequence to the real outcome", () => {
     expect(realOutcome({ consequence: { kind: "goal", xt_swing: 0, horizon_s: 10, event_ids: [] } })).toBe("goal");

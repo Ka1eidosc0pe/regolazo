@@ -769,6 +769,7 @@ body[data-rewind="realities"] .stat-card {
   color: var(--flare);
 }
 .vd-framing.same_call_as_reality,
+.vd-framing.worked_but_reality_scored,
 .vd-framing.as_expected {
   color: var(--cyan);
 }

@@ -15,7 +15,13 @@ export const TOP_SPEED_MPS = 9.0;
 export const GOAL_X = 52.5;
 
 export type Outcome = RolloutOutcome["label"];
-export type Framing = "beat_the_odds" | "unlucky" | "as_expected" | "bold_and_paid_off" | "same_call_as_reality";
+export type Framing =
+  | "beat_the_odds"
+  | "unlucky"
+  | "as_expected"
+  | "bold_and_paid_off"
+  | "worked_but_reality_scored"
+  | "same_call_as_reality";
 
 export function kmh(mps: number): number {
   return mps * KMH;
@@ -165,6 +171,7 @@ export const FRAMING_TEXT: Record<Framing, string> = {
   unlucky: "Unlucky",
   as_expected: "As expected",
   bold_and_paid_off: "Bold, and it paid off",
+  worked_but_reality_scored: "It worked, but reality scored",
   same_call_as_reality: "Same call as reality",
 };
 
@@ -190,15 +197,17 @@ export function sameCall(a: OptionEvaluation["intent"], b: OptionEvaluation["int
 /**
  * Verdict framing (judgement-free until here). "Good" means the fan's action itself succeeded.
  * A low-probability success beats the odds, a risky one (under 65 %) was bold and paid off, and a likely action
- * that failed was unlucky.
+ * that failed was unlucky. A success that falls short of a real goal says so rather than claiming it paid off.
  */
 export function verdictFraming(
   user: Pick<OptionEvaluation, "p_success" | "intent">,
   real: Pick<OptionEvaluation, "intent"> | null,
   outcome: Pick<RolloutOutcome, "primary_success" | "label">,
+  realLabel?: Outcome,
 ): Framing {
   if (real && sameCall(user.intent, real.intent)) return "same_call_as_reality";
   const good = outcome.primary_success || outcome.label === "goal";
+  if (good && realLabel === "goal" && outcome.label !== "goal") return "worked_but_reality_scored";
   if (good && user.p_success < 0.4) return "beat_the_odds";
   if (good && user.p_success < 0.65) return "bold_and_paid_off";
   if (!good && user.p_success >= 0.5) return "unlucky";
