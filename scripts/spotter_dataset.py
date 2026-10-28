@@ -36,6 +36,8 @@ WINDOWS.append(Window(DEMO_MATCH, DEMO_START, DEMO_END, "broadcast", 25, "test")
 WINDOWS.append(Window(DEMO_MATCH, 2890.0, 2920.0, "replay", 4, "test"))
 # second-half event-evaluation segment (two shots); not part of the YOLO test split
 WINDOWS.append(Window(DEMO_MATCH, 4060.0, 4120.0, "broadcast", 25, "eval"))
+# validation-match segment for tuning the event rules (never the held-out match)
+WINDOWS.append(Window("candidate-2021", 2000.0, 2090.0, "broadcast", 25, "tune"))
 
 
 def render(only: str | None) -> None:

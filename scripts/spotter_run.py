@@ -22,7 +22,7 @@ from shared.recording import Recording
 from shared.schemas.common import Period
 from shared.schemas.events import MatchEvent
 from vision.clips import export_clip
-from vision.evaluate import Report, combine, evaluate, shot_speeds
+from vision.evaluate import Report, combine, evaluate, id_switches, shot_speeds
 from vision.events import detect
 from vision.pipeline import default_weights, load_results, run_frames, save_results
 from vision.tracking import FrameMeta, FrameResult, Spotter, kits_from_meta, load_frame_meta, to_tracks
@@ -54,6 +54,7 @@ def offline(rerun: bool) -> None:
     strict: list[Report] = []
     loose: list[Report] = []
     seg_info = []
+    sw_total, minutes_total = 0, 0.0
     for n_seg, (segment, period) in enumerate(SEGMENTS):
         render = DATA / "vision" / "renders" / segment
         if not (render / "manifest.json").exists():
@@ -74,8 +75,12 @@ def offline(rerun: bool) -> None:
         events += seg_events
         strict.append(evaluate(rec, seg_events, runs, tracks, tol=1.0))
         loose.append(evaluate(rec, seg_events, runs, tracks, tol=2.0))
+        sw, minutes = id_switches(rec, tracks)
+        sw_total, minutes_total = sw_total + sw, minutes_total + minutes
         seg_info.append(
             {
+                "id_switches": sw,
+                "matched_player_minutes": minutes,
                 "render": segment,
                 "period": period,
                 "t": [float(tracks.t[0]), float(tracks.t[-1])],
@@ -96,6 +101,11 @@ def offline(rerun: bool) -> None:
         "detection": {"tol_1s": scores_json(report), "tol_2s": scores_json(report2)},
         "mae": {k: {"mae": v[0], "support": v[1], "unit": v[2]} for k, v in report.mae.items()},
         "team_accuracy": {"accuracy": report.team_accuracy[0], "track_frames": report.team_accuracy[1]},
+        "tracking": {
+            "id_switches": sw_total,
+            "matched_player_minutes": minutes_total,
+            "id_switches_per_player_minute": sw_total / minutes_total if minutes_total else None,
+        },
     }
     (out / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     print(json.dumps(metrics, indent=2))

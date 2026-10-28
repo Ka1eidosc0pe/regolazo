@@ -208,3 +208,37 @@ def combine(reports: list[Report]) -> Report:
     hits = sum(r.team_accuracy[0] * r.team_accuracy[1] for r in reports)
     n = sum(r.team_accuracy[1] for r in reports)
     return Report(reports[0].t0, reports[-1].t1, reports[0].tol, scores, mae, (hits / n if n else 0.0, n))
+
+
+def id_switches(rec: Recording, tracks: Tracks, radius: float = 1.0) -> tuple[int, float]:
+    """(ID switches, matched player-minutes): per frame, tracks and GT players are paired as mutual nearest
+    neighbours within `radius`; a switch is a GT player's paired track id changing from its previous pairing."""
+    t = tracks.t
+    idx = np.array([rec.index_at(float(x) + 1e-6) for x in t])
+    pp = rec.arrays["player_pos"][idx]
+    on = rec.arrays["player_on_pitch"][idx].astype(bool)
+    ids = [k for k in tracks.players if tracks.role.get(k) != "referee"]
+    if not ids:
+        return 0, 0.0
+    xy = np.stack([tracks.players[k] for k in ids])  # (T, N, 2)
+    last: dict[int, int] = {}
+    switches = 0
+    matched = 0
+    for i in range(len(t)):
+        seen = ~np.isnan(xy[:, i, 0])
+        if not seen.any():
+            continue
+        d = np.linalg.norm(xy[seen, i][:, None] - pp[i][None], axis=2)
+        d[:, ~on[i]] = np.inf
+        tids = np.asarray(ids)[seen]
+        near_gt = np.argmin(d, axis=1)
+        near_tr = np.argmin(d, axis=0)
+        for a, j in enumerate(near_gt):
+            if d[a, j] < radius and near_tr[j] == a:  # mutual nearest: one track per GT player per frame
+                matched += 1
+                k = int(tids[a])
+                if j in last and last[int(j)] != k:
+                    switches += 1
+                last[int(j)] = k
+    dt = float(np.median(np.diff(t))) if len(t) > 1 else 0.04
+    return switches, matched * dt / 60.0
