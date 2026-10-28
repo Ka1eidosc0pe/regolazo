@@ -115,10 +115,12 @@ uv run python -m agents.precompute --match candidate-2004
 # 4. Serve it with the live engine
 REGOLAZO_ENGINE=sim.engine:create_engine uv run python -m server --match candidate-2004
 
-# 5. In another terminal: the web app
-cd web && npm run dev
-# open http://localhost:5173/?ws=ws://localhost:8000/ws
+# 5. In another terminal: the web app (vite proxies /api and /ws to the server, so no CORS setup is needed)
+cd web && REGOLAZO_API=http://127.0.0.1:8000 npm run dev
+# open http://localhost:5173/?live=1          (add &t=4448 to start just before the 74' rewind moment)
 ```
+
+The server listens on port 8000 by default; change it with `REGOLAZO_PORT` or `--port`, and change the web port with `npm run dev -- --port <n>`. If you connect the page directly to the server with `?ws=ws://host:port/ws`, instead of through the proxy, add the page's origin to `REGOLAZO_CORS_ORIGINS`.
 
 Without Azure keys, everything except narration works.
 
