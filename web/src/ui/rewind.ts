@@ -503,11 +503,11 @@ export class Rewind {
     this.card.dataset.framing = framing;
     const head = el("div", "vd-head");
     head.append(el("span", "vd-kicker", "Verdict"), el("span", `vd-framing ${framing}`, FRAMING_TEXT[framing]));
-    const col = (who: string, label: string, p: number | null, base: number | null, outcome: string, cls: string) => {
+    const col = (who: string, label: string, p: number | null, base: number | null, outcome: string, cls: string, isShot: boolean) => {
       const c = el("div", `vd-col ${cls}`);
       c.append(el("span", "vd-who", who), el("span", "vd-label", label));
       const stat = el("div", "vd-stat");
-      stat.append(el("span", "vd-p", p === null ? "–" : pct(p)), el("span", "vd-p-k", r.resolved.action_type === "shot" && cls === "you" ? "xG" : "chance it works"));
+      stat.append(el("span", "vd-p", p === null ? "–" : pct(p)), el("span", "vd-p-k", isShot ? "xG" : "chance it works"));
       c.appendChild(stat);
       if (base !== null) c.appendChild(el("span", "vd-base", `Average player: ${pct(base)}`));
       c.appendChild(el("span", "vd-out", outcome));
@@ -517,8 +517,8 @@ export class Rewind {
     const tech = r.resolved.pass_technique ?? r.resolved.shot_technique;
     const grid = el("div", "vd-grid");
     grid.append(
-      col("Your call", tech ? `${userLabel} · ${tech.replace(/_/g, " ")}` : userLabel, r.evaluation.p_success, r.evaluation.p_success_baseline ?? null, OUTCOME_TEXT[r.outcome.label], "you"),
-      col("Reality", real ? this.label(real) : (m.real_action.action_type ?? "").replace(/_/g, " "), real?.p_success ?? null, real?.p_success_baseline ?? null, OUTCOME_TEXT[realOut], "real"),
+      col("Your call", tech ? `${userLabel} · ${tech.replace(/_/g, " ")}` : userLabel, r.evaluation.p_success, r.evaluation.p_success_baseline ?? null, OUTCOME_TEXT[r.outcome.label], "you", r.resolved.action_type === "shot"),
+      col("Reality", real ? this.label(real) : (m.real_action.action_type ?? "").replace(/_/g, " "), real?.p_success ?? null, real?.p_success_baseline ?? null, OUTCOME_TEXT[realOut], "real", (real?.intent.kind ?? m.real_action.intent.kind) === "shot"),
     );
     const actions = el("div", "vd-actions");
     const runBtn = el("button", "vd-run", "Run 1,000 realities");
@@ -648,8 +648,9 @@ export class Rewind {
       const c = document.createElementNS(NS, "circle");
       const [a, b] = s.end_xy;
       if (shot) {
-        c.setAttribute("cx", (a * flip).toFixed(2));
-        c.setAttribute("cy", (3 - Math.min(3.4, b) - 0.44).toFixed(2));
+        // goal-mouth (y, z), seen from the pitch: the shooter's left (+y when attacking +x) is screen left
+        c.setAttribute("cx", (-a * flip).toFixed(2));
+        c.setAttribute("cy", (3 - Math.min(3.5, b)).toFixed(2));
         c.setAttribute("r", "0.12");
       } else {
         // attacking to the right on the mini pitch
@@ -657,7 +658,8 @@ export class Rewind {
         c.setAttribute("cy", (-b * flip).toFixed(2));
         c.setAttribute("r", "1.1");
       }
-      c.setAttribute("class", `vd-dot ${s.label === "goal" ? "goal" : s.primary_success ? "ok" : "bad"}`);
+      const onTarget = s.label === "shot_saved" || s.label === "woodwork";
+      c.setAttribute("class", `vd-dot ${s.label === "goal" ? "goal" : s.primary_success || (shot && onTarget) ? "ok" : "bad"}`);
       svg.appendChild(c);
     }
     return svg;

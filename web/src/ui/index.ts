@@ -25,8 +25,18 @@ export async function mountUi(app: App, source: SwitchSource, api: Api): Promise
   const hud = new Hud(overlay, app, app.meta, {
     onMarker: (m) => void rewind?.open(m),
     onRewindHere: () => {
-      const e = lastOnBall(recent, source.live.clock().t);
-      if (e) void rewind?.openAt(e);
+      const t = source.live.clock().t;
+      const local = lastOnBall(recent, t, 60);
+      // the stream only carries events from where playback started; ask the server for the last minute otherwise
+      const found = local
+        ? Promise.resolve(local)
+        : fetch(`${api.base}/api/events?from=${Math.max(0, t - 60).toFixed(2)}&to=${(t + 0.05).toFixed(2)}`)
+            .then((r) => (r.ok ? (r.json() as Promise<MatchEvent[]>) : []))
+            .then((evs) => lastOnBall(evs, t, 60));
+      void found.then((e) => {
+        if (e) void rewind?.openAt(e);
+        else narration.say("Rewind", "No touch of the ball in the last minute to rewind.");
+      });
     },
     onSeek: (t) => {
       if (!source.isLive) return;

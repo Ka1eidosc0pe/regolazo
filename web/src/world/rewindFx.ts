@@ -78,10 +78,13 @@ export class PitchControlLayer {
 /** Reality as translucent cyan figures (and ball) while the alternate reality plays in full colour. */
 export class RealityGhosts {
   readonly group = new THREE.Group();
-  private readonly bodies = new Map<string, THREE.Mesh>();
+  private readonly bodies = new Map<string, THREE.Group>();
   private readonly ball: THREE.Mesh;
   private readonly mat: THREE.MeshBasicMaterial;
-  private readonly geo = new THREE.CapsuleGeometry(0.32, 1.15, 4, 10);
+  private readonly ringMat: THREE.MeshBasicMaterial;
+  private readonly geo = new THREE.CapsuleGeometry(0.26, 0.95, 4, 10);
+  private readonly head = new THREE.SphereGeometry(0.17, 12, 8);
+  private readonly ring = new THREE.RingGeometry(0.42, 0.55, 24);
 
   constructor() {
     this.mat = new THREE.MeshBasicMaterial({
@@ -92,6 +95,9 @@ export class RealityGhosts {
       blending: THREE.AdditiveBlending,
       toneMapped: false,
     });
+    this.ringMat = this.mat.clone();
+    this.ringMat.opacity = 0.55;
+    this.ringMat.side = THREE.DoubleSide;
     this.ball = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), this.mat);
     this.group.add(this.ball);
     this.group.visible = false;
@@ -109,12 +115,20 @@ export class RealityGhosts {
       if (!p.onPitch) continue;
       let m = this.bodies.get(p.id);
       if (!m) {
-        m = new THREE.Mesh(this.geo, this.mat);
+        m = new THREE.Group();
+        const body = new THREE.Mesh(this.geo, this.mat);
+        body.position.y = 0.85;
+        const head = new THREE.Mesh(this.head, this.mat);
+        head.position.y = 1.68;
+        const ring = new THREE.Mesh(this.ring, this.ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = 0.03;
+        m.add(body, head, ring);
         this.bodies.set(p.id, m);
         this.group.add(m);
       }
       const [x, , z] = worldToThree(p.x, p.y, 0);
-      m.position.set(x, 0.92, z);
+      m.position.set(x, 0, z);
       m.visible = true;
       seen.add(p.id);
     }
