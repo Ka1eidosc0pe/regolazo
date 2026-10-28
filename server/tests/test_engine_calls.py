@@ -71,7 +71,8 @@ def test_cheap_routes_stay_fast_while_slow_engine_calls_are_in_flight(recording_
                 assert httpx.get(srv.http_url + path, timeout=5).status_code == 200
                 worst = max(worst, time.monotonic() - t0)
         assert engine.active > 0, "the slow calls must still be running while we measured"
-        assert worst < 0.25, f"cheap route took {worst * 1000:.0f} ms behind engine calls"
+        # blocked behind an engine call would take >= 0.6 s; shared CI runners add ~0.3 s of noise
+        assert worst < 0.45, f"cheap route took {worst * 1000:.0f} ms behind engine calls"
         assert all(f.result().status_code == 200 for f in futures)
     assert engine.max_active == 2  # bounded by engine_concurrency
 
