@@ -93,7 +93,9 @@ renders and spots at the same time and runs at 12.8 frames/s. There the renderer
 - **No ball height.** The ball is projected onto the ground plane. A lofted ball projects too far from the camera and
   looks too fast. Both missed shots are aerial: a header at z ≈ 2–3 m, and a chip that peaks at 4.7 m.
   The one detected shot was struck at z up to 2 m, which is why its speed is 48 km/h too high (32 m/s against 18.7 m/s
-  in ground truth). Fitting a trajectory with the shadow cue (`ball_shadow_px`) is the next step.
+  in ground truth). Fitting a trajectory with the shadow cue (`ball_shadow_px`) is the next step. For the same reason, 10 of
+  the 33 detected passes in `detected_events.jsonl` carry a `ball_speed_mps` above 120 km/h. The demo captions hide
+  any ball speed above 120 km/h.
 - **ID fragmentation.** ByteTrack makes 282 tracks in 120 s on the zoomed broadcast camera, against about 22 players
   on the pitch. Tracks and ground-truth players are paired as mutual nearest neighbours within 1 m. On that pairing,
   a player's track id changes **728 times in 27.9 matched player-minutes (26 per player-minute)**. Players leaving and

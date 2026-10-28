@@ -26,6 +26,7 @@ DATA = Path(os.environ.get("REGOLAZO_DATA_DIR", REPO / "data"))
 DEMO = "candidate-2004"
 RENDER = DATA / "vision" / "renders" / "candidate-2004-1180-1300-broadcast-25fps"
 CAPTION_S = 2.5
+MAX_SHOWN_KMH = 120.0  # ball speeds above this come from ground-projecting a lofted ball: not shown
 FFMPEG_IN = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "bgr24"]
 MW, MH, MS = 210, 136, 2.0  # minimap: 105 x 68 m at 2 px/m
 
@@ -35,14 +36,17 @@ def bgr(hex_colour: str) -> tuple[int, int, int]:
     return int(h[4:6], 16), int(h[2:4], 16), int(h[0:2], 16)
 
 
-def caption(e: MatchEvent, team_name: dict[str, str], shot_kMH: dict[str, float]) -> str:
+def caption(e: MatchEvent, team_name: dict[str, str], shot_kmh: dict[str, float]) -> str:
     who = f"{team_name.get(e.team or '', '?')} #{e.track_id}"
     q = e.qualifiers
     if e.type == "pass" and q is not None and q.kind == "pass":
         res = "completed" if q.outcome == "complete" else "INTERCEPTED"
-        return f"PASS  {who}  {q.length_m:.0f} m  {res}  ball {q.ball_speed_mps * 3.6:.0f} km/h"
+        kmh = q.ball_speed_mps * 3.6
+        speed = f"  ball {kmh:.0f} km/h" if kmh <= MAX_SHOWN_KMH else ""  # airborne balls project too fast
+        return f"PASS  {who}  {q.length_m:.0f} m  {res}{speed}"
     if e.type == "shot":
-        return f"SHOT  {who}  {shot_kMH.get(e.id, 0):.0f} km/h"
+        kmh = shot_kmh.get(e.id, 0.0)
+        return f"SHOT  {who}  {kmh:.0f} km/h" if kmh <= MAX_SHOWN_KMH else f"SHOT  {who}"
     if e.type == "sprint" and q is not None and q.kind == "physical":
         return f"SPRINT  {who}  peak {q.peak_speed_mps * 3.6:.1f} km/h  {q.distance_m:.0f} m"
     return f"{e.type.upper()}  {who}"
@@ -69,7 +73,7 @@ def main() -> None:
         if x and (e := MatchEvent.model_validate_json(x)).period == 1
     ]
     shots = [e for e in events if e.type == "shot"]
-    shot_kMH = {e.id: v * 3.6 for e, v in zip(shots, shot_speeds(tracks, shots), strict=True)}
+    shot_kmh = {e.id: v * 3.6 for e, v in zip(shots, shot_speeds(tracks, shots), strict=True)}
     colour = {"home": bgr(meta.home.kit.primary), "away": bgr(meta.away.kit.primary)}
     team_name = {"home": meta.home.short_name, "away": meta.away.short_name}
     w, h = frames[0].width, frames[0].height
@@ -110,7 +114,7 @@ def main() -> None:
         live += [e for e in events if e.type == "sprint" and e.t <= fm.t <= e.t + e.duration_s + 1.0][:2]
         y = h - 20
         for e in reversed(live[-3:]):
-            text = caption(e, team_name, shot_kMH)
+            text = caption(e, team_name, shot_kmh)
             (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
             cv2.rectangle(img, (12, y - th - 8), (24 + tw, y + 6), (20, 20, 20), -1)
             c = colour[e.team] if e.team else (255, 255, 255)
