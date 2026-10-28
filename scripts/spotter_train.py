@@ -49,8 +49,8 @@ def test(imgsz: int, name: str = "spotter") -> None:
     )
     per_class = {}
     for i, c in enumerate(m.box.ap_class_index):
-        name = CLASSES[int(c)]
-        per_class[name] = {"map50": float(m.box.ap50[i]), "map50_95": float(m.box.ap[i])}
+        cls_name = CLASSES[int(c)]
+        per_class[cls_name] = {"map50": float(m.box.ap50[i]), "map50_95": float(m.box.ap[i])}
     out = {
         "match": "candidate-2004",
         "images": len(list((VISION / "yolo" / "images" / "test").glob("*.jpg"))),

@@ -88,6 +88,44 @@ lands at a median of 0.19 m and a 90th percentile of 0.35 m.
 Throughput: detection plus tracking runs at 50–60 frames/s on MPS, about 2× real time at 25 fps. The live mode
 renders and spots at the same time and runs at 12.8 frames/s. There the renderer is the bottleneck.
 
+## Experiments compared on candidate-2004 (selection-biased)
+
+These experiments come from the last sprint hour. At the lead's request, they were compared directly on
+candidate-2004. A setting chosen this way would no longer have a clean held-out score. That is why the rule was to
+adopt a change only if no held-out number got worse. None of the experiments below met it, so the shipped defaults
+(and every number above) are unchanged.
+
+| Setting | Ball coverage (seg 1 / seg 2) | Pass F1 | Shot F1 | Possession F1 | Sprint F1 | Ball MAE, ground | ID switches |
+|---|---|---|---|---|---|---|---|
+| **shipped:** imgsz 960, gate ≥ 0.3, re-acquire ≥ 0.5 | 50 % / 36 % | 0.545 | 0.500 | 0.400 | 0.600 | 2.38 km/h | 728 |
+| imgsz 960, gate ≥ 0.1 | 57 % / 46 % | 0.452 | 0.333 | 0.462 | 0.600 | 4.28 km/h | n/a |
+| imgsz 1280 at inference (same weights) | 66 % / 56 % | 0.592 | **0.000** | 0.621 | 0.632 | 2.50 km/h | 833 |
+| imgsz 1280, gate ≥ 0.1 | 74 % / 70 % | 0.658 | 0.000 | 0.621 | 0.632 | 3.53 km/h | n/a |
+| ball gap interpolation 1.2 s (instead of 0.5 s) | same | 0.529 | 0.500 | 0.455 | 0.600 | 2.53 km/h | 728 |
+| 4 more epochs from best.pt (`--init … --name spotter_long`, 9 min), imgsz 960 | 62 % / 58 % | **0.656** | 0.000 | 0.387 | 0.537 | **2.09 km/h** | n/a |
+
+At 1280 px the small ball is found much more often, and passes and possession improve. But the one detected shot is
+lost: the shooter's track gets the wrong team from kit colour, so the shot "heads for the wrong goal". The ID-switch
+count also rises. That makes `--imgsz 1280` the most promising next step, paired with a sturdier team assignment, but
+it is not the default: `uv run python scripts/spotter_run.py offline --imgsz 1280`.
+
+Training for longer (run `spotter_long`) helps the detector on the held-out match:
+
+| Class | shipped mAP50 / 50-95 | spotter_long mAP50 / 50-95 |
+|---|---|---|
+| player_home | 0.338 / 0.271 | 0.496 / 0.408 |
+| player_away | 0.509 / 0.442 | 0.573 / 0.505 |
+| goalkeeper | 0.977 / 0.870 | 0.975 / 0.870 |
+| referee | 0.989 / 0.869 | 0.991 / 0.885 |
+| ball | 0.625 / 0.347 | **0.673 / 0.375** |
+| all | 0.687 / 0.560 | **0.742 / 0.609** |
+| player, either team (AP50) | 0.988 | 0.987 |
+
+Validation on candidate-2021 rises from 0.904 / 0.735 to 0.936 / 0.759. Downstream, pass F1 and ball-speed error
+improve, but the shot is lost and sprint and possession F1 dip, so `spotter_long` is not the default either:
+`uv run python scripts/spotter_run.py offline --run spotter_long`. Both variants lose the same shot to the same
+team-assignment error, which makes the colour-based team classifier the bottleneck to fix first.
+
 ## Known limits (honest)
 
 - **No ball height.** The ball is projected onto the ground plane. A lofted ball projects too far from the camera and
