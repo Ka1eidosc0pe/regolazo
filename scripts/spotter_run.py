@@ -36,10 +36,6 @@ SEGMENTS: list[tuple[str, Period]] = [
 ]
 
 
-def cache_path(segment: str) -> Path:
-    return DATA / "matches" / DEMO / "spotter" / f"detections-{segment}.json"
-
-
 def scores_json(r: Report) -> dict[str, dict[str, float]]:
     return {
         k: {"precision": s.precision, "recall": s.recall, "f1": s.f1, "tp": s.tp, "fp": s.fp, "fn": s.fn}
@@ -47,7 +43,12 @@ def scores_json(r: Report) -> dict[str, dict[str, float]]:
     }
 
 
-def offline(rerun: bool) -> None:
+def cache_path(segment: str, imgsz: int = 960, run: str = "spotter") -> Path:
+    tag = "" if (imgsz, run) == (960, "spotter") else f"-{run}-{imgsz}"
+    return DATA / "matches" / DEMO / "spotter" / f"detections-{segment}{tag}.json"
+
+
+def offline(rerun: bool, imgsz: int = 960, run: str = "spotter") -> None:
     out = DATA / "matches" / DEMO / "spotter"
     rec = Recording.open(DATA / "matches" / DEMO)
     events: list[MatchEvent] = []
@@ -60,10 +61,10 @@ def offline(rerun: bool) -> None:
         if not (render / "manifest.json").exists():
             print("missing render", render, file=sys.stderr)
             continue
-        cache = cache_path(segment)
+        cache = cache_path(segment, imgsz, run)
         if rerun or not cache.exists():
             frames = load_frame_meta(render)
-            spotter = Spotter(default_weights(DATA), fps=25)
+            spotter = Spotter(DATA / "vision" / "runs" / run / "weights" / "best.pt", fps=25, imgsz=imgsz)
             t0 = time.time()
             results = run_frames(spotter, frames)
             secs = time.time() - t0
@@ -170,13 +171,15 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["offline", "live"])
     ap.add_argument("--rerun", action="store_true")
+    ap.add_argument("--imgsz", type=int, default=960, help="detector input size (offline)")
+    ap.add_argument("--run", default="spotter", help="weights run under $DATA/vision/runs (offline)")
     ap.add_argument("--match", default=DEMO)
     ap.add_argument("--start", type=float, default=1225.0)
     ap.add_argument("--end", type=float, default=1240.0)
     ap.add_argument("--fps", type=int, default=25)
     a = ap.parse_args()
     if a.cmd == "offline":
-        offline(a.rerun)
+        offline(a.rerun, a.imgsz, a.run)
     else:
         live(a.match, a.start, a.end, a.fps)
 
