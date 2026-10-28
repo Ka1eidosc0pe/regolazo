@@ -1,5 +1,8 @@
 # ReGolazo: submission pitch
 
+- Demo video: https://youtu.be/-GfUATd-dwQ
+- Repo: https://github.com/Ka1eidosc0pe/regolazo
+
 ## Elevator pitch (one line)
 
 Every fan has yelled at the screen. ReGolazo lets the screen answer back: rewind any decision, make your own call, and watch that alternate reality play out, with outcomes from real football analytics, not an LLM.

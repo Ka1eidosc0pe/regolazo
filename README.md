@@ -6,7 +6,7 @@ ReGolazo is an AI broadcast crew for synthetic football matches. A simulated mat
 
 Built for the Premier League × Microsoft **"Inside the Game"** hackathon.
 
-<!-- DEMO VIDEO LINK GOES HERE -->
+**▶ Demo video (1:56): https://youtu.be/-GfUATd-dwQ**
 
 ## What it does
 
