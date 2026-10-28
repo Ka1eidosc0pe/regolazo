@@ -18,9 +18,9 @@ REPO = Path(__file__).resolve().parents[1]
 DATA = Path(os.environ.get("REGOLAZO_DATA_DIR", REPO / "data"))
 MATCH = "candidate-2021"
 RENDER = DATA / "vision" / "renders" / "candidate-2021-2000-2090-broadcast-25fps"
-GRID = {
+GRID: dict[str, list[float]] = {
     "POSSESSION_RADIUS_M": [1.0, 1.5, 2.0],
-    "MIN_CONTROL_FRAMES": [2, 3, 5],
+    "MIN_CONTROL_FRAMES": [2, 3, 5],  # frames (ints)
     "MIN_PASS_TRAVEL_M": [3.0, 4.0, 6.0],
 }
 
@@ -34,7 +34,7 @@ def main() -> None:
     rows = []
     for values in itertools.product(*GRID.values()):
         for k, v in zip(GRID, values, strict=True):
-            setattr(ev, k, v)
+            setattr(ev, k, int(v) if k == "MIN_CONTROL_FRAMES" else v)
         events, runs = ev.detect(tracks, 1, rec.meta.home_attacks_positive_x_first_half)
         r = evaluate(rec, events, runs, tracks, tol=1.0)
         f1 = {k: s.f1 for k, s in r.scores.items()}
