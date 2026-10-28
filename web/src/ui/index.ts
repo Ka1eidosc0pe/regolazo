@@ -1,7 +1,7 @@
 // The live-match UI: HUD, Rewind & Rewrite, narration and accuracy panels, and the `window.regolazo.demo` hooks.
 import "./ui.css";
 import type { App } from "../app.ts";
-import type { DecisionMoment, MatchEvent } from "../types/generated/contracts.ts";
+import type { DecisionMoment, MatchEvent, Narrative } from "../types/generated/contracts.ts";
 import type { ServerMessage } from "../types.ts";
 import { Api } from "./api.ts";
 import { Hud } from "./hud.ts";
@@ -107,6 +107,9 @@ export interface DemoHooks {
   runRealities(): Promise<void>;
   backToLive(): void;
   phase(): string;
+  /** Feed a Narrative as if it came over the stream (tests, demos without the narration agent). */
+  narrate(n: Narrative): void;
+  profile(): { mode: string; language: string } | null;
 }
 
 declare global {
@@ -134,6 +137,8 @@ function installDemo(ui: LiveUi, source: SwitchSource): void {
     runRealities: () => ui.rewind.runRealities(),
     backToLive: () => ui.rewind.backToLive(),
     phase: () => ui.rewind.phase,
+    narrate: (n) => ui.narration.show(n),
+    profile: () => ui.narration.currentProfile(),
   };
   window.regolazoDemo = hooks;
 }

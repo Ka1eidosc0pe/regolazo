@@ -89,6 +89,10 @@ export class Narration {
     this.syncPicker();
   }
 
+  currentProfile(): { mode: string; language: string } | null {
+    return this.profile ? { mode: this.profile.mode, language: this.profile.language } : null;
+  }
+
   get mode(): ViewerProfile["mode"] {
     return this.profile?.mode ?? "casual";
   }
