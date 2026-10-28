@@ -26,7 +26,7 @@ def test_goal_fact_sheet_has_names_and_exact_numbers(match: MatchData) -> None:
     assert f["xg"] == "0.31" and f["post_shot_xg"] == "0.40"
     assert f["shot_speed_kmh"] == 90  # 25 m/s
     assert f["shot_distance_m"] == 18
-    assert f["score_now"] == "1-0" and f["minute"] == 1
+    assert f["score_now"] == f"{match.meta.home.name} 1-0 {match.meta.away.name}" and f["minute"] == 1
     assert goal.t == 5.0 + 1.5
     assert not any(v in match.players for v in f.values() if isinstance(v, str)), "ids must not leak into facts"
 

@@ -236,7 +236,8 @@ class MatchData:
         s.add("moment_type", kind.replace("_", " "), ev)
         s.add("minute", minute, ev)
         s.add("half", "first half" if e.period == 1 else "second half", ev)
-        s.add("score_now", f"{self.score_at(e.t)[0]}-{self.score_at(e.t)[1]}", ("stat", "score"))
+        sh, sa = self.score_at(e.t)
+        s.add("score_now", f"{self.meta.home.name} {sh}-{sa} {self.meta.away.name}", ("stat", "score"))
         s.add("home_team", self.meta.home.name, ("stat", "meta.home"))
         s.add("away_team", self.meta.away.name, ("stat", "meta.away"))
         s.add("team", self.team_name(e.team), ev)
@@ -250,7 +251,7 @@ class MatchData:
         s.add("post_shot_xg", f"{q.psxg:.2f}" if q.psxg is not None else None, ("model_output", f"{e.id}.psxg"))
         s.add("shot_speed_kmh", round(q.ball_speed_mps * MS_TO_KMH), ev)
         s.add("shot_distance_m", round(q.distance_to_goal_m), ev)
-        s.add("shooter_speed_kmh", round(self.speed_at(e.player, e.t)), ("stat", f"player.{e.player}.speed"))
+        s.add("shooter_running_speed_kmh", round(self.speed_at(e.player, e.t)), ("stat", f"player.{e.player}.speed"))
         s.add("under_pressure", "yes" if e.under_pressure else "no", ev)
         if q.key_pass_id and q.key_pass_id in self.by_id:
             kp = self.by_id[q.key_pass_id]
@@ -279,7 +280,9 @@ class MatchData:
         s.add("moment_type", kind.replace("_", " "), st)
         s.add("home_team", self.meta.home.name, ("stat", "meta.home"))
         s.add("away_team", self.meta.away.name, ("stat", "meta.away"))
-        for k, v in self.match_stats(t_event).items():
+        stats = self.match_stats(t_event)
+        s.add("scoreline", f"{self.meta.home.name} {stats['score']} {self.meta.away.name}", st)
+        for k, v in stats.items():
             s.add(k, v, ("stat", f"{k}@{kind}"))
         if kind == "full_time":
             goals = [
