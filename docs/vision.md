@@ -103,7 +103,12 @@ renders and spots at the same time and runs at 12.8 frames/s. There the renderer
   hurts the timing of pass receptions and possession changes.
 - Sprints are matched by team and start time only, not by player, because tracks have no player id.
 - Events are passes, shots, possession and sprints only: no receipts, carries, duels or qualifiers beyond pass
-  length and outcome. Thresholds were set from the taxonomy and the training matches, not tuned on candidate-2004.
+  length and outcome.
+- **Thresholds were not tuned on candidate-2004.** They come from the taxonomy. A grid search
+  (`scripts/spotter_tune.py`, 81 combinations of possession radius, minimum control frames, minimum pass travel and
+  maximum pass duration) on a validation-match segment (candidate-2021, t 2000–2090 s, 15 ground-truth passes) was
+  inconclusive. The best objective (0.39) swaps pass F1 for possession F1 (0.56 / 0.22), against 0.67 / 0.00 for the
+  defaults, on very few events. So the defaults were kept: 1.5 m, 3 frames, 4 m, no duration cap.
 
 ## Commands
 

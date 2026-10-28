@@ -19,6 +19,7 @@ POSSESSION_RADIUS_M = 1.5
 MIN_CONTROL_FRAMES = 3
 MIN_POSSESSION_S = 0.4
 MIN_PASS_TRAVEL_M = 4.0
+MAX_PASS_S = 1e9  # no limit unless tuning on the validation match says otherwise
 SHOT_MIN_SPEED_MPS = 12.0
 SHOT_MAX_DIST_M = 35.0
 SHOT_GOAL_HALF_WIDTH_M = 3.66 + 4.0
@@ -221,7 +222,7 @@ def detect(
             continue
         end = ball.pos[nxt.i0]
         travel = float(np.linalg.norm(end - start))
-        if np.isnan(travel) or travel < MIN_PASS_TRAVEL_M:
+        if np.isnan(travel) or travel < MIN_PASS_TRAVEL_M or t[nxt.i0] - t[r.i1] > MAX_PASS_S:
             continue
         seg = ball.speed[r.i1 : nxt.i0 + 1]
         raw.append(

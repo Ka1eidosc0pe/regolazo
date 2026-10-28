@@ -22,6 +22,7 @@ GRID: dict[str, list[float]] = {
     "POSSESSION_RADIUS_M": [1.0, 1.5, 2.0],
     "MIN_CONTROL_FRAMES": [2, 3, 5],  # frames (ints)
     "MIN_PASS_TRAVEL_M": [3.0, 4.0, 6.0],
+    "MAX_PASS_S": [3.0, 5.0, 1e9],
 }
 
 
