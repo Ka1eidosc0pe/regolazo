@@ -197,7 +197,7 @@ def detect(
     ball = kinematics(tracks.ball, t, max_gap_s=0.5, win_s=0.12)
     kin = {k: kinematics(v, t) for k, v in tracks.players.items() if k in teams}
     owner = owners(ball.pos, {k: v.pos for k, v in kin.items()}, teams)
-    runs = controls(owner, teams)
+    runs = controls(owner, teams, MIN_CONTROL_FRAMES)
     raw: list[Raw] = []
     poss_ids = possession_ids(runs, t)
     for r_i, r in enumerate(runs):

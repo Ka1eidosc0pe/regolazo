@@ -95,7 +95,9 @@ renders and spots at the same time and runs at 12.8 frames/s. There the renderer
   The one detected shot was struck at z up to 2 m, which is why its speed is 48 km/h too high (32 m/s against 18.7 m/s
   in ground truth). Fitting a trajectory with the shadow cue (`ball_shadow_px`) is the next step.
 - **ID fragmentation.** ByteTrack makes 282 tracks in 120 s on the zoomed broadcast camera, against about 22 players
-  on the pitch. Rules that need the same player across frames are therefore unreliable: passes between "different"
+  on the pitch. Tracks and ground-truth players are paired as mutual nearest neighbours within 1 m. On that pairing,
+  a player's track id changes **728 times in 27.9 matched player-minutes (26 per player-minute)**. Players leaving and
+  re-entering the moving frame account for part of that, and swaps inside clusters of players for the rest. Rules that need the same player across frames are therefore unreliable: passes between "different"
   tracks of the same player are dropped by the ≥ 4 m travel rule, but they still cost some precision.
 - **Ball recall.** The gated ball track covers 50 % of frames in the first segment and 36 % in the second. Fast or airborne balls are often missed, which
   hurts the timing of pass receptions and possession changes.
