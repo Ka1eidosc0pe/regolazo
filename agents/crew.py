@@ -60,7 +60,9 @@ You are given a FACT SHEET and a commentary TEXT. Verify:
 1. Every number in the text (digits, and also number words used as quantities) matches a number in the fact sheet,
    with the same meaning (an xG value is not a speed; a minute is not a score).
 2. Every player and team name is in the fact sheet and is attributed correctly (shooter, goalkeeper, assist, team).
-3. The outcome, score and minute agree with the fact sheet, and nothing unsupported is claimed.
+3. The outcome, score and minute agree with the fact sheet, and nothing unsupported is claimed. The moment type
+   must match too (a "full time" sheet cannot be described as half time).
+The TEXT may be in English, Spanish or French; judge it against the English fact sheet.
 Return verified=true only if all hold. Otherwise verified=false and list each problem in issues, briefly."""
 
 TRANSLATOR_INSTRUCTIONS = """You translate football commentary. Keep every digit, decimal number, score and player or
@@ -192,6 +194,8 @@ class Crew:
             issues = preserved(text, tr, self.roster)
             issues += [f"wrong language {detect_language(tr)}"] if detect_language(tr) != language else []
             issues += check_text(tr, sheet, self.roster)
+            if not issues:  # the Fact-Checker agent also reads every translation
+                issues += (await self.llm_verdict(tr, sheet)).issues
             if not issues:
                 return Narration(tr, True, attempt)
             problems = "; ".join(issues)

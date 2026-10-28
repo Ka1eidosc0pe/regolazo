@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 from typing import cast
 
-from agents.crew import MODE_STYLE, STORYTELLER_RULES, Crew, Narration
+from agents.crew import CHECKER_INSTRUCTIONS, MODE_STYLE, STORYTELLER_RULES, TRANSLATOR_INSTRUCTIONS, Crew, Narration
 from agents.llm import VOICES, load_env, tts
 from agents.stats import MatchData, Moment, numbers_in
 from server.config import data_dir
@@ -73,8 +73,9 @@ class Cache:
         directory.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
-    def stamp(moment: Moment, mode: str) -> str:
-        blob = f"{STORYTELLER_RULES}\n{MODE_STYLE[mode]}\n{moment.facts.render()}"
+    def stamp(moment: Moment, mode: str, language: str = "en") -> str:
+        prompts = STORYTELLER_RULES if language == "en" else f"{TRANSLATOR_INSTRUCTIONS}\n{CHECKER_INSTRUCTIONS}"
+        blob = f"{prompts}\n{MODE_STYLE[mode]}\n{moment.facts.render()}"
         return hashlib.sha256(blob.encode()).hexdigest()[:16]
 
     def get(self, moment: Moment, mode: str, language: str) -> Narration | None:
@@ -82,14 +83,16 @@ class Cache:
         if not path.exists():
             return None
         data = json.loads(path.read_text())
-        if data["stamp"] != self.stamp(moment, mode):
+        if data["stamp"] != self.stamp(moment, mode, language):
             return None
         return Narration(**data["narration"])
 
     def put(self, moment: Moment, mode: str, language: str, n: Narration) -> None:
         path = self.dir / f"{moment.id}_{mode}_{language}.json"
         path.write_text(
-            json.dumps({"stamp": self.stamp(moment, mode), "narration": n.__dict__}, ensure_ascii=False, indent=1)
+            json.dumps(
+                {"stamp": self.stamp(moment, mode, language), "narration": n.__dict__}, ensure_ascii=False, indent=1
+            )
         )
 
 
@@ -145,8 +148,11 @@ async def precompute(
             path = audio_dir / name
             async with sem:
                 try:
-                    if not path.exists():
+                    stamp = path.with_suffix(".sha")
+                    digest = hashlib.sha256(f"{nar.voice}|{nar.text}".encode()).hexdigest()[:16]
+                    if not path.exists() or not stamp.exists() or stamp.read_text() != digest:
                         path.write_bytes(await tts(nar.text, nar.language))
+                        stamp.write_text(digest)
                         stats["audio"] += 1
                     results[key] = nar.model_copy(update={"audio_url": AUDIO_URL.format(name=name)})
                 except Exception:

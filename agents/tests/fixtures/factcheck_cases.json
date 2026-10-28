@@ -29,7 +29,7 @@
    "mode": "analyst",
    "moment_id": "mom_ev_005291",
    "mutation": "none",
-   "text": "Minute 21 first half. Lopes (Northgate FC) right foot chip from 26 m, shot speed 64 km/h, off target, under no pressure, xG 0.22. Team running totals: 1 shot, team xG so far 0.22; score Northgate FC 0-0 Eastmoor Comets."
+   "text": "Minute 21 first half, Northgate FC 0-0 Eastmoor Comets — Lopes skies a right foot chip off target from 26 m in open play. xG 0.22, shot speed 64 km/h, running speed 4 km/h, under pressure no; team shots 1, team xG so far 0.22."
   },
   {
    "facts": {
@@ -56,13 +56,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Minute stated as 28 in the text but fact sheet minute is 21."
+    "Minute mismatch: fact sheet minute is 21 (first half) but text states Minute 28 (first half)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_005291",
    "mutation": "number_swap",
-   "text": "Minute 28 first half. Lopes (Northgate FC) right foot chip from 26 m, shot speed 64 km/h, off target, under no pressure, xG 0.22. Team running totals: 1 shot, team xG so far 0.22; score Northgate FC 0-0 Eastmoor Comets."
+   "text": "Minute 28 first half, Northgate FC 0-0 Eastmoor Comets — Lopes skies a right foot chip off target from 26 m in open play. xG 0.22, shot speed 64 km/h, running speed 4 km/h, under pressure no; team shots 1, team xG so far 0.22."
   },
   {
    "facts": {
@@ -89,13 +89,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Score stated as 'Northgate FC 0-7 Eastmoor Comets' does not match fact sheet score 'Northgate FC 0-0 Eastmoor Comets' (the '7' is not in the fact sheet)."
+    "Score in text 'Northgate FC 7-0 Eastmoor Comets' does not match fact sheet score 'Northgate FC 0-0 Eastmoor Comets'."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_005291",
    "mutation": "number_swap",
-   "text": "Minute 21 first half. Lopes (Northgate FC) right foot chip from 26 m, shot speed 64 km/h, off target, under no pressure, xG 0.22. Team running totals: 1 shot, team xG so far 0.22; score Northgate FC 0-7 Eastmoor Comets."
+   "text": "Minute 21 first half, Northgate FC 7-0 Eastmoor Comets — Lopes skies a right foot chip off target from 26 m in open play. xG 0.22, shot speed 64 km/h, running speed 4 km/h, under pressure no; team shots 1, team xG so far 0.22."
   },
   {
    "facts": {
@@ -122,13 +122,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name incorrect: fact sheet lists shooter as Lopes, but text names Valencia."
+    "Shooter name mismatch: fact sheet lists shooter as Lopes, but text describes the shot by Bianchi."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_005291",
    "mutation": "name_not_in_sheet",
-   "text": "Minute 21 first half. Valencia (Northgate FC) right foot chip from 26 m, shot speed 64 km/h, off target, under no pressure, xG 0.22. Team running totals: 1 shot, team xG so far 0.22; score Northgate FC 0-0 Eastmoor Comets."
+   "text": "Minute 21 first half, Northgate FC 0-0 Eastmoor Comets — Bianchi skies a right foot chip off target from 26 m in open play. xG 0.22, shot speed 64 km/h, running speed 4 km/h, under pressure no; team shots 1, team xG so far 0.22."
   },
   {
    "facts": {
@@ -155,13 +155,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name mismatch: text lists Martinez (Northgate FC) but fact sheet lists shooter as Lopes."
+    "Shooter name mismatch: text names 'Martinez' but fact sheet lists shooter as 'Lopes' (Martinez is not in the fact sheet)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_005291",
    "mutation": "fabricated_name",
-   "text": "Minute 21 first half. Martinez (Northgate FC) right foot chip from 26 m, shot speed 64 km/h, off target, under no pressure, xG 0.22. Team running totals: 1 shot, team xG so far 0.22; score Northgate FC 0-0 Eastmoor Comets."
+   "text": "Minute 21 first half, Northgate FC 0-0 Eastmoor Comets — Martinez skies a right foot chip off target from 26 m in open play. xG 0.22, shot speed 64 km/h, running speed 4 km/h, under pressure no; team shots 1, team xG so far 0.22."
   },
   {
    "facts": {
@@ -188,13 +188,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Claim 'He has scored 12 goals this season.' is not supported by the fact sheet."
+    "Claim 'He has scored 12 goals this season' is not supported by the fact sheet (no season goal count provided)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_005291",
    "mutation": "invented_number",
-   "text": "Minute 21 first half. Lopes (Northgate FC) right foot chip from 26 m, shot speed 64 km/h, off target, under no pressure, xG 0.22. Team running totals: 1 shot, team xG so far 0.22; score Northgate FC 0-0 Eastmoor Comets. He has scored 12 goals this season."
+   "text": "Minute 21 first half, Northgate FC 0-0 Eastmoor Comets — Lopes skies a right foot chip off target from 26 m in open play. xG 0.22, shot speed 64 km/h, running speed 4 km/h, under pressure no; team shots 1, team xG so far 0.22. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -221,13 +221,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The text states \"It was his first goal for the club and the crowd erupted,\" but the fact sheet shows the outcome was \"off target\" (not a goal) and contains no information about goals scored or crowd reactions; the claim is unsupported and contradicts the fact sheet."
+    "Text claims \"It was his first goal for the club and the crowd erupted,\" but the fact sheet records the outcome as off target (no goal); there is no support for any goal or it being his first for the club."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_005291",
    "mutation": "invented_claim",
-   "text": "Minute 21 first half. Lopes (Northgate FC) right foot chip from 26 m, shot speed 64 km/h, off target, under no pressure, xG 0.22. Team running totals: 1 shot, team xG so far 0.22; score Northgate FC 0-0 Eastmoor Comets. It was his first goal for the club and the crowd erupted."
+   "text": "Minute 21 first half, Northgate FC 0-0 Eastmoor Comets — Lopes skies a right foot chip off target from 26 m in open play. xG 0.22, shot speed 64 km/h, running speed 4 km/h, under pressure no; team shots 1, team xG so far 0.22. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -254,13 +254,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text claims \"It ended up in the back of the net for a goal,\" but fact sheet outcome is \"off target\" — contradiction between goal and off target."
+    "The text's final sentence 'It ended up in the back of the net for a goal.' contradicts the fact sheet outcome, which records the shot as 'off target' (no goal)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_005291",
    "mutation": "contradiction",
-   "text": "Minute 21 first half. Lopes (Northgate FC) right foot chip from 26 m, shot speed 64 km/h, off target, under no pressure, xG 0.22. Team running totals: 1 shot, team xG so far 0.22; score Northgate FC 0-0 Eastmoor Comets. It ended up in the back of the net for a goal."
+   "text": "Minute 21 first half, Northgate FC 0-0 Eastmoor Comets — Lopes skies a right foot chip off target from 26 m in open play. xG 0.22, shot speed 64 km/h, running speed 4 km/h, under pressure no; team shots 1, team xG so far 0.22. It ended up in the back of the net for a goal."
   },
   {
    "facts": {
@@ -291,7 +291,7 @@
    "mode": "casual",
    "moment_id": "mom_ev_005291",
    "mutation": "none",
-   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes tries a right-foot chip in open play but it goes off target; Gelashvili is the goalkeeper."
+   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes chips with his right foot from open play but it goes off target past Gelashvili."
   },
   {
    "facts": {
@@ -318,13 +318,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Score in text 'Northgate FC 0-7 Eastmoor Comets' does not match fact sheet score 'Northgate FC 0-0 Eastmoor Comets'."
+    "Score in text ('Northgate FC 7-0 Eastmoor Comets') does not match fact sheet score ('Northgate FC 0-0 Eastmoor Comets')."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_005291",
    "mutation": "number_swap",
-   "text": "minute 21, Northgate FC 0-7 Eastmoor Comets. Lopes tries a right-foot chip in open play but it goes off target; Gelashvili is the goalkeeper."
+   "text": "minute 21, Northgate FC 7-0 Eastmoor Comets. Lopes chips with his right foot from open play but it goes off target past Gelashvili."
   },
   {
    "facts": {
@@ -351,13 +351,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Minute stated as 28 in the text, but the fact sheet records minute 21."
+    "Minute in text is 28 but fact sheet minute is 21."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_005291",
    "mutation": "number_swap",
-   "text": "minute 28, Northgate FC 0-0 Eastmoor Comets. Lopes tries a right-foot chip in open play but it goes off target; Gelashvili is the goalkeeper."
+   "text": "minute 28, Northgate FC 0-0 Eastmoor Comets. Lopes chips with his right foot from open play but it goes off target past Gelashvili."
   },
   {
    "facts": {
@@ -384,13 +384,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Goalkeeper name mismatch: fact sheet lists Gelashvili as goalkeeper, text names Ekambi-Ndo."
+    "Text names the goalkeeper as Ekambi-Ndo, but the fact sheet lists Gelashvili as the goalkeeper."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_005291",
    "mutation": "name_not_in_sheet",
-   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes tries a right-foot chip in open play but it goes off target; Ekambi-Ndo is the goalkeeper."
+   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes chips with his right foot from open play but it goes off target past Ekambi-Ndo."
   },
   {
    "facts": {
@@ -417,13 +417,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Goalkeeper name incorrect: text names Martinez but fact sheet lists Gelashvili as the goalkeeper."
+    "Goalkeeper name mismatch: fact sheet lists Gelashvili as goalkeeper, but text says Martinez."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_005291",
    "mutation": "fabricated_name",
-   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes tries a right-foot chip in open play but it goes off target; Martinez is the goalkeeper."
+   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes chips with his right foot from open play but it goes off target past Martinez."
   },
   {
    "facts": {
@@ -450,13 +450,15 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter and goalkeeper are swapped: fact sheet lists Lopes as the shooter and Gelashvili as the goalkeeper, but the text states Gelashvili took the shot and Lopes was the goalkeeper."
+    "Player roles are reversed: fact sheet lists Lopes as shooter and Gelashvili as goalkeeper, but the text says Gelashvili took the chip and it went past Lopes.",
+    "The action attribution is incorrect: the chip with the right foot and the off-target shot were by shooter Lopes (per fact sheet), not by Gelashvili.",
+    "The phrase 'goes off target past Lopes' implies Lopes was the goalkeeper/defender preventing the shot, which contradicts the fact sheet that names Lopes as the shooter."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_005291",
    "mutation": "names_swapped",
-   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Gelashvili tries a right-foot chip in open play but it goes off target; Lopes is the goalkeeper."
+   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Gelashvili chips with his right foot from open play but it goes off target past Lopes."
   },
   {
    "facts": {
@@ -483,13 +485,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Claim that 'He has scored 12 goals this season' is not supported by the fact sheet (no seasonal goal tally provided)."
+    "The text states 'He has scored 12 goals this season.' This 12-goal figure does not appear in the fact sheet and is unsupported."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_005291",
    "mutation": "invented_number",
-   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes tries a right-foot chip in open play but it goes off target; Gelashvili is the goalkeeper. He has scored 12 goals this season."
+   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes chips with his right foot from open play but it goes off target past Gelashvili. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -516,14 +518,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text states \"It was his first goal for the club\" — the fact sheet records the outcome as \"off target\" (no goal) and contains no information about any goal, so this claim is incorrect/unsupported.",
-    "Text states \"the crowd erupted\" — the fact sheet contains no information about crowd reaction, so this is unsupported."
+    "Text claims a goal (‘It was his first goal for the club’) but fact sheet records the outcome as off target (no goal).",
+    "Text describes crowd reaction (‘and the crowd erupted’) and a milestone (first goal) that are not supported by the fact sheet (moment is a big chance, not a scored goal)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_005291",
    "mutation": "invented_claim",
-   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes tries a right-foot chip in open play but it goes off target; Gelashvili is the goalkeeper. It was his first goal for the club and the crowd erupted."
+   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes chips with his right foot from open play but it goes off target past Gelashvili. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -550,356 +552,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text states \"It ended up in the back of the net for a goal,\" which contradicts the fact sheet outcome \"off target\" (no goal).",
-    "The text implies a goal which would alter the score, but the fact sheet shows score_now as 0-0 at minute 21; there is no support in the fact sheet for a goal or a changed score."
+    "Text states \"It ended up in the back of the net for a goal,\" which contradicts the fact sheet outcome of the shot being \"off target\" (no goal).",
+    "No other numerical or naming mismatches found: minute 21, score 0-0, shooter Lopes, goalkeeper Gelashvili, right foot chip from open play all match the fact sheet."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_005291",
    "mutation": "contradiction",
-   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes tries a right-foot chip in open play but it goes off target; Gelashvili is the goalkeeper. It ended up in the back of the net for a goal."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "true",
-   "llm_issues": [],
-   "llm_verified": true,
-   "mode": "analyst",
-   "moment_id": "mom_ev_007984",
-   "mutation": "none",
-   "text": "Minute 32, corner phase: Lopes heads under pressure from 7 m, shot speed 49 km/h, xG 0.09, post-shot xG 0.58, saved by Gelashvili with a 0.3 m dive. Assist by Morales, pass 38 m, assist pass xPass 0.50; team shots 3, team xG 0.38."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Shot distance mismatch: text states 'from 14 m' but fact sheet lists shot_distance_m as 7 m."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_007984",
-   "mutation": "number_swap",
-   "text": "Minute 32, corner phase: Lopes heads under pressure from 14 m, shot speed 49 km/h, xG 0.09, post-shot xG 0.58, saved by Gelashvili with a 0.3 m dive. Assist by Morales, pass 38 m, assist pass xPass 0.50; team shots 3, team xG 0.38."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Team shots mismatch: text states team shots 10 but fact sheet lists team_shots_so_far as 3."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_007984",
-   "mutation": "number_swap",
-   "text": "Minute 32, corner phase: Lopes heads under pressure from 7 m, shot speed 49 km/h, xG 0.09, post-shot xG 0.58, saved by Gelashvili with a 0.3 m dive. Assist by Morales, pass 38 m, assist pass xPass 0.50; team shots 10, team xG 0.38."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Goalkeeper name mismatch: fact sheet lists goalkeeper as Gelashvili but text says saved by Ekambi-Ndo (name not in fact sheet)."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_007984",
-   "mutation": "name_not_in_sheet",
-   "text": "Minute 32, corner phase: Lopes heads under pressure from 7 m, shot speed 49 km/h, xG 0.09, post-shot xG 0.58, saved by Ekambi-Ndo with a 0.3 m dive. Assist by Morales, pass 38 m, assist pass xPass 0.50; team shots 3, team xG 0.38."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Goalkeeper name mismatch: text says 'saved by Martinez' but fact sheet lists goalkeeper as Gelashvili."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_007984",
-   "mutation": "fabricated_name",
-   "text": "Minute 32, corner phase: Lopes heads under pressure from 7 m, shot speed 49 km/h, xG 0.09, post-shot xG 0.58, saved by Martinez with a 0.3 m dive. Assist by Morales, pass 38 m, assist pass xPass 0.50; team shots 3, team xG 0.38."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Shooter and goalkeeper are swapped: fact sheet lists shooter as Lopes and goalkeeper as Gelashvili, but the text states Gelashvili headed and that Lopes made the save.",
-    "Incorrect attribution of the header: fact sheet indicates the shooter (Lopes) performed a header; the text says Gelashvili headed.",
-    "Incorrect attribution of the save and dive: fact sheet records Gelashvili making the save with a 0.3 m dive (keeper_dive_m = 0.3), but the text says Lopes made the save with a 0.3 m dive."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_007984",
-   "mutation": "names_swapped",
-   "text": "Minute 32, corner phase: Gelashvili heads under pressure from 7 m, shot speed 49 km/h, xG 0.09, post-shot xG 0.58, saved by Lopes with a 0.3 m dive. Assist by Morales, pass 38 m, assist pass xPass 0.50; team shots 3, team xG 0.38."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Claim 'He has scored 12 goals this season.' is not supported by the fact sheet and no season goal total is provided."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_007984",
-   "mutation": "invented_number",
-   "text": "Minute 32, corner phase: Lopes heads under pressure from 7 m, shot speed 49 km/h, xG 0.09, post-shot xG 0.58, saved by Gelashvili with a 0.3 m dive. Assist by Morales, pass 38 m, assist pass xPass 0.50; team shots 3, team xG 0.38. He has scored 12 goals this season."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Text claims \"It was his first goal for the club and the crowd erupted.\" Fact sheet states outcome is \"saved\" (no goal), so the claim of a goal is unsupported and incorrect."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_007984",
-   "mutation": "invented_claim",
-   "text": "Minute 32, corner phase: Lopes heads under pressure from 7 m, shot speed 49 km/h, xG 0.09, post-shot xG 0.58, saved by Gelashvili with a 0.3 m dive. Assist by Morales, pass 38 m, assist pass xPass 0.50; team shots 3, team xG 0.38. It was his first goal for the club and the crowd erupted."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Final sentence claims 'It ended up in the back of the net for a goal.' Fact sheet records the outcome as 'saved' (no goal), so this statement is unsupported and incorrect."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_007984",
-   "mutation": "contradiction",
-   "text": "Minute 32, corner phase: Lopes heads under pressure from 7 m, shot speed 49 km/h, xG 0.09, post-shot xG 0.58, saved by Gelashvili with a 0.3 m dive. Assist by Morales, pass 38 m, assist pass xPass 0.50; team shots 3, team xG 0.38. It ended up in the back of the net for a goal."
+   "text": "minute 21, Northgate FC 0-0 Eastmoor Comets. Lopes chips with his right foot from open play but it goes off target past Gelashvili. It ended up in the back of the net for a goal."
   },
   {
    "facts": {
@@ -932,10 +592,10 @@
    "label": "true",
    "llm_issues": [],
    "llm_verified": true,
-   "mode": "casual",
+   "mode": "analyst",
    "moment_id": "mom_ev_007984",
    "mutation": "none",
-   "text": "Minute 32, score Northgate FC 0-0. Gelashvili tips away Lopes's header from a corner, assisted by Morales, keeping it out under pressure."
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Lopes heads from a corner, distance 7 m, shot speed 49 km/h, shooter running speed 0 km/h, under pressure yes, assist Morales, assist pass 38 m, assist pass xpass 0.50; xG 0.09, post-shot xG 0.58, Gelashvili saves with 0.3 m dive, team shots 3, team xG 0.38."
   },
   {
    "facts": {
@@ -967,13 +627,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Score in text 'Northgate FC 14-0' does not match fact sheet score 'Northgate FC 0-0'."
+    "post-shot xG in text (0.75) does not match fact sheet (0.58)."
    ],
    "llm_verified": false,
-   "mode": "casual",
+   "mode": "analyst",
    "moment_id": "mom_ev_007984",
    "mutation": "number_swap",
-   "text": "Minute 32, score Northgate FC 14-0. Gelashvili tips away Lopes's header from a corner, assisted by Morales, keeping it out under pressure."
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Lopes heads from a corner, distance 7 m, shot speed 49 km/h, shooter running speed 0 km/h, under pressure yes, assist Morales, assist pass 38 m, assist pass xpass 0.50; xG 0.09, post-shot xG 0.75, Gelashvili saves with 0.3 m dive, team shots 3, team xG 0.38."
   },
   {
    "facts": {
@@ -1005,13 +665,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Minute in text is 39 but fact sheet minute is 32."
+    "Score mismatch: text says \"Northgate FC 14-0 Eastmoor Comets\" but fact sheet score_now is \"Northgate FC 0-0 Eastmoor Comets\"."
    ],
    "llm_verified": false,
-   "mode": "casual",
+   "mode": "analyst",
    "moment_id": "mom_ev_007984",
    "mutation": "number_swap",
-   "text": "Minute 39, score Northgate FC 0-0. Gelashvili tips away Lopes's header from a corner, assisted by Morales, keeping it out under pressure."
+   "text": "Minute 32, Northgate FC 14-0 Eastmoor Comets. Lopes heads from a corner, distance 7 m, shot speed 49 km/h, shooter running speed 0 km/h, under pressure yes, assist Morales, assist pass 38 m, assist pass xpass 0.50; xG 0.09, post-shot xG 0.58, Gelashvili saves with 0.3 m dive, team shots 3, team xG 0.38."
   },
   {
    "facts": {
@@ -1043,13 +703,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Goalkeeper name mismatch: text says 'Dietrich' but fact sheet lists goalkeeper as Gelashvili."
+    "Goalkeeper name mismatch: fact sheet lists Gelashvili as the goalkeeper who made the save; text names Đorđević."
    ],
    "llm_verified": false,
-   "mode": "casual",
+   "mode": "analyst",
    "moment_id": "mom_ev_007984",
    "mutation": "name_not_in_sheet",
-   "text": "Minute 32, score Northgate FC 0-0. Dietrich tips away Lopes's header from a corner, assisted by Morales, keeping it out under pressure."
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Lopes heads from a corner, distance 7 m, shot speed 49 km/h, shooter running speed 0 km/h, under pressure yes, assist Morales, assist pass 38 m, assist pass xpass 0.50; xG 0.09, post-shot xG 0.58, Đorđević saves with 0.3 m dive, team shots 3, team xG 0.38."
   },
   {
    "facts": {
@@ -1081,13 +741,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Goalkeeper name mismatch: text says 'Martinez' but fact sheet lists goalkeeper as 'Gelashvili'."
+    "Goalkeeper name mismatch: fact sheet lists Gelashvili as the goalkeeper/maker of the save, but the text names Martinez as making the save."
    ],
    "llm_verified": false,
-   "mode": "casual",
+   "mode": "analyst",
    "moment_id": "mom_ev_007984",
    "mutation": "fabricated_name",
-   "text": "Minute 32, score Northgate FC 0-0. Martinez tips away Lopes's header from a corner, assisted by Morales, keeping it out under pressure."
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Lopes heads from a corner, distance 7 m, shot speed 49 km/h, shooter running speed 0 km/h, under pressure yes, assist Morales, assist pass 38 m, assist pass xpass 0.50; xG 0.09, post-shot xG 0.58, Martinez saves with 0.3 m dive, team shots 3, team xG 0.38."
   },
   {
    "facts": {
@@ -1119,14 +779,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Player roles are swapped: the text describes Lopes tipping away a header by Gelashvili, but the fact sheet lists Lopes as the shooter and Gelashvili as the goalkeeper (i.e., Lopes should be the shooter and Gelashvili the keeper).",
-    "The phrase \"Gelashvili's header\" incorrectly attributes the header to the goalkeeper; the fact sheet indicates the shooter (header) is Lopes and the goalkeeper making the save is Gelashvili."
+    "Player roles reversed: fact sheet lists shooter as Lopes and goalkeeper as Gelashvili, but text says 'Gelashvili heads' (implying Gelashvili is shooter) and 'Lopes saves' (implying Lopes is goalkeeper).",
+    "Incorrect attribution of the save and goalkeeper dive: fact sheet records Gelashvili making the save with keeper_dive_m 0.3, but text states 'Lopes saves with 0.3 m dive' which contradicts the fact sheet."
    ],
    "llm_verified": false,
-   "mode": "casual",
+   "mode": "analyst",
    "moment_id": "mom_ev_007984",
    "mutation": "names_swapped",
-   "text": "Minute 32, score Northgate FC 0-0. Lopes tips away Gelashvili's header from a corner, assisted by Morales, keeping it out under pressure."
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Gelashvili heads from a corner, distance 7 m, shot speed 49 km/h, shooter running speed 0 km/h, under pressure yes, assist Morales, assist pass 38 m, assist pass xpass 0.50; xG 0.09, post-shot xG 0.58, Lopes saves with 0.3 m dive, team shots 3, team xG 0.38."
   },
   {
    "facts": {
@@ -1155,963 +815,6 @@
     "technique": "header",
     "under_pressure": "yes",
     "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "The sentence 'He has scored 12 goals this season.' is not supported by the fact sheet — no seasonal goal tally is provided for any player."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_007984",
-   "mutation": "invented_number",
-   "text": "Minute 32, score Northgate FC 0-0. Gelashvili tips away Lopes's header from a corner, assisted by Morales, keeping it out under pressure. He has scored 12 goals this season."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "The text states \"It was his first goal for the club\" — the fact sheet records a saved header (outcome: saved), not a goal, and contains no information about any player's first goal; this claim is unsupported and contradictory.",
-    "The text says \"the crowd erupted\" — there is no information in the fact sheet about crowd reaction, so this is an unsupported claim."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_007984",
-   "mutation": "invented_claim",
-   "text": "Minute 32, score Northgate FC 0-0. Gelashvili tips away Lopes's header from a corner, assisted by Morales, keeping it out under pressure. It was his first goal for the club and the crowd erupted."
-  },
-  {
-   "facts": {
-    "assist_by": "Morales",
-    "assist_pass_length_m": 38,
-    "assist_pass_xpass": "0.50",
-    "away_team": "Eastmoor Comets",
-    "body_part": "head",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.3",
-    "minute": 32,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.58",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Lopes",
-    "shooter_running_speed_kmh": 0,
-    "shot_distance_m": 7,
-    "shot_speed_kmh": 49,
-    "situation": "corner phase",
-    "team": "Northgate FC",
-    "team_shots_so_far": 3,
-    "team_xg_so_far": "0.38",
-    "technique": "header",
-    "under_pressure": "yes",
-    "xg": "0.09"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Text claims \"It ended up in the back of the net for a goal,\" which contradicts the fact sheet that records the moment as a saved header (outcome: saved) by goalkeeper Gelashvili."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_007984",
-   "mutation": "contradiction",
-   "text": "Minute 32, score Northgate FC 0-0. Gelashvili tips away Lopes's header from a corner, assisted by Morales, keeping it out under pressure. It ended up in the back of the net for a goal."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "true",
-   "llm_issues": [],
-   "llm_verified": true,
-   "mode": "analyst",
-   "moment_id": "mom_ev_009293",
-   "mutation": "none",
-   "text": "Minute 37, Vestergaard's left foot finesse direct free kick from 25 m, shot speed 83 km/h, shooter running speed 1 km/h, was saved by Gelashvili diving 0.8 m. xG 0.04, post-shot xG 0.32; running totals Northgate FC 4 shots, 0.42 xG."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "post-shot xG in text is 0.49 but fact sheet gives post_shot_xg as 0.32."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_009293",
-   "mutation": "number_swap",
-   "text": "Minute 37, Vestergaard's left foot finesse direct free kick from 25 m, shot speed 83 km/h, shooter running speed 1 km/h, was saved by Gelashvili diving 0.8 m. xG 0.04, post-shot xG 0.49; running totals Northgate FC 4 shots, 0.42 xG."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Shot distance stated as 32 m in text but fact sheet lists shot_distance_m as 25 m."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_009293",
-   "mutation": "number_swap",
-   "text": "Minute 37, Vestergaard's left foot finesse direct free kick from 32 m, shot speed 83 km/h, shooter running speed 1 km/h, was saved by Gelashvili diving 0.8 m. xG 0.04, post-shot xG 0.32; running totals Northgate FC 4 shots, 0.42 xG."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Goalkeeper name mismatch: text says the save was by 'Fujimoto', but fact sheet lists goalkeeper as 'Gelashvili'."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_009293",
-   "mutation": "name_not_in_sheet",
-   "text": "Minute 37, Vestergaard's left foot finesse direct free kick from 25 m, shot speed 83 km/h, shooter running speed 1 km/h, was saved by Fujimoto diving 0.8 m. xG 0.04, post-shot xG 0.32; running totals Northgate FC 4 shots, 0.42 xG."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Goalkeeper name mismatch: fact sheet lists Gelashvili as goalkeeper, but text says Martinez saved the shot."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_009293",
-   "mutation": "fabricated_name",
-   "text": "Minute 37, Vestergaard's left foot finesse direct free kick from 25 m, shot speed 83 km/h, shooter running speed 1 km/h, was saved by Martinez diving 0.8 m. xG 0.04, post-shot xG 0.32; running totals Northgate FC 4 shots, 0.42 xG."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Player roles swapped: fact sheet lists Vestergaard as shooter and Gelashvili as goalkeeper, but the text describes Gelashvili as the shooter and Vestergaard as the saver (diving 0.8 m).",
-    "Attribution error: text says \"Gelashvili's left foot finesse direct free kick\" but fact sheet records the shooter (left foot, finesse, direct free kick) as Vestergaard."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_009293",
-   "mutation": "names_swapped",
-   "text": "Minute 37, Gelashvili's left foot finesse direct free kick from 25 m, shot speed 83 km/h, shooter running speed 1 km/h, was saved by Vestergaard diving 0.8 m. xG 0.04, post-shot xG 0.32; running totals Northgate FC 4 shots, 0.42 xG."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Claim 'He has scored 12 goals this season.' is not supported by the fact sheet (no information on season goals)."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_009293",
-   "mutation": "invented_number",
-   "text": "Minute 37, Vestergaard's left foot finesse direct free kick from 25 m, shot speed 83 km/h, shooter running speed 1 km/h, was saved by Gelashvili diving 0.8 m. xG 0.04, post-shot xG 0.32; running totals Northgate FC 4 shots, 0.42 xG. He has scored 12 goals this season."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "The final sentence claims \"It was his first goal for the club and the crowd erupted.\" The fact sheet shows the shot was saved (outcome: saved) and the score remained 0-0, so it was not a goal; there is no information in the fact sheet about any \"first goal\" or crowd reaction."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_009293",
-   "mutation": "invented_claim",
-   "text": "Minute 37, Vestergaard's left foot finesse direct free kick from 25 m, shot speed 83 km/h, shooter running speed 1 km/h, was saved by Gelashvili diving 0.8 m. xG 0.04, post-shot xG 0.32; running totals Northgate FC 4 shots, 0.42 xG. It was his first goal for the club and the crowd erupted."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Text states 'It ended up in the back of the net for a goal,' but the fact sheet records the outcome as 'saved' (moment_type: save)."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_009293",
-   "mutation": "contradiction",
-   "text": "Minute 37, Vestergaard's left foot finesse direct free kick from 25 m, shot speed 83 km/h, shooter running speed 1 km/h, was saved by Gelashvili diving 0.8 m. xG 0.04, post-shot xG 0.32; running totals Northgate FC 4 shots, 0.42 xG. It ended up in the back of the net for a goal."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "true",
-   "llm_issues": [],
-   "llm_verified": true,
-   "mode": "casual",
-   "moment_id": "mom_ev_009293",
-   "mutation": "none",
-   "text": "Minute 37, Vestergaard curls a left-footed finesse direct free kick and Gelashvili saves for Northgate FC, keeping it 0-0."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Score in text 'keeping it 0-7' does not match fact sheet score_now 'Northgate FC 0-0 Eastmoor Comets' (incorrect score)."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_009293",
-   "mutation": "number_swap",
-   "text": "Minute 37, Vestergaard curls a left-footed finesse direct free kick and Gelashvili saves for Northgate FC, keeping it 0-7."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Minute in text is 44 but fact sheet minute is 37; mismatch in timing."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_009293",
-   "mutation": "number_swap",
-   "text": "Minute 44, Vestergaard curls a left-footed finesse direct free kick and Gelashvili saves for Northgate FC, keeping it 0-0."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Incorrect goalkeeper name: fact sheet lists Gelashvili as the goalkeeper who made the save, but the text names Benítez."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_009293",
-   "mutation": "name_not_in_sheet",
-   "text": "Minute 37, Vestergaard curls a left-footed finesse direct free kick and Benítez saves for Northgate FC, keeping it 0-0."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Goalkeeper name mismatch: fact sheet lists Gelashvili as the goalkeeper, but text names Martinez.",
-    "Incorrect team attribution for the save: the fact sheet implies the save was made by Gelashvili (Eastmoor Comets), whereas the text says the save was 'for Northgate FC' (wrong team)."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_009293",
-   "mutation": "fabricated_name",
-   "text": "Minute 37, Vestergaard curls a left-footed finesse direct free kick and Martinez saves for Northgate FC, keeping it 0-0."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Player roles are reversed: the fact sheet shows shooter = Vestergaard and goalkeeper = Gelashvili (Gelashvili made the save), but the text says Gelashvili curled the free kick and Vestergaard saved, which contradicts the fact sheet."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_009293",
-   "mutation": "names_swapped",
-   "text": "Minute 37, Gelashvili curls a left-footed finesse direct free kick and Vestergaard saves for Northgate FC, keeping it 0-0."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "The sentence 'He has scored 12 goals this season.' is not supported by the fact sheet — no seasonal goal tally is provided for any player."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_009293",
-   "mutation": "invented_number",
-   "text": "Minute 37, Vestergaard curls a left-footed finesse direct free kick and Gelashvili saves for Northgate FC, keeping it 0-0. He has scored 12 goals this season."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "The claim \"It was his first goal for the club\" is unsupported and incorrect: the fact sheet records a saved shot (no goal) and contains no information about any \"first goal\" for any player.",
-    "The phrase \"the crowd erupted\" is not supported by the fact sheet (no crowd reaction or attendance information is provided)."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_009293",
-   "mutation": "invented_claim",
-   "text": "Minute 37, Vestergaard curls a left-footed finesse direct free kick and Gelashvili saves for Northgate FC, keeping it 0-0. It was his first goal for the club and the crowd erupted."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Gelashvili",
-    "half": "first half",
-    "home_team": "Northgate FC",
-    "keeper_dive_m": "0.8",
-    "minute": 37,
-    "moment_type": "save",
-    "outcome": "saved",
-    "post_shot_xg": "0.32",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Vestergaard",
-    "shooter_running_speed_kmh": 1,
-    "shot_distance_m": 25,
-    "shot_speed_kmh": 83,
-    "situation": "direct free kick",
-    "team": "Northgate FC",
-    "team_shots_so_far": 4,
-    "team_xg_so_far": "0.42",
-    "technique": "finesse",
-    "under_pressure": "no",
-    "xg": "0.04"
-   },
-   "label": "false",
-   "llm_issues": [
-    "The text claims \"It ended up in the back of the net for a goal,\" which contradicts the fact sheet outcome of 'saved' (no goal)."
-   ],
-   "llm_verified": false,
-   "mode": "casual",
-   "moment_id": "mom_ev_009293",
-   "mutation": "contradiction",
-   "text": "Minute 37, Vestergaard curls a left-footed finesse direct free kick and Gelashvili saves for Northgate FC, keeping it 0-0. It ended up in the back of the net for a goal."
-  },
-  {
-   "facts": {
-    "assist_by": "Buchanan",
-    "assist_pass_length_m": 30,
-    "assist_pass_xpass": "0.55",
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Dietrich",
-    "half": "second half",
-    "home_team": "Northgate FC",
-    "minute": 74,
-    "moment_type": "big chance",
-    "outcome": "blocked",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Đorđević",
-    "shooter_running_speed_kmh": 11,
-    "shot_distance_m": 12,
-    "shot_speed_kmh": 63,
-    "situation": "open play",
-    "team": "Eastmoor Comets",
-    "team_shots_so_far": 6,
-    "team_xg_so_far": "0.66",
-    "technique": "toe poke",
-    "under_pressure": "yes",
-    "xg": "0.22"
-   },
-   "label": "true",
-   "llm_issues": [],
-   "llm_verified": true,
-   "mode": "analyst",
-   "moment_id": "mom_ev_018651",
-   "mutation": "none",
-   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m after Buchanan assist pass 30 m, xPass 0.55; xG 0.22, shot speed 63 km/h, running speed 11 km/h, blocked by Dietrich under pressure. Team shots 6, team xG 0.66, score Northgate FC 0-0."
-  },
-  {
-   "facts": {
-    "assist_by": "Buchanan",
-    "assist_pass_length_m": 30,
-    "assist_pass_xpass": "0.55",
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Dietrich",
-    "half": "second half",
-    "home_team": "Northgate FC",
-    "minute": 74,
-    "moment_type": "big chance",
-    "outcome": "blocked",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Đorđević",
-    "shooter_running_speed_kmh": 11,
-    "shot_distance_m": 12,
-    "shot_speed_kmh": 63,
-    "situation": "open play",
-    "team": "Eastmoor Comets",
-    "team_shots_so_far": 6,
-    "team_xg_so_far": "0.66",
-    "technique": "toe poke",
-    "under_pressure": "yes",
-    "xg": "0.22"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Minute in text is 81 but fact sheet minute is 74 (mismatch)."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_018651",
-   "mutation": "number_swap",
-   "text": "Minute 81, Eastmoor Comets' Đorđević left-foot toe poke from 12 m after Buchanan assist pass 30 m, xPass 0.55; xG 0.22, shot speed 63 km/h, running speed 11 km/h, blocked by Dietrich under pressure. Team shots 6, team xG 0.66, score Northgate FC 0-0."
-  },
-  {
-   "facts": {
-    "assist_by": "Buchanan",
-    "assist_pass_length_m": 30,
-    "assist_pass_xpass": "0.55",
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Dietrich",
-    "half": "second half",
-    "home_team": "Northgate FC",
-    "minute": 74,
-    "moment_type": "big chance",
-    "outcome": "blocked",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Đorđević",
-    "shooter_running_speed_kmh": 11,
-    "shot_distance_m": 12,
-    "shot_speed_kmh": 63,
-    "situation": "open play",
-    "team": "Eastmoor Comets",
-    "team_shots_so_far": 6,
-    "team_xg_so_far": "0.66",
-    "technique": "toe poke",
-    "under_pressure": "yes",
-    "xg": "0.22"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Score mismatch: fact sheet lists score_now as 'Northgate FC 0-0 Eastmoor Comets' but text states 'score Northgate FC 7-0'."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_018651",
-   "mutation": "number_swap",
-   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m after Buchanan assist pass 30 m, xPass 0.55; xG 0.22, shot speed 63 km/h, running speed 11 km/h, blocked by Dietrich under pressure. Team shots 6, team xG 0.66, score Northgate FC 7-0."
-  },
-  {
-   "facts": {
-    "assist_by": "Buchanan",
-    "assist_pass_length_m": 30,
-    "assist_pass_xpass": "0.55",
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Dietrich",
-    "half": "second half",
-    "home_team": "Northgate FC",
-    "minute": 74,
-    "moment_type": "big chance",
-    "outcome": "blocked",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Đorđević",
-    "shooter_running_speed_kmh": 11,
-    "shot_distance_m": 12,
-    "shot_speed_kmh": 63,
-    "situation": "open play",
-    "team": "Eastmoor Comets",
-    "team_shots_so_far": 6,
-    "team_xg_so_far": "0.66",
-    "technique": "toe poke",
-    "under_pressure": "yes",
-    "xg": "0.22"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Assist name incorrect: text says 'Bennett' but fact sheet lists assist_by as 'Buchanan'."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_018651",
-   "mutation": "name_not_in_sheet",
-   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m after Bennett assist pass 30 m, xPass 0.55; xG 0.22, shot speed 63 km/h, running speed 11 km/h, blocked by Dietrich under pressure. Team shots 6, team xG 0.66, score Northgate FC 0-0."
-  },
-  {
-   "facts": {
-    "assist_by": "Buchanan",
-    "assist_pass_length_m": 30,
-    "assist_pass_xpass": "0.55",
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Dietrich",
-    "half": "second half",
-    "home_team": "Northgate FC",
-    "minute": 74,
-    "moment_type": "big chance",
-    "outcome": "blocked",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Đorđević",
-    "shooter_running_speed_kmh": 11,
-    "shot_distance_m": 12,
-    "shot_speed_kmh": 63,
-    "situation": "open play",
-    "team": "Eastmoor Comets",
-    "team_shots_so_far": 6,
-    "team_xg_so_far": "0.66",
-    "technique": "toe poke",
-    "under_pressure": "yes",
-    "xg": "0.22"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Assist attribution incorrect: text names 'Martinez' as the assister, but the fact sheet lists 'Buchanan'. All other numbers, players, teams, outcome, and minute match the fact sheet."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_018651",
-   "mutation": "fabricated_name",
-   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m after Martinez assist pass 30 m, xPass 0.55; xG 0.22, shot speed 63 km/h, running speed 11 km/h, blocked by Dietrich under pressure. Team shots 6, team xG 0.66, score Northgate FC 0-0."
-  },
-  {
-   "facts": {
-    "assist_by": "Buchanan",
-    "assist_pass_length_m": 30,
-    "assist_pass_xpass": "0.55",
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Dietrich",
-    "half": "second half",
-    "home_team": "Northgate FC",
-    "minute": 74,
-    "moment_type": "big chance",
-    "outcome": "blocked",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Đorđević",
-    "shooter_running_speed_kmh": 11,
-    "shot_distance_m": 12,
-    "shot_speed_kmh": 63,
-    "situation": "open play",
-    "team": "Eastmoor Comets",
-    "team_shots_so_far": 6,
-    "team_xg_so_far": "0.66",
-    "technique": "toe poke",
-    "under_pressure": "yes",
-    "xg": "0.22"
-   },
-   "label": "false",
-   "llm_issues": [
-    "Text attributes the 30 m assist pass to Dietrich, but the fact sheet lists Buchanan as the assister (assist_by: Buchanan).",
-    "Text says the shot was \"blocked by Buchanan\", but the fact sheet identifies Dietrich as the goalkeeper (goalkeeper: Dietrich) and does not say Buchanan blocked the shot; Buchanan was the assister."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_018651",
-   "mutation": "names_swapped",
-   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m after Dietrich assist pass 30 m, xPass 0.55; xG 0.22, shot speed 63 km/h, running speed 11 km/h, blocked by Buchanan under pressure. Team shots 6, team xG 0.66, score Northgate FC 0-0."
-  },
-  {
-   "facts": {
-    "assist_by": "Buchanan",
-    "assist_pass_length_m": 30,
-    "assist_pass_xpass": "0.55",
-    "away_team": "Eastmoor Comets",
-    "body_part": "left foot",
-    "goalkeeper": "Dietrich",
-    "half": "second half",
-    "home_team": "Northgate FC",
-    "minute": 74,
-    "moment_type": "big chance",
-    "outcome": "blocked",
-    "score_now": "Northgate FC 0-0 Eastmoor Comets",
-    "shooter": "Đorđević",
-    "shooter_running_speed_kmh": 11,
-    "shot_distance_m": 12,
-    "shot_speed_kmh": 63,
-    "situation": "open play",
-    "team": "Eastmoor Comets",
-    "team_shots_so_far": 6,
-    "team_xg_so_far": "0.66",
-    "technique": "toe poke",
-    "under_pressure": "yes",
-    "xg": "0.22"
    },
    "label": "false",
    "llm_issues": [
@@ -2119,9 +822,1093 @@
    ],
    "llm_verified": false,
    "mode": "analyst",
-   "moment_id": "mom_ev_018651",
+   "moment_id": "mom_ev_007984",
    "mutation": "invented_number",
-   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m after Buchanan assist pass 30 m, xPass 0.55; xG 0.22, shot speed 63 km/h, running speed 11 km/h, blocked by Dietrich under pressure. Team shots 6, team xG 0.66, score Northgate FC 0-0. He has scored 12 goals this season."
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Lopes heads from a corner, distance 7 m, shot speed 49 km/h, shooter running speed 0 km/h, under pressure yes, assist Morales, assist pass 38 m, assist pass xpass 0.50; xG 0.09, post-shot xG 0.58, Gelashvili saves with 0.3 m dive, team shots 3, team xG 0.38. He has scored 12 goals this season."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "The text claims \"It was his first goal for the club\" which contradicts the fact sheet: the outcome was a save (no goal) and there is no data about any player scoring or first goals.",
+    "The statement \"and the crowd erupted\" is unsupported by the fact sheet; there is no information about crowd reaction."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_007984",
+   "mutation": "invented_claim",
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Lopes heads from a corner, distance 7 m, shot speed 49 km/h, shooter running speed 0 km/h, under pressure yes, assist Morales, assist pass 38 m, assist pass xpass 0.50; xG 0.09, post-shot xG 0.58, Gelashvili saves with 0.3 m dive, team shots 3, team xG 0.38. It was his first goal for the club and the crowd erupted."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Final sentence claims it ended up in the back of the net for a goal, but fact sheet outcome is 'saved' (no goal)."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_007984",
+   "mutation": "contradiction",
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Lopes heads from a corner, distance 7 m, shot speed 49 km/h, shooter running speed 0 km/h, under pressure yes, assist Morales, assist pass 38 m, assist pass xpass 0.50; xG 0.09, post-shot xG 0.58, Gelashvili saves with 0.3 m dive, team shots 3, team xG 0.38. It ended up in the back of the net for a goal."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "true",
+   "llm_issues": [],
+   "llm_verified": true,
+   "mode": "casual",
+   "moment_id": "mom_ev_007984",
+   "mutation": "none",
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Gelashvili saves Lopes's header from a corner set up by Morales, keeping the score level."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Score in text 'Northgate FC 14-0 Eastmoor Comets' does not match fact sheet score 'Northgate FC 0-0 Eastmoor Comets'."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_007984",
+   "mutation": "number_swap",
+   "text": "Minute 32, Northgate FC 14-0 Eastmoor Comets. Gelashvili saves Lopes's header from a corner set up by Morales, keeping the score level."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Minute stated as 39 in text but fact sheet minute is 32."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_007984",
+   "mutation": "number_swap",
+   "text": "Minute 39, Northgate FC 0-0 Eastmoor Comets. Gelashvili saves Lopes's header from a corner set up by Morales, keeping the score level."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Incorrect goalkeeper name: text states 'Buchanan' made the save but fact sheet lists goalkeeper as 'Gelashvili'."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_007984",
+   "mutation": "name_not_in_sheet",
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Buchanan saves Lopes's header from a corner set up by Morales, keeping the score level."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Goalkeeper name mismatch: fact sheet lists Gelashvili as the goalkeeper who made the save, but the text names Martinez. All other details (minute 32, score 0-0, shooter Lopes, header from a corner, assist by Morales) match the fact sheet."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_007984",
+   "mutation": "fabricated_name",
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Martinez saves Lopes's header from a corner set up by Morales, keeping the score level."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "The text reverses shooter and goalkeeper: the fact sheet lists Lopes as the shooter and Gelashvili as the goalkeeper (outcome: saved), but the text says \"Lopes saves Gelashvili's header,\" implying Lopes was the keeper and Gelashvili the shooter, which contradicts the fact sheet.",
+    "All numbers (minute 32 and score 0-0) and the corner/assist by Morales and header technique match the fact sheet, but the player role attribution is incorrect."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_007984",
+   "mutation": "names_swapped",
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Lopes saves Gelashvili's header from a corner set up by Morales, keeping the score level."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "The text states \"He has scored 12 goals this season.\" The fact sheet contains no information about Gelashvili (or any player) having 12 goals this season; this claim is unsupported."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_007984",
+   "mutation": "invented_number",
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Gelashvili saves Lopes's header from a corner set up by Morales, keeping the score level. He has scored 12 goals this season."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "The sentence \"It was his first goal for the club\" contradicts the fact sheet: the outcome is a save (no goal).",
+    "The phrase \"and the crowd erupted\" is an event not supported by the fact sheet (no crowd reaction recorded)."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_007984",
+   "mutation": "invented_claim",
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Gelashvili saves Lopes's header from a corner set up by Morales, keeping the score level. It was his first goal for the club and the crowd erupted."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 38,
+    "assist_pass_xpass": "0.50",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.3",
+    "minute": 32,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.58",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Lopes",
+    "shooter_running_speed_kmh": 0,
+    "shot_distance_m": 7,
+    "shot_speed_kmh": 49,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 3,
+    "team_xg_so_far": "0.38",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.09"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Text claims \"It ended up in the back of the net for a goal,\" which contradicts the fact sheet outcome (saved). No goal is recorded in the fact sheet."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_007984",
+   "mutation": "contradiction",
+   "text": "Minute 32, Northgate FC 0-0 Eastmoor Comets. Gelashvili saves Lopes's header from a corner set up by Morales, keeping the score level. It ended up in the back of the net for a goal."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "true",
+   "llm_issues": [],
+   "llm_verified": true,
+   "mode": "analyst",
+   "moment_id": "mom_ev_009293",
+   "mutation": "none",
+   "text": "Minute 37, Vestergaard's 25 m direct free kick with left foot finesse saved by Gelashvili, shot speed 83 km/h, post-shot xG 0.32 versus xG 0.04; keeper dive 0.8 m. Northgate FC shots 4, xG 0.42."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "post-shot xG given in text as 0.49 but fact sheet lists post_shot_xg as 0.32."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_009293",
+   "mutation": "number_swap",
+   "text": "Minute 37, Vestergaard's 25 m direct free kick with left foot finesse saved by Gelashvili, shot speed 83 km/h, post-shot xG 0.49 versus xG 0.04; keeper dive 0.8 m. Northgate FC shots 4, xG 0.42."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Keeper dive distance mismatch: text states 1.1 m but fact sheet gives 0.8 m."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_009293",
+   "mutation": "number_swap",
+   "text": "Minute 37, Vestergaard's 25 m direct free kick with left foot finesse saved by Gelashvili, shot speed 83 km/h, post-shot xG 0.32 versus xG 0.04; keeper dive 1.1 m. Northgate FC shots 4, xG 0.42."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Goalkeeper name mismatch: fact sheet lists Gelashvili but text names Bennett."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_009293",
+   "mutation": "name_not_in_sheet",
+   "text": "Minute 37, Vestergaard's 25 m direct free kick with left foot finesse saved by Bennett, shot speed 83 km/h, post-shot xG 0.32 versus xG 0.04; keeper dive 0.8 m. Northgate FC shots 4, xG 0.42."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Goalkeeper name incorrect: text says Martinez but fact sheet lists Gelashvili."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_009293",
+   "mutation": "fabricated_name",
+   "text": "Minute 37, Vestergaard's 25 m direct free kick with left foot finesse saved by Martinez, shot speed 83 km/h, post-shot xG 0.32 versus xG 0.04; keeper dive 0.8 m. Northgate FC shots 4, xG 0.42."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Shooter and goalkeeper are swapped: fact sheet lists Vestergaard as shooter and Gelashvili as goalkeeper (so Gelashvili made the save), but the text says Gelashvili took the free kick and it was saved by Vestergaard."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_009293",
+   "mutation": "names_swapped",
+   "text": "Minute 37, Gelashvili's 25 m direct free kick with left foot finesse saved by Vestergaard, shot speed 83 km/h, post-shot xG 0.32 versus xG 0.04; keeper dive 0.8 m. Northgate FC shots 4, xG 0.42."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "The statement 'He has scored 12 goals this season.' is unsupported by the fact sheet (no season goal total provided)."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_009293",
+   "mutation": "invented_number",
+   "text": "Minute 37, Vestergaard's 25 m direct free kick with left foot finesse saved by Gelashvili, shot speed 83 km/h, post-shot xG 0.32 versus xG 0.04; keeper dive 0.8 m. Northgate FC shots 4, xG 0.42. He has scored 12 goals this season."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "The sentence 'It was his first goal for the club' is unsupported and contradicts the fact sheet: the outcome is 'saved', not a goal.",
+    "'the crowd erupted' (a reaction) is not supported by the fact sheet and thus is an unsupported claim."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_009293",
+   "mutation": "invented_claim",
+   "text": "Minute 37, Vestergaard's 25 m direct free kick with left foot finesse saved by Gelashvili, shot speed 83 km/h, post-shot xG 0.32 versus xG 0.04; keeper dive 0.8 m. Northgate FC shots 4, xG 0.42. It was his first goal for the club and the crowd erupted."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Text claims 'It ended up in the back of the net for a goal,' which contradicts the fact sheet outcome 'saved' and is unsupported by the fact sheet."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_009293",
+   "mutation": "contradiction",
+   "text": "Minute 37, Vestergaard's 25 m direct free kick with left foot finesse saved by Gelashvili, shot speed 83 km/h, post-shot xG 0.32 versus xG 0.04; keeper dive 0.8 m. Northgate FC shots 4, xG 0.42. It ended up in the back of the net for a goal."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "true",
+   "llm_issues": [],
+   "llm_verified": true,
+   "mode": "casual",
+   "moment_id": "mom_ev_009293",
+   "mutation": "none",
+   "text": "Minute 37, score Northgate FC 0-0 Eastmoor Comets. Gelashvili tips away Vestergaard's left-footed finesse direct free kick and it's saved."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Score is incorrect: text states '7-0' but fact sheet score_now is 'Northgate FC 0-0 Eastmoor Comets'."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_009293",
+   "mutation": "number_swap",
+   "text": "Minute 37, score Northgate FC 7-0 Eastmoor Comets. Gelashvili tips away Vestergaard's left-footed finesse direct free kick and it's saved."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Minute in text is 44 but fact sheet minute is 37."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_009293",
+   "mutation": "number_swap",
+   "text": "Minute 44, score Northgate FC 0-0 Eastmoor Comets. Gelashvili tips away Vestergaard's left-footed finesse direct free kick and it's saved."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Goalkeeper name mismatch: fact sheet lists goalkeeper as Gelashvili but text names Oliveira."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_009293",
+   "mutation": "name_not_in_sheet",
+   "text": "Minute 37, score Northgate FC 0-0 Eastmoor Comets. Oliveira tips away Vestergaard's left-footed finesse direct free kick and it's saved."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Goalkeeper name mismatch: text says 'Martinez' tipped the shot, but fact sheet lists goalkeeper as 'Gelashvili'."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_009293",
+   "mutation": "fabricated_name",
+   "text": "Minute 37, score Northgate FC 0-0 Eastmoor Comets. Martinez tips away Vestergaard's left-footed finesse direct free kick and it's saved."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Player attribution reversed: fact sheet lists Vestergaard as shooter and Gelashvili as goalkeeper, but the text describes Gelashvili as the shooter and Vestergaard as the one who 'tips away' the shot.",
+    "Phrase 'tips away' implies a goalkeeper action by Vestergaard which contradicts the fact sheet where Gelashvili is the goalkeeper who made the save."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_009293",
+   "mutation": "names_swapped",
+   "text": "Minute 37, score Northgate FC 0-0 Eastmoor Comets. Vestergaard tips away Gelashvili's left-footed finesse direct free kick and it's saved."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "The text states \"He has scored 12 goals this season,\" but the fact sheet contains no information about any player having 12 goals this season; this claim is unsupported.",
+    "Every number in the text must match the fact sheet: the quantity \"12\" does not appear in the fact sheet and therefore is incorrect."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_009293",
+   "mutation": "invented_number",
+   "text": "Minute 37, score Northgate FC 0-0 Eastmoor Comets. Gelashvili tips away Vestergaard's left-footed finesse direct free kick and it's saved. He has scored 12 goals this season."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "The sentence 'It was his first goal for the club' is not supported by the fact sheet (no information about any goal or 'first' goal).",
+    "The claim 'and the crowd erupted' is not supported by the fact sheet (no crowd reaction or attendance info)."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_009293",
+   "mutation": "invented_claim",
+   "text": "Minute 37, score Northgate FC 0-0 Eastmoor Comets. Gelashvili tips away Vestergaard's left-footed finesse direct free kick and it's saved. It was his first goal for the club and the crowd erupted."
+  },
+  {
+   "facts": {
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Gelashvili",
+    "half": "first half",
+    "home_team": "Northgate FC",
+    "keeper_dive_m": "0.8",
+    "minute": 37,
+    "moment_type": "save",
+    "outcome": "saved",
+    "post_shot_xg": "0.32",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Vestergaard",
+    "shooter_running_speed_kmh": 1,
+    "shot_distance_m": 25,
+    "shot_speed_kmh": 83,
+    "situation": "direct free kick",
+    "team": "Northgate FC",
+    "team_shots_so_far": 4,
+    "team_xg_so_far": "0.42",
+    "technique": "finesse",
+    "under_pressure": "no",
+    "xg": "0.04"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Text states \"It ended up in the back of the net for a goal,\" which contradicts the fact sheet outcome (saved).",
+    "No other numerical or attribution mismatches found: minute 37, teams, shooter (Vestergaard), goalkeeper (Gelashvili), left foot, finesse, direct free kick all match the fact sheet."
+   ],
+   "llm_verified": false,
+   "mode": "casual",
+   "moment_id": "mom_ev_009293",
+   "mutation": "contradiction",
+   "text": "Minute 37, score Northgate FC 0-0 Eastmoor Comets. Gelashvili tips away Vestergaard's left-footed finesse direct free kick and it's saved. It ended up in the back of the net for a goal."
+  },
+  {
+   "facts": {
+    "assist_by": "Buchanan",
+    "assist_pass_length_m": 30,
+    "assist_pass_xpass": "0.55",
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Dietrich",
+    "half": "second half",
+    "home_team": "Northgate FC",
+    "minute": 74,
+    "moment_type": "big chance",
+    "outcome": "blocked",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Đorđević",
+    "shooter_running_speed_kmh": 11,
+    "shot_distance_m": 12,
+    "shot_speed_kmh": 63,
+    "situation": "open play",
+    "team": "Eastmoor Comets",
+    "team_shots_so_far": 6,
+    "team_xg_so_far": "0.66",
+    "technique": "toe poke",
+    "under_pressure": "yes",
+    "xg": "0.22"
+   },
+   "label": "true",
+   "llm_issues": [],
+   "llm_verified": true,
+   "mode": "analyst",
+   "moment_id": "mom_ev_018651",
+   "mutation": "none",
+   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m, 63 km/h, running 11 km/h under pressure; Dietrich blocks. Buchanan assist 30 m, xPass 0.55; shot xG 0.22; team shots 6, team xG 0.66."
   },
   {
    "facts": {
@@ -2151,14 +1938,232 @@
    },
    "label": "false",
    "llm_issues": [
-    "The sentence 'It was his first goal for the club' is incorrect/unsupported — the fact sheet records the shot as 'blocked', not a goal.",
-    "The phrase 'and the crowd erupted' is unsupported by the fact sheet (no crowd reaction recorded)."
+    "Shot distance mismatch: fact sheet shot_distance_m is 12 m but text states 19 m."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_018651",
+   "mutation": "number_swap",
+   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 19 m, 63 km/h, running 11 km/h under pressure; Dietrich blocks. Buchanan assist 30 m, xPass 0.55; shot xG 0.22; team shots 6, team xG 0.66."
+  },
+  {
+   "facts": {
+    "assist_by": "Buchanan",
+    "assist_pass_length_m": 30,
+    "assist_pass_xpass": "0.55",
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Dietrich",
+    "half": "second half",
+    "home_team": "Northgate FC",
+    "minute": 74,
+    "moment_type": "big chance",
+    "outcome": "blocked",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Đorđević",
+    "shooter_running_speed_kmh": 11,
+    "shot_distance_m": 12,
+    "shot_speed_kmh": 63,
+    "situation": "open play",
+    "team": "Eastmoor Comets",
+    "team_shots_so_far": 6,
+    "team_xg_so_far": "0.66",
+    "technique": "toe poke",
+    "under_pressure": "yes",
+    "xg": "0.22"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Shot xG in text is 0.39 but fact sheet lists xG as 0.22."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_018651",
+   "mutation": "number_swap",
+   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m, 63 km/h, running 11 km/h under pressure; Dietrich blocks. Buchanan assist 30 m, xPass 0.55; shot xG 0.39; team shots 6, team xG 0.66."
+  },
+  {
+   "facts": {
+    "assist_by": "Buchanan",
+    "assist_pass_length_m": 30,
+    "assist_pass_xpass": "0.55",
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Dietrich",
+    "half": "second half",
+    "home_team": "Northgate FC",
+    "minute": 74,
+    "moment_type": "big chance",
+    "outcome": "blocked",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Đorđević",
+    "shooter_running_speed_kmh": 11,
+    "shot_distance_m": 12,
+    "shot_speed_kmh": 63,
+    "situation": "open play",
+    "team": "Eastmoor Comets",
+    "team_shots_so_far": 6,
+    "team_xg_so_far": "0.66",
+    "technique": "toe poke",
+    "under_pressure": "yes",
+    "xg": "0.22"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Assist name mismatch: fact sheet lists assist_by as Buchanan but text states Babić assist."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_018651",
+   "mutation": "name_not_in_sheet",
+   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m, 63 km/h, running 11 km/h under pressure; Dietrich blocks. Babić assist 30 m, xPass 0.55; shot xG 0.22; team shots 6, team xG 0.66."
+  },
+  {
+   "facts": {
+    "assist_by": "Buchanan",
+    "assist_pass_length_m": 30,
+    "assist_pass_xpass": "0.55",
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Dietrich",
+    "half": "second half",
+    "home_team": "Northgate FC",
+    "minute": 74,
+    "moment_type": "big chance",
+    "outcome": "blocked",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Đorđević",
+    "shooter_running_speed_kmh": 11,
+    "shot_distance_m": 12,
+    "shot_speed_kmh": 63,
+    "situation": "open play",
+    "team": "Eastmoor Comets",
+    "team_shots_so_far": 6,
+    "team_xg_so_far": "0.66",
+    "technique": "toe poke",
+    "under_pressure": "yes",
+    "xg": "0.22"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Assist name mismatch: text says 'Martinez' provided the assist, but fact sheet lists 'Buchanan'."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_018651",
+   "mutation": "fabricated_name",
+   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m, 63 km/h, running 11 km/h under pressure; Dietrich blocks. Martinez assist 30 m, xPass 0.55; shot xG 0.22; team shots 6, team xG 0.66."
+  },
+  {
+   "facts": {
+    "assist_by": "Buchanan",
+    "assist_pass_length_m": 30,
+    "assist_pass_xpass": "0.55",
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Dietrich",
+    "half": "second half",
+    "home_team": "Northgate FC",
+    "minute": 74,
+    "moment_type": "big chance",
+    "outcome": "blocked",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Đorđević",
+    "shooter_running_speed_kmh": 11,
+    "shot_distance_m": 12,
+    "shot_speed_kmh": 63,
+    "situation": "open play",
+    "team": "Eastmoor Comets",
+    "team_shots_so_far": 6,
+    "team_xg_so_far": "0.66",
+    "technique": "toe poke",
+    "under_pressure": "yes",
+    "xg": "0.22"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Text states 'Buchanan blocks.' The fact sheet lists Buchanan as the assister (assist_by) — it does not say Buchanan made the block; attributing the block to Buchanan is unsupported/incorrect.",
+    "Text states 'Dietrich assist 30 m' which attributes the assist to Dietrich. In the fact sheet Dietrich is the goalkeeper (goalkeeper) and the assist is by Buchanan with length 30 m; attributing the assist to Dietrich is incorrect."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_018651",
+   "mutation": "names_swapped",
+   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m, 63 km/h, running 11 km/h under pressure; Buchanan blocks. Dietrich assist 30 m, xPass 0.55; shot xG 0.22; team shots 6, team xG 0.66."
+  },
+  {
+   "facts": {
+    "assist_by": "Buchanan",
+    "assist_pass_length_m": 30,
+    "assist_pass_xpass": "0.55",
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Dietrich",
+    "half": "second half",
+    "home_team": "Northgate FC",
+    "minute": 74,
+    "moment_type": "big chance",
+    "outcome": "blocked",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Đorđević",
+    "shooter_running_speed_kmh": 11,
+    "shot_distance_m": 12,
+    "shot_speed_kmh": 63,
+    "situation": "open play",
+    "team": "Eastmoor Comets",
+    "team_shots_so_far": 6,
+    "team_xg_so_far": "0.66",
+    "technique": "toe poke",
+    "under_pressure": "yes",
+    "xg": "0.22"
+   },
+   "label": "false",
+   "llm_issues": [
+    "Unsupported statistic: 'He has scored 12 goals this season.' — the fact sheet contains no information about season goal totals for Đorđević."
+   ],
+   "llm_verified": false,
+   "mode": "analyst",
+   "moment_id": "mom_ev_018651",
+   "mutation": "invented_number",
+   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m, 63 km/h, running 11 km/h under pressure; Dietrich blocks. Buchanan assist 30 m, xPass 0.55; shot xG 0.22; team shots 6, team xG 0.66. He has scored 12 goals this season."
+  },
+  {
+   "facts": {
+    "assist_by": "Buchanan",
+    "assist_pass_length_m": 30,
+    "assist_pass_xpass": "0.55",
+    "away_team": "Eastmoor Comets",
+    "body_part": "left foot",
+    "goalkeeper": "Dietrich",
+    "half": "second half",
+    "home_team": "Northgate FC",
+    "minute": 74,
+    "moment_type": "big chance",
+    "outcome": "blocked",
+    "score_now": "Northgate FC 0-0 Eastmoor Comets",
+    "shooter": "Đorđević",
+    "shooter_running_speed_kmh": 11,
+    "shot_distance_m": 12,
+    "shot_speed_kmh": 63,
+    "situation": "open play",
+    "team": "Eastmoor Comets",
+    "team_shots_so_far": 6,
+    "team_xg_so_far": "0.66",
+    "technique": "toe poke",
+    "under_pressure": "yes",
+    "xg": "0.22"
+   },
+   "label": "false",
+   "llm_issues": [
+    "The sentence 'It was his first goal for the club' is unsupported and contradicts the fact sheet: the outcome is 'blocked', not a goal.",
+    "'First' (a numerical claim) is not present in the fact sheet and thus does not match any provided number or fact.",
+    "'and the crowd erupted' is an unsupported event not present in the fact sheet."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_018651",
    "mutation": "invented_claim",
-   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m after Buchanan assist pass 30 m, xPass 0.55; xG 0.22, shot speed 63 km/h, running speed 11 km/h, blocked by Dietrich under pressure. Team shots 6, team xG 0.66, score Northgate FC 0-0. It was his first goal for the club and the crowd erupted."
+   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m, 63 km/h, running 11 km/h under pressure; Dietrich blocks. Buchanan assist 30 m, xPass 0.55; shot xG 0.22; team shots 6, team xG 0.66. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -2188,13 +2193,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text claims \"It ended up in the back of the net for a goal,\" but fact sheet lists the outcome as \"blocked\" (no goal)."
+    "Final sentence claims the shot \"ended up in the back of the net for a goal,\" but the fact sheet records the outcome as \"blocked\" (no goal)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_018651",
    "mutation": "contradiction",
-   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m after Buchanan assist pass 30 m, xPass 0.55; xG 0.22, shot speed 63 km/h, running speed 11 km/h, blocked by Dietrich under pressure. Team shots 6, team xG 0.66, score Northgate FC 0-0. It ended up in the back of the net for a goal."
+   "text": "Minute 74, Eastmoor Comets' Đorđević left-foot toe poke from 12 m, 63 km/h, running 11 km/h under pressure; Dietrich blocks. Buchanan assist 30 m, xPass 0.55; shot xG 0.22; team shots 6, team xG 0.66. It ended up in the back of the net for a goal."
   },
   {
    "facts": {
@@ -2228,7 +2233,7 @@
    "mode": "casual",
    "moment_id": "mom_ev_018651",
    "mutation": "none",
-   "text": "minute 74, Northgate FC 0-0 Eastmoor Comets. Đorđević, from Buchanan in open play, tries a left foot toe poke but Dietrich blocks it under pressure."
+   "text": "minute 74, score 0-0: Đorđević gets a big chance for Eastmoor Comets from an assist by Buchanan but his left foot toe poke is blocked by Dietrich."
   },
   {
    "facts": {
@@ -2258,13 +2263,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Score in text 'Northgate FC 0-7 Eastmoor Comets' does not match fact sheet score 'Northgate FC 0-0 Eastmoor Comets'."
+    "Minute mismatch: fact sheet minute is 74 (second half) but text says minute 81."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018651",
    "mutation": "number_swap",
-   "text": "minute 74, Northgate FC 0-7 Eastmoor Comets. Đorđević, from Buchanan in open play, tries a left foot toe poke but Dietrich blocks it under pressure."
+   "text": "minute 81, score 0-0: Đorđević gets a big chance for Eastmoor Comets from an assist by Buchanan but his left foot toe poke is blocked by Dietrich."
   },
   {
    "facts": {
@@ -2294,13 +2299,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Minute in text (81) does not match fact sheet minute (74)."
+    "Score in text '0-7' does not match fact sheet score 'Northgate FC 0-0 Eastmoor Comets'."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018651",
    "mutation": "number_swap",
-   "text": "minute 81, Northgate FC 0-0 Eastmoor Comets. Đorđević, from Buchanan in open play, tries a left foot toe poke but Dietrich blocks it under pressure."
+   "text": "minute 74, score 0-7: Đorđević gets a big chance for Eastmoor Comets from an assist by Buchanan but his left foot toe poke is blocked by Dietrich."
   },
   {
    "facts": {
@@ -2330,13 +2335,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The text credits the build-up to 'Ekambi-Ndo', but the fact sheet lists the assist as Buchanan (assist_by: Buchanan); 'Ekambi-Ndo' is not in the fact sheet and the assist attribution is incorrect."
+    "Assist attribution incorrect: text names Fujimoto as the assister but fact sheet lists Buchanan as assist_by. All other numbers, names and the outcome/minute/moment type match the fact sheet."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018651",
    "mutation": "name_not_in_sheet",
-   "text": "minute 74, Northgate FC 0-0 Eastmoor Comets. Đorđević, from Ekambi-Ndo in open play, tries a left foot toe poke but Dietrich blocks it under pressure."
+   "text": "minute 74, score 0-0: Đorđević gets a big chance for Eastmoor Comets from an assist by Fujimoto but his left foot toe poke is blocked by Dietrich."
   },
   {
    "facts": {
@@ -2366,13 +2371,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Assist attribution incorrect: fact sheet lists Buchanan as assist provider, text says Martinez."
+    "Assist mismatch: text names the assist provider as Martinez but fact sheet lists Buchanan."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018651",
    "mutation": "fabricated_name",
-   "text": "minute 74, Northgate FC 0-0 Eastmoor Comets. Đorđević, from Martinez in open play, tries a left foot toe poke but Dietrich blocks it under pressure."
+   "text": "minute 74, score 0-0: Đorđević gets a big chance for Eastmoor Comets from an assist by Martinez but his left foot toe poke is blocked by Dietrich."
   },
   {
    "facts": {
@@ -2402,14 +2407,15 @@
    },
    "label": "false",
    "llm_issues": [
-    "Buchanan misattributed: fact sheet lists Buchanan as assist provider, but the text says Buchanan 'blocks' the shot (blocker) — role mismatch.",
-    "Phrase 'from Dietrich in open play' is misleading/incorrect: Dietrich is the goalkeeper in the fact sheet, not the source of the action; the fact sheet does not support wording that the action was 'from Dietrich'."
+    "Assist attribution incorrect: fact sheet lists Buchanan as the assister, but the text says the assist was by Dietrich.",
+    "Blocker attribution incorrect/unsupported: the fact sheet does not state who made the block; it only records the outcome as 'blocked'. The text claims Buchanan made the block, which contradicts the fact that Buchanan is listed as the assister.",
+    "Role of Dietrich incorrect: the fact sheet lists Dietrich as the goalkeeper, not the assister as stated in the text."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018651",
    "mutation": "names_swapped",
-   "text": "minute 74, Northgate FC 0-0 Eastmoor Comets. Đorđević, from Dietrich in open play, tries a left foot toe poke but Buchanan blocks it under pressure."
+   "text": "minute 74, score 0-0: Đorđević gets a big chance for Eastmoor Comets from an assist by Dietrich but his left foot toe poke is blocked by Buchanan."
   },
   {
    "facts": {
@@ -2439,13 +2445,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The statement \"He has scored 12 goals this season.\" is not supported by the fact sheet. The only occurrence of the number 12 in the fact sheet refers to shot_distance_m (12 metres), not a seasonal goal tally."
+    "Claim 'He has scored 12 goals this season' is not supported by the fact sheet (no season-goal total provided)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018651",
    "mutation": "invented_number",
-   "text": "minute 74, Northgate FC 0-0 Eastmoor Comets. Đorđević, from Buchanan in open play, tries a left foot toe poke but Dietrich blocks it under pressure. He has scored 12 goals this season."
+   "text": "minute 74, score 0-0: Đorđević gets a big chance for Eastmoor Comets from an assist by Buchanan but his left foot toe poke is blocked by Dietrich. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -2475,14 +2481,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "The text claims “It was his first goal for the club” but the fact sheet records the outcome as blocked (no goal) and contains no information about any first goal.",
-    "The text states “the crowd erupted,” which is not supported or mentioned in the fact sheet."
+    "Text states \"It was his first goal for the club\" despite fact sheet showing the shot was blocked (no goal).",
+    "Text claims \"the crowd erupted,\" which is an unsupported narrative detail not present in the fact sheet."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018651",
    "mutation": "invented_claim",
-   "text": "minute 74, Northgate FC 0-0 Eastmoor Comets. Đorđević, from Buchanan in open play, tries a left foot toe poke but Dietrich blocks it under pressure. It was his first goal for the club and the crowd erupted."
+   "text": "minute 74, score 0-0: Đorđević gets a big chance for Eastmoor Comets from an assist by Buchanan but his left foot toe poke is blocked by Dietrich. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -2512,13 +2518,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text claims 'It ended up in the back of the net for a goal,' but the fact sheet states the outcome was 'blocked' (no goal)."
+    "Text states 'It ended up in the back of the net for a goal,' but fact sheet outcome is 'blocked' (no goal). This contradicts the fact sheet."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018651",
    "mutation": "contradiction",
-   "text": "minute 74, Northgate FC 0-0 Eastmoor Comets. Đorđević, from Buchanan in open play, tries a left foot toe poke but Dietrich blocks it under pressure. It ended up in the back of the net for a goal."
+   "text": "minute 74, score 0-0: Đorđević gets a big chance for Eastmoor Comets from an assist by Buchanan but his left foot toe poke is blocked by Dietrich. It ended up in the back of the net for a goal."
   },
   {
    "facts": {
@@ -2550,7 +2556,7 @@
    "mode": "analyst",
    "moment_id": "mom_ev_018667",
    "mutation": "none",
-   "text": "Minute 74, Eastmoor Comets goal: Đorđević right foot finesse past Dietrich from 17 m in open play under pressure. xG 0.05, post-shot xG 0.45, shot speed 82 km/h, shooter running speed 2 km/h, team shots 7, team xG 0.71."
+   "text": "Minute 74. Eastmoor Comets' Đorđević finishes with his right foot from 17 m in open play under pressure using a finesse shot at 82 km/h; xG 0.05, post-shot xG 0.45, running speed 2 km/h. Team shots 7, team xG 0.71."
   },
   {
    "facts": {
@@ -2578,13 +2584,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "post-shot xG in text is 0.62 but fact sheet gives post_shot_xg as 0.45."
+    "post-shot xG in text is 0.62 but fact sheet lists post_shot_xg as 0.45."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_018667",
    "mutation": "number_swap",
-   "text": "Minute 74, Eastmoor Comets goal: Đorđević right foot finesse past Dietrich from 17 m in open play under pressure. xG 0.05, post-shot xG 0.62, shot speed 82 km/h, shooter running speed 2 km/h, team shots 7, team xG 0.71."
+   "text": "Minute 74. Eastmoor Comets' Đorđević finishes with his right foot from 17 m in open play under pressure using a finesse shot at 82 km/h; xG 0.05, post-shot xG 0.62, running speed 2 km/h. Team shots 7, team xG 0.71."
   },
   {
    "facts": {
@@ -2612,13 +2618,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter running speed mismatch: text states 9 km/h but fact sheet has 2 km/h."
+    "Team xG in text is 0.88 but fact sheet lists team_xg_so_far as 0.71."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_018667",
    "mutation": "number_swap",
-   "text": "Minute 74, Eastmoor Comets goal: Đorđević right foot finesse past Dietrich from 17 m in open play under pressure. xG 0.05, post-shot xG 0.45, shot speed 82 km/h, shooter running speed 9 km/h, team shots 7, team xG 0.71."
+   "text": "Minute 74. Eastmoor Comets' Đorđević finishes with his right foot from 17 m in open play under pressure using a finesse shot at 82 km/h; xG 0.05, post-shot xG 0.45, running speed 2 km/h. Team shots 7, team xG 0.88."
   },
   {
    "facts": {
@@ -2646,13 +2652,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Goalkeeper name mismatch: text says 'Bennett' while fact sheet lists goalkeeper as 'Dietrich'."
+    "Shooter name mismatch: fact sheet lists Đorđević as shooter, but text names Diallo, who is not in the fact sheet."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_018667",
    "mutation": "name_not_in_sheet",
-   "text": "Minute 74, Eastmoor Comets goal: Đorđević right foot finesse past Bennett from 17 m in open play under pressure. xG 0.05, post-shot xG 0.45, shot speed 82 km/h, shooter running speed 2 km/h, team shots 7, team xG 0.71."
+   "text": "Minute 74. Eastmoor Comets' Diallo finishes with his right foot from 17 m in open play under pressure using a finesse shot at 82 km/h; xG 0.05, post-shot xG 0.45, running speed 2 km/h. Team shots 7, team xG 0.71."
   },
   {
    "facts": {
@@ -2680,13 +2686,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text names the goalkeeper as 'Martinez' but the fact sheet lists the goalkeeper as 'Dietrich'."
+    "Shooter name mismatch: fact sheet lists shooter as Đorđević, but text names Martinez."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_018667",
    "mutation": "fabricated_name",
-   "text": "Minute 74, Eastmoor Comets goal: Đorđević right foot finesse past Martinez from 17 m in open play under pressure. xG 0.05, post-shot xG 0.45, shot speed 82 km/h, shooter running speed 2 km/h, team shots 7, team xG 0.71."
+   "text": "Minute 74. Eastmoor Comets' Martinez finishes with his right foot from 17 m in open play under pressure using a finesse shot at 82 km/h; xG 0.05, post-shot xG 0.45, running speed 2 km/h. Team shots 7, team xG 0.71."
   },
   {
    "facts": {
@@ -2714,48 +2720,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter and goalkeeper are swapped: fact sheet lists Đorđević as shooter and Dietrich as goalkeeper, but text says Dietrich scored past Đorđević.",
-    "The phrasing 'Dietrich right foot finesse past Đorđević' misattributes body part and technique to the goalkeeper rather than the shooter (Đorđević), contrary to the fact sheet."
-   ],
-   "llm_verified": false,
-   "mode": "analyst",
-   "moment_id": "mom_ev_018667",
-   "mutation": "names_swapped",
-   "text": "Minute 74, Eastmoor Comets goal: Dietrich right foot finesse past Đorđević from 17 m in open play under pressure. xG 0.05, post-shot xG 0.45, shot speed 82 km/h, shooter running speed 2 km/h, team shots 7, team xG 0.71."
-  },
-  {
-   "facts": {
-    "away_team": "Eastmoor Comets",
-    "body_part": "right foot",
-    "goalkeeper": "Dietrich",
-    "half": "second half",
-    "home_team": "Northgate FC",
-    "minute": 74,
-    "moment_type": "goal",
-    "outcome": "goal",
-    "post_shot_xg": "0.45",
-    "score_now": "Northgate FC 0-1 Eastmoor Comets",
-    "shooter": "Đorđević",
-    "shooter_running_speed_kmh": 2,
-    "shot_distance_m": 17,
-    "shot_speed_kmh": 82,
-    "situation": "open play",
-    "team": "Eastmoor Comets",
-    "team_shots_so_far": 7,
-    "team_xg_so_far": "0.71",
-    "technique": "finesse",
-    "under_pressure": "yes",
-    "xg": "0.05"
-   },
-   "label": "false",
-   "llm_issues": [
-    "The text states \"He has scored 12 goals this season.\" — the fact sheet does not provide any season goal tally for the shooter, so this claim is unsupported."
+    "The text claims \"He has scored 12 goals this season,\" but the fact sheet contains no information about the player's seasonal goal tally; this is unsupported."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_018667",
    "mutation": "invented_number",
-   "text": "Minute 74, Eastmoor Comets goal: Đorđević right foot finesse past Dietrich from 17 m in open play under pressure. xG 0.05, post-shot xG 0.45, shot speed 82 km/h, shooter running speed 2 km/h, team shots 7, team xG 0.71. He has scored 12 goals this season."
+   "text": "Minute 74. Eastmoor Comets' Đorđević finishes with his right foot from 17 m in open play under pressure using a finesse shot at 82 km/h; xG 0.05, post-shot xG 0.45, running speed 2 km/h. Team shots 7, team xG 0.71. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -2783,13 +2754,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The sentence 'It was his first goal for the club and the crowd erupted.' is not supported by the fact sheet — there is no information about this being his first goal or about crowd reaction."
+    "The sentence 'It was his first goal for the club and the crowd erupted.' is not supported by the fact sheet (no information about first goals or crowd reaction)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_018667",
    "mutation": "invented_claim",
-   "text": "Minute 74, Eastmoor Comets goal: Đorđević right foot finesse past Dietrich from 17 m in open play under pressure. xG 0.05, post-shot xG 0.45, shot speed 82 km/h, shooter running speed 2 km/h, team shots 7, team xG 0.71. It was his first goal for the club and the crowd erupted."
+   "text": "Minute 74. Eastmoor Comets' Đorđević finishes with his right foot from 17 m in open play under pressure using a finesse shot at 82 km/h; xG 0.05, post-shot xG 0.45, running speed 2 km/h. Team shots 7, team xG 0.71. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -2817,13 +2788,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Contradiction: text states both that Đorđević scored a goal for Eastmoor Comets and also that \"The goalkeeper saved it comfortably.\" Fact sheet outcome is a goal, so the claim that the goalkeeper saved it is unsupported/contradicts the fact sheet."
+    "Text states \"The goalkeeper saved it comfortably,\" but the fact sheet records the outcome as a goal (goal by Đorđević). This is a direct contradiction of the recorded outcome and minute event."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_018667",
    "mutation": "contradiction",
-   "text": "Minute 74, Eastmoor Comets goal: Đorđević right foot finesse past Dietrich from 17 m in open play under pressure. xG 0.05, post-shot xG 0.45, shot speed 82 km/h, shooter running speed 2 km/h, team shots 7, team xG 0.71. The goalkeeper saved it comfortably."
+   "text": "Minute 74. Eastmoor Comets' Đorđević finishes with his right foot from 17 m in open play under pressure using a finesse shot at 82 km/h; xG 0.05, post-shot xG 0.45, running speed 2 km/h. Team shots 7, team xG 0.71. The goalkeeper saved it comfortably."
   },
   {
    "facts": {
@@ -2855,7 +2826,7 @@
    "mode": "casual",
    "moment_id": "mom_ev_018667",
    "mutation": "none",
-   "text": "minute 74, Northgate FC 0-1 Eastmoor Comets. Đorđević scores with a right foot finesse from 17 m past Dietrich under pressure."
+   "text": "minute 74, Đorđević slots a right-foot finesse past Dietrich from open play, and it's Northgate FC 0-1 Eastmoor Comets."
   },
   {
    "facts": {
@@ -2883,13 +2854,15 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shot distance mismatch: text states 24 m but fact sheet lists shot_distance_m as 17 m."
+    "Score in text 'Northgate FC 14-1 Eastmoor Comets' does not match fact sheet score 'Northgate FC 0-1 Eastmoor Comets'.",
+    "Text presents an unsupported scoreline '14-1' — this number is not in the fact sheet.",
+    "The text implies the goal benefited Northgate FC (by placing Northgate first in the scoreline and large lead), whereas the fact sheet records the scorer Đorđević as playing for Eastmoor Comets and the goal making it 0-1 in favor of Eastmoor Comets (team attribution is incorrect)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018667",
    "mutation": "number_swap",
-   "text": "minute 74, Northgate FC 0-1 Eastmoor Comets. Đorđević scores with a right foot finesse from 24 m past Dietrich under pressure."
+   "text": "minute 74, Đorđević slots a right-foot finesse past Dietrich from open play, and it's Northgate FC 14-1 Eastmoor Comets."
   },
   {
    "facts": {
@@ -2917,13 +2890,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Minute mismatch: fact sheet minute is 74 but text states minute 81."
+    "Minute mismatch: fact sheet minute is 74 (second half), text states minute 81."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018667",
    "mutation": "number_swap",
-   "text": "minute 81, Northgate FC 0-1 Eastmoor Comets. Đorđević scores with a right foot finesse from 17 m past Dietrich under pressure."
+   "text": "minute 81, Đorđević slots a right-foot finesse past Dietrich from open play, and it's Northgate FC 0-1 Eastmoor Comets."
   },
   {
    "facts": {
@@ -2951,14 +2924,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text names the goalkeeper as Fujimoto, but the fact sheet lists the goalkeeper as Dietrich.",
-    "The text mentions Fujimoto who does not appear in the fact sheet; all player names must match the fact sheet."
+    "Goalkeeper name mismatch: fact sheet lists goalkeeper as Dietrich but text names 'Buchanan'."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018667",
    "mutation": "name_not_in_sheet",
-   "text": "minute 74, Northgate FC 0-1 Eastmoor Comets. Đorđević scores with a right foot finesse from 17 m past Fujimoto under pressure."
+   "text": "minute 74, Đorđević slots a right-foot finesse past Buchanan from open play, and it's Northgate FC 0-1 Eastmoor Comets."
   },
   {
    "facts": {
@@ -2986,13 +2958,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Goalkeeper name mismatch: text says the shot went past 'Martinez' but the fact sheet lists the goalkeeper as 'Dietrich' and does not mention Martinez."
+    "Goalkeeper name mismatch: fact sheet lists goalkeeper as Dietrich but text names Martinez."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018667",
    "mutation": "fabricated_name",
-   "text": "minute 74, Northgate FC 0-1 Eastmoor Comets. Đorđević scores with a right foot finesse from 17 m past Martinez under pressure."
+   "text": "minute 74, Đorđević slots a right-foot finesse past Martinez from open play, and it's Northgate FC 0-1 Eastmoor Comets."
   },
   {
    "facts": {
@@ -3020,13 +2992,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Scorer and goalkeeper reversed: fact sheet lists Đorđević as the shooter/goal scorer and Dietrich as the goalkeeper, but the text says Dietrich scores past Đorđević."
+    "Player roles reversed: fact sheet lists Đorđević as the shooter and Dietrich as the goalkeeper, but the text states Dietrich scored past Đorđević.",
+    "All other items match (minute 74, score Northgate FC 0-1 Eastmoor Comets, right-foot finesse, open play)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018667",
    "mutation": "names_swapped",
-   "text": "minute 74, Northgate FC 0-1 Eastmoor Comets. Dietrich scores with a right foot finesse from 17 m past Đorđević under pressure."
+   "text": "minute 74, Dietrich slots a right-foot finesse past Đorđević from open play, and it's Northgate FC 0-1 Eastmoor Comets."
   },
   {
    "facts": {
@@ -3054,14 +3027,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text claims \"He has scored 12 goals this season.\" — season goal total (12) is not provided in the fact sheet.",
-    "All other numbers and names match the fact sheet (minute 74; score 0-1; 17 m; right foot; finesse; shooter Đorđević; goalkeeper Dietrich; teams Northgate FC and Eastmoor Comets)."
+    "The claim 'He has scored 12 goals this season' is not supported by the fact sheet (no season goal total given)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018667",
    "mutation": "invented_number",
-   "text": "minute 74, Northgate FC 0-1 Eastmoor Comets. Đorđević scores with a right foot finesse from 17 m past Dietrich under pressure. He has scored 12 goals this season."
+   "text": "minute 74, Đorđević slots a right-foot finesse past Dietrich from open play, and it's Northgate FC 0-1 Eastmoor Comets. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -3089,14 +3061,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Claim that it was his first goal for the club is not supported by the fact sheet.",
-    "Claim that the crowd erupted is not supported by the fact sheet."
+    "The text claims 'It was his first goal for the club' — the fact sheet contains no information about this, so this is unsupported.",
+    "The text says 'the crowd erupted' — the fact sheet provides no information about crowd reaction, so this is unsupported."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018667",
    "mutation": "invented_claim",
-   "text": "minute 74, Northgate FC 0-1 Eastmoor Comets. Đorđević scores with a right foot finesse from 17 m past Dietrich under pressure. It was his first goal for the club and the crowd erupted."
+   "text": "minute 74, Đorđević slots a right-foot finesse past Dietrich from open play, and it's Northgate FC 0-1 Eastmoor Comets. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -3124,13 +3096,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text states 'The goalkeeper saved it comfortably.' but fact sheet outcome is 'goal' (shot beaten goalkeeper) — this is a direct contradiction."
+    "Text states \"The goalkeeper saved it comfortably,\" which contradicts the fact sheet stating the moment is a goal (Đorđević scored past goalkeeper Dietrich). This is an unsupported/false claim."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_018667",
    "mutation": "contradiction",
-   "text": "minute 74, Northgate FC 0-1 Eastmoor Comets. Đorđević scores with a right foot finesse from 17 m past Dietrich under pressure. The goalkeeper saved it comfortably."
+   "text": "minute 74, Đorđević slots a right-foot finesse past Dietrich from open play, and it's Northgate FC 0-1 Eastmoor Comets. The goalkeeper saved it comfortably."
   },
   {
    "facts": {
@@ -3163,7 +3135,7 @@
    "mode": "analyst",
    "moment_id": "mom_ev_020188",
    "mutation": "none",
-   "text": "Minute 81: Barnes toe poke right foot from 14 m, shot speed 54 km/h, shooter running speed 1 km/h, under pressure yes, xG 0.16, post-shot xG 0.04. Dietrich saves with a 0.2 m keeper dive; Eastmoor Comets team shots so far 8, team xG so far 0.87, score Northgate FC 0-1 Eastmoor Comets."
+   "text": "Minute 81, Barnes for Eastmoor Comets toe poke right foot from 14 m, shot speed 54 km/h, running speed 1 km/h, under pressure yes; xG 0.16, post-shot xG 0.04, saved by Dietrich diving 0.2 m. Eastmoor Comets shots 8, team xG 0.87."
   },
   {
    "facts": {
@@ -3192,13 +3164,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Score mismatch: text states 'score Northgate FC 7-1 Eastmoor Comets' but fact sheet score_now is 'Northgate FC 0-1 Eastmoor Comets'."
+    "Keeper dive distance mismatch: text says Dietrich dove 0.4 m but fact sheet gives keeper_dive_m as 0.2 m."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_020188",
    "mutation": "number_swap",
-   "text": "Minute 81: Barnes toe poke right foot from 14 m, shot speed 54 km/h, shooter running speed 1 km/h, under pressure yes, xG 0.16, post-shot xG 0.04. Dietrich saves with a 0.2 m keeper dive; Eastmoor Comets team shots so far 8, team xG so far 0.87, score Northgate FC 7-1 Eastmoor Comets."
+   "text": "Minute 81, Barnes for Eastmoor Comets toe poke right foot from 14 m, shot speed 54 km/h, running speed 1 km/h, under pressure yes; xG 0.16, post-shot xG 0.04, saved by Dietrich diving 0.4 m. Eastmoor Comets shots 8, team xG 0.87."
   },
   {
    "facts": {
@@ -3227,13 +3199,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "xG mismatch: text states xG 0.33 but fact sheet xG is 0.16."
+    "Minute in text is 88 but fact sheet minute is 81; the minute does not match the fact sheet."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_020188",
    "mutation": "number_swap",
-   "text": "Minute 81: Barnes toe poke right foot from 14 m, shot speed 54 km/h, shooter running speed 1 km/h, under pressure yes, xG 0.33, post-shot xG 0.04. Dietrich saves with a 0.2 m keeper dive; Eastmoor Comets team shots so far 8, team xG so far 0.87, score Northgate FC 0-1 Eastmoor Comets."
+   "text": "Minute 88, Barnes for Eastmoor Comets toe poke right foot from 14 m, shot speed 54 km/h, running speed 1 km/h, under pressure yes; xG 0.16, post-shot xG 0.04, saved by Dietrich diving 0.2 m. Eastmoor Comets shots 8, team xG 0.87."
   },
   {
    "facts": {
@@ -3262,13 +3234,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name mismatch: fact sheet lists shooter as 'Barnes' but the text names 'Ekambi-Ndo'."
+    "Shooter name mismatch: text says 'Gaber' but fact sheet lists the shooter as 'Barnes'. All other numbers, teams, roles and the outcome match the fact sheet."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_020188",
    "mutation": "name_not_in_sheet",
-   "text": "Minute 81: Ekambi-Ndo toe poke right foot from 14 m, shot speed 54 km/h, shooter running speed 1 km/h, under pressure yes, xG 0.16, post-shot xG 0.04. Dietrich saves with a 0.2 m keeper dive; Eastmoor Comets team shots so far 8, team xG so far 0.87, score Northgate FC 0-1 Eastmoor Comets."
+   "text": "Minute 81, Gaber for Eastmoor Comets toe poke right foot from 14 m, shot speed 54 km/h, running speed 1 km/h, under pressure yes; xG 0.16, post-shot xG 0.04, saved by Dietrich diving 0.2 m. Eastmoor Comets shots 8, team xG 0.87."
   },
   {
    "facts": {
@@ -3297,13 +3269,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name mismatch: fact sheet lists shooter as Barnes, but text names Martinez."
+    "Shooter name mismatch: fact sheet lists shooter as 'Barnes' but text states 'Martinez'."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_020188",
    "mutation": "fabricated_name",
-   "text": "Minute 81: Martinez toe poke right foot from 14 m, shot speed 54 km/h, shooter running speed 1 km/h, under pressure yes, xG 0.16, post-shot xG 0.04. Dietrich saves with a 0.2 m keeper dive; Eastmoor Comets team shots so far 8, team xG so far 0.87, score Northgate FC 0-1 Eastmoor Comets."
+   "text": "Minute 81, Martinez for Eastmoor Comets toe poke right foot from 14 m, shot speed 54 km/h, running speed 1 km/h, under pressure yes; xG 0.16, post-shot xG 0.04, saved by Dietrich diving 0.2 m. Eastmoor Comets shots 8, team xG 0.87."
   },
   {
    "facts": {
@@ -3332,13 +3304,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Player attribution errors: the fact sheet lists Barnes as the shooter and Dietrich as the goalkeeper, but the text states “Dietrich toe poke” (implying Dietrich shot) and later says “Barnes saves with a 0.2 m keeper dive” (implying Barnes was the goalkeeper). These are reversed and contradict the fact sheet. All numeric values otherwise match the fact sheet."
+    "Shooter and goalkeeper are swapped: fact sheet lists Barnes as shooter and Dietrich as goalkeeper, but text states Dietrich took the shot and Barnes made the save.",
+    "The save/dive attribution is incorrect: fact sheet indicates Dietrich made the save (keeper_dive_m 0.2), but the text says the shot was \"saved by Barnes diving 0.2 m.\""
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_020188",
    "mutation": "names_swapped",
-   "text": "Minute 81: Dietrich toe poke right foot from 14 m, shot speed 54 km/h, shooter running speed 1 km/h, under pressure yes, xG 0.16, post-shot xG 0.04. Barnes saves with a 0.2 m keeper dive; Eastmoor Comets team shots so far 8, team xG so far 0.87, score Northgate FC 0-1 Eastmoor Comets."
+   "text": "Minute 81, Dietrich for Eastmoor Comets toe poke right foot from 14 m, shot speed 54 km/h, running speed 1 km/h, under pressure yes; xG 0.16, post-shot xG 0.04, saved by Barnes diving 0.2 m. Eastmoor Comets shots 8, team xG 0.87."
   },
   {
    "facts": {
@@ -3367,13 +3340,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The statement 'He has scored 12 goals this season.' is not supported by the fact sheet (no season goal total provided)."
+    "The statement \"He has scored 12 goals this season.\" is not supported by the fact sheet (no seasonal goal total provided)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_020188",
    "mutation": "invented_number",
-   "text": "Minute 81: Barnes toe poke right foot from 14 m, shot speed 54 km/h, shooter running speed 1 km/h, under pressure yes, xG 0.16, post-shot xG 0.04. Dietrich saves with a 0.2 m keeper dive; Eastmoor Comets team shots so far 8, team xG so far 0.87, score Northgate FC 0-1 Eastmoor Comets. He has scored 12 goals this season."
+   "text": "Minute 81, Barnes for Eastmoor Comets toe poke right foot from 14 m, shot speed 54 km/h, running speed 1 km/h, under pressure yes; xG 0.16, post-shot xG 0.04, saved by Dietrich diving 0.2 m. Eastmoor Comets shots 8, team xG 0.87. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -3402,13 +3375,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "The sentence 'It was his first goal for the club and the crowd erupted.' is unsupported and contradicts the fact sheet: the moment is recorded as a saved shot (no goal) and there is no information about first goals or crowd reaction in the fact sheet."
+    "The sentence 'It was his first goal for the club' is false/unsupported: the fact sheet records the outcome as 'saved' (no goal).",
+    "The phrase 'and the crowd erupted' is not supported by the fact sheet (no information about crowd reaction)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_020188",
    "mutation": "invented_claim",
-   "text": "Minute 81: Barnes toe poke right foot from 14 m, shot speed 54 km/h, shooter running speed 1 km/h, under pressure yes, xG 0.16, post-shot xG 0.04. Dietrich saves with a 0.2 m keeper dive; Eastmoor Comets team shots so far 8, team xG so far 0.87, score Northgate FC 0-1 Eastmoor Comets. It was his first goal for the club and the crowd erupted."
+   "text": "Minute 81, Barnes for Eastmoor Comets toe poke right foot from 14 m, shot speed 54 km/h, running speed 1 km/h, under pressure yes; xG 0.16, post-shot xG 0.04, saved by Dietrich diving 0.2 m. Eastmoor Comets shots 8, team xG 0.87. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -3437,13 +3411,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Final sentence claims the shot \"ended up in the back of the net for a goal,\" which contradicts the fact sheet outcome of the moment: saved by goalkeeper Dietrich."
+    "Text claims \"It ended up in the back of the net for a goal,\" but fact sheet outcome is \"saved\" (no goal)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_020188",
    "mutation": "contradiction",
-   "text": "Minute 81: Barnes toe poke right foot from 14 m, shot speed 54 km/h, shooter running speed 1 km/h, under pressure yes, xG 0.16, post-shot xG 0.04. Dietrich saves with a 0.2 m keeper dive; Eastmoor Comets team shots so far 8, team xG so far 0.87, score Northgate FC 0-1 Eastmoor Comets. It ended up in the back of the net for a goal."
+   "text": "Minute 81, Barnes for Eastmoor Comets toe poke right foot from 14 m, shot speed 54 km/h, running speed 1 km/h, under pressure yes; xG 0.16, post-shot xG 0.04, saved by Dietrich diving 0.2 m. Eastmoor Comets shots 8, team xG 0.87. It ended up in the back of the net for a goal."
   },
   {
    "facts": {
@@ -3476,7 +3450,7 @@
    "mode": "casual",
    "moment_id": "mom_ev_020188",
    "mutation": "none",
-   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Dietrich saves Barnes' right foot toe poke in open play as Barnes was under pressure."
+   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Barnes' right-foot toe poke from open play is saved by Dietrich under pressure."
   },
   {
    "facts": {
@@ -3505,14 +3479,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Score in text ('Northgate FC 7-1 Eastmoor Comets') does not match fact sheet score ('Northgate FC 0-1 Eastmoor Comets').",
-    "Text claims a 7-1 scoreline (implies goals) that is unsupported by the fact sheet."
+    "Minute mismatch: text states minute 88 but fact sheet minute is 81."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_020188",
    "mutation": "number_swap",
-   "text": "Minute 81, Northgate FC 7-1 Eastmoor Comets. Dietrich saves Barnes' right foot toe poke in open play as Barnes was under pressure."
+   "text": "Minute 88, Northgate FC 0-1 Eastmoor Comets. Barnes' right-foot toe poke from open play is saved by Dietrich under pressure."
   },
   {
    "facts": {
@@ -3541,13 +3514,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Minute given in text is 88 but fact sheet minute is 81."
+    "Score in text 'Northgate FC 0-15 Eastmoor Comets' does not match fact sheet score 'Northgate FC 0-1 Eastmoor Comets'."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_020188",
    "mutation": "number_swap",
-   "text": "Minute 88, Northgate FC 0-1 Eastmoor Comets. Dietrich saves Barnes' right foot toe poke in open play as Barnes was under pressure."
+   "text": "Minute 81, Northgate FC 0-15 Eastmoor Comets. Barnes' right-foot toe poke from open play is saved by Dietrich under pressure."
   },
   {
    "facts": {
@@ -3576,13 +3549,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name mismatch: fact sheet lists shooter as Barnes, but text names Cardona."
+    "Shooter name mismatch: fact sheet lists Barnes as shooter, text names Kelly (not in fact sheet)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_020188",
    "mutation": "name_not_in_sheet",
-   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Dietrich saves Cardona' right foot toe poke in open play as Cardona was under pressure."
+   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Kelly' right-foot toe poke from open play is saved by Dietrich under pressure."
   },
   {
    "facts": {
@@ -3611,13 +3584,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name incorrect: text says Martinez as the shooter, but fact sheet lists Barnes as the shooter."
+    "Shooter name mismatch: fact sheet lists shooter as Barnes but text names Martinez."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_020188",
    "mutation": "fabricated_name",
-   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Dietrich saves Martinez' right foot toe poke in open play as Martinez was under pressure."
+   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Martinez' right-foot toe poke from open play is saved by Dietrich under pressure."
   },
   {
    "facts": {
@@ -3646,16 +3619,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Incorrect attribution: text says 'Barnes saves Dietrich' which reverses roles — fact sheet lists Barnes as shooter and Dietrich as goalkeeper (Dietrich made the save).",
-    "Incorrect pressure claim: text states 'Dietrich was under pressure' but fact sheet indicates the shooter (Barnes) was under pressure.",
-    "Minor wording: text implies the keeper was saved rather than the keeper making the save (misleading).",
-    "No other numerical or factual mismatches found: minute (81), score (Northgate FC 0-1 Eastmoor Comets), 'right foot' and 'toe poke', and 'open play' match the fact sheet."
+    "Shooter and goalkeeper are swapped: fact sheet lists Barnes as shooter and Dietrich as goalkeeper, but text describes Dietrich shooting and Barnes making the save.",
+    "The phrasing 'is saved by Barnes' contradicts the fact sheet outcome attribution (the save was by goalkeeper Dietrich)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_020188",
    "mutation": "names_swapped",
-   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Barnes saves Dietrich' right foot toe poke in open play as Dietrich was under pressure."
+   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Dietrich' right-foot toe poke from open play is saved by Barnes under pressure."
   },
   {
    "facts": {
@@ -3684,13 +3655,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The statement 'He has scored 12 goals this season.' is not supported by the fact sheet (no season goal tally provided for Barnes)."
+    "The statement \"He has scored 12 goals this season\" is not supported by the fact sheet (no season goal total provided for Barnes)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_020188",
    "mutation": "invented_number",
-   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Dietrich saves Barnes' right foot toe poke in open play as Barnes was under pressure. He has scored 12 goals this season."
+   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Barnes' right-foot toe poke from open play is saved by Dietrich under pressure. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -3719,15 +3690,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text claims \"It was his first goal for the club\" — the fact sheet records the outcome as a save (no goal) and contains no information about any \"first goal\" for Barnes.",
-    "Text states \"the crowd erupted\" — crowd reaction is not mentioned in the fact sheet and is unsupported.",
-    "The word \"first\" (a numeric/quantitative claim) appears in the text but is not present or supported by the fact sheet."
+    "The text claims \"It was his first goal for the club\" — the fact sheet records the outcome as 'saved' (no goal), and contains no information about any goal or 'first goal'.",
+    "The text claims \"the crowd erupted\" — the fact sheet contains no information about crowd reaction, so this is unsupported."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_020188",
    "mutation": "invented_claim",
-   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Dietrich saves Barnes' right foot toe poke in open play as Barnes was under pressure. It was his first goal for the club and the crowd erupted."
+   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Barnes' right-foot toe poke from open play is saved by Dietrich under pressure. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -3756,14 +3726,48 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text claims \"It ended up in the back of the net for a goal,\" which contradicts the fact sheet outcome (saved).",
-    "Text contains a logical contradiction: it describes Dietrich saving Barnes' shot and then says it was a goal; the fact sheet records the event as a save, not a goal."
+    "Text states \"It ended up in the back of the net for a goal,\" which contradicts the fact sheet outcome: the shot was saved (moment_type: save; outcome: saved)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_020188",
    "mutation": "contradiction",
-   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Dietrich saves Barnes' right foot toe poke in open play as Barnes was under pressure. It ended up in the back of the net for a goal."
+   "text": "Minute 81, Northgate FC 0-1 Eastmoor Comets. Barnes' right-foot toe poke from open play is saved by Dietrich under pressure. It ended up in the back of the net for a goal."
+  },
+  {
+   "facts": {
+    "assist_by": "Morales",
+    "assist_pass_length_m": 27,
+    "assist_pass_xpass": "0.43",
+    "away_team": "Eastmoor Comets",
+    "body_part": "head",
+    "goalkeeper": "Gelashvili",
+    "half": "second half",
+    "home_team": "Northgate FC",
+    "minute": 90,
+    "moment_type": "goal",
+    "outcome": "goal",
+    "post_shot_xg": "0.24",
+    "score_now": "Northgate FC 1-1 Eastmoor Comets",
+    "shooter": "Ferrari",
+    "shooter_running_speed_kmh": 10,
+    "shot_distance_m": 9,
+    "shot_speed_kmh": 51,
+    "situation": "corner phase",
+    "team": "Northgate FC",
+    "team_shots_so_far": 6,
+    "team_xg_so_far": "0.57",
+    "technique": "header",
+    "under_pressure": "yes",
+    "xg": "0.05"
+   },
+   "label": "true",
+   "llm_issues": [],
+   "llm_verified": true,
+   "mode": "analyst",
+   "moment_id": "mom_ev_022296",
+   "mutation": "none",
+   "text": "Minute 90, Ferrari heads home from a corner phase assisted by Morales with a 27m pass xpass 0.43. Shot header 9m, shot speed 51 km/h, shooter running speed 10 km/h, xG 0.05, post-shot xG 0.24, under pressure; team shots 6, team xG 0.57."
   },
   {
    "facts": {
@@ -3794,14 +3798,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Minute discrepancy: text says Minute 97 but fact sheet minute is 90 (second half).",
-    "Half/extra-time not supported: text implies a 97th-minute goal (extra time) while fact sheet only records minute 90; no extra-time minute provided in fact sheet."
+    "Assist pass length in text stated as 34m but fact sheet lists assist_pass_length_m as 27m."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_022296",
    "mutation": "number_swap",
-   "text": "Minute 97, Ferrari scores for Northgate FC with a header from 9 m off a corner phase, assisted by Morales' 27 m pass. xG 0.05, post-shot xG 0.24, shot speed 51 km/h, shooter running speed 10 km/h, under_pressure yes; team shots 6, team xG 0.57."
+   "text": "Minute 90, Ferrari heads home from a corner phase assisted by Morales with a 34m pass xpass 0.43. Shot header 9m, shot speed 51 km/h, shooter running speed 10 km/h, xG 0.05, post-shot xG 0.24, under pressure; team shots 6, team xG 0.57."
   },
   {
    "facts": {
@@ -3832,13 +3835,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Assist pass length mismatch: text states Morales' pass was 34 m but fact sheet lists assist_pass_length_m as 27 m."
+    "Team shots value mismatch: text says 'team shots 13' but fact sheet 'team_shots_so_far' is 6."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_022296",
    "mutation": "number_swap",
-   "text": "Minute 90, Ferrari scores for Northgate FC with a header from 9 m off a corner phase, assisted by Morales' 34 m pass. xG 0.05, post-shot xG 0.24, shot speed 51 km/h, shooter running speed 10 km/h, under_pressure yes; team shots 6, team xG 0.57."
+   "text": "Minute 90, Ferrari heads home from a corner phase assisted by Morales with a 27m pass xpass 0.43. Shot header 9m, shot speed 51 km/h, shooter running speed 10 km/h, xG 0.05, post-shot xG 0.24, under pressure; team shots 13, team xG 0.57."
   },
   {
    "facts": {
@@ -3869,13 +3872,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name mismatch: text says 'Castro' scores but fact sheet lists shooter as 'Ferrari'."
+    "Shooter name mismatch: text says 'Ngadeu' while fact sheet lists shooter as 'Ferrari'."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_022296",
    "mutation": "name_not_in_sheet",
-   "text": "Minute 90, Castro scores for Northgate FC with a header from 9 m off a corner phase, assisted by Morales' 27 m pass. xG 0.05, post-shot xG 0.24, shot speed 51 km/h, shooter running speed 10 km/h, under_pressure yes; team shots 6, team xG 0.57."
+   "text": "Minute 90, Ngadeu heads home from a corner phase assisted by Morales with a 27m pass xpass 0.43. Shot header 9m, shot speed 51 km/h, shooter running speed 10 km/h, xG 0.05, post-shot xG 0.24, under pressure; team shots 6, team xG 0.57."
   },
   {
    "facts": {
@@ -3906,13 +3909,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name mismatch: text says 'Martinez' but fact sheet shooter is 'Ferrari'."
+    "Shooter name mismatch: text names 'Martinez' as the scorer, but fact sheet lists shooter as 'Ferrari'."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_022296",
    "mutation": "fabricated_name",
-   "text": "Minute 90, Martinez scores for Northgate FC with a header from 9 m off a corner phase, assisted by Morales' 27 m pass. xG 0.05, post-shot xG 0.24, shot speed 51 km/h, shooter running speed 10 km/h, under_pressure yes; team shots 6, team xG 0.57."
+   "text": "Minute 90, Martinez heads home from a corner phase assisted by Morales with a 27m pass xpass 0.43. Shot header 9m, shot speed 51 km/h, shooter running speed 10 km/h, xG 0.05, post-shot xG 0.24, under pressure; team shots 6, team xG 0.57."
   },
   {
    "facts": {
@@ -3943,13 +3946,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter and assist are swapped: fact sheet lists Ferrari as shooter and Morales as assist provider, but text says Morales scores and was assisted by Ferrari."
+    "Shooter and assister are swapped: the fact sheet lists Ferrari as the shooter (goal) and Morales as the assist provider, but the text says Morales scored and was assisted by Ferrari, which contradicts the fact sheet."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_022296",
    "mutation": "names_swapped",
-   "text": "Minute 90, Morales scores for Northgate FC with a header from 9 m off a corner phase, assisted by Ferrari' 27 m pass. xG 0.05, post-shot xG 0.24, shot speed 51 km/h, shooter running speed 10 km/h, under_pressure yes; team shots 6, team xG 0.57."
+   "text": "Minute 90, Morales heads home from a corner phase assisted by Ferrari with a 27m pass xpass 0.43. Shot header 9m, shot speed 51 km/h, shooter running speed 10 km/h, xG 0.05, post-shot xG 0.24, under pressure; team shots 6, team xG 0.57."
   },
   {
    "facts": {
@@ -3980,13 +3983,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The statement 'He has scored 12 goals this season.' is not supported by the fact sheet — season goal tally is not provided."
+    "Claim 'He has scored 12 goals this season.' is not supported by the fact sheet (no season total provided)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_022296",
    "mutation": "invented_number",
-   "text": "Minute 90, Ferrari scores for Northgate FC with a header from 9 m off a corner phase, assisted by Morales' 27 m pass. xG 0.05, post-shot xG 0.24, shot speed 51 km/h, shooter running speed 10 km/h, under_pressure yes; team shots 6, team xG 0.57. He has scored 12 goals this season."
+   "text": "Minute 90, Ferrari heads home from a corner phase assisted by Morales with a 27m pass xpass 0.43. Shot header 9m, shot speed 51 km/h, shooter running speed 10 km/h, xG 0.05, post-shot xG 0.24, under pressure; team shots 6, team xG 0.57. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -4017,14 +4020,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "The claim \"It was his first goal for the club\" is not supported by the fact sheet (no information about being his first goal).",
-    "The statement \"the crowd erupted\" is not supported by the fact sheet (no crowd reaction data)."
+    "Claim 'It was his first goal for the club' is not supported by the fact sheet.",
+    "Claim 'the crowd erupted' (crowd reaction) is not supported by the fact sheet."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_022296",
    "mutation": "invented_claim",
-   "text": "Minute 90, Ferrari scores for Northgate FC with a header from 9 m off a corner phase, assisted by Morales' 27 m pass. xG 0.05, post-shot xG 0.24, shot speed 51 km/h, shooter running speed 10 km/h, under_pressure yes; team shots 6, team xG 0.57. It was his first goal for the club and the crowd erupted."
+   "text": "Minute 90, Ferrari heads home from a corner phase assisted by Morales with a 27m pass xpass 0.43. Shot header 9m, shot speed 51 km/h, shooter running speed 10 km/h, xG 0.05, post-shot xG 0.24, under pressure; team shots 6, team xG 0.57. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -4055,13 +4058,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Text states \"The goalkeeper saved it comfortably,\" but fact sheet outcome is a goal (shooter Ferrari scored); this contradicts the fact sheet."
+    "Text states 'The goalkeeper saved it comfortably,' which contradicts the fact sheet outcome (goal) and moment_type (goal at minute 90)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_ev_022296",
    "mutation": "contradiction",
-   "text": "Minute 90, Ferrari scores for Northgate FC with a header from 9 m off a corner phase, assisted by Morales' 27 m pass. xG 0.05, post-shot xG 0.24, shot speed 51 km/h, shooter running speed 10 km/h, under_pressure yes; team shots 6, team xG 0.57. The goalkeeper saved it comfortably."
+   "text": "Minute 90, Ferrari heads home from a corner phase assisted by Morales with a 27m pass xpass 0.43. Shot header 9m, shot speed 51 km/h, shooter running speed 10 km/h, xG 0.05, post-shot xG 0.24, under pressure; team shots 6, team xG 0.57. The goalkeeper saved it comfortably."
   },
   {
    "facts": {
@@ -4096,7 +4099,7 @@
    "mode": "casual",
    "moment_id": "mom_ev_022296",
    "mutation": "none",
-   "text": "minute 90, Ferrari heads home from a corner, assisted by Morales, and it's Northgate FC 1-1 Eastmoor Comets."
+   "text": "minute 90, Ferrari heads in from a corner assisted by Morales to make it Northgate FC 1-1 Eastmoor Comets, beating Gelashvili with a header."
   },
   {
    "facts": {
@@ -4127,13 +4130,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Minute mismatch: text states minute 97 but fact sheet records minute 90 (second half)."
+    "Minute in text (97) does not match fact sheet minute (90)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_022296",
    "mutation": "number_swap",
-   "text": "minute 97, Ferrari heads home from a corner, assisted by Morales, and it's Northgate FC 1-1 Eastmoor Comets."
+   "text": "minute 97, Ferrari heads in from a corner assisted by Morales to make it Northgate FC 1-1 Eastmoor Comets, beating Gelashvili with a header."
   },
   {
    "facts": {
@@ -4164,13 +4167,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Reported score 'Northgate FC 1-8 Eastmoor Comets' does not match fact sheet score 'Northgate FC 1-1 Eastmoor Comets'."
+    "Score in text 'Northgate FC 1-8 Eastmoor Comets' does not match fact sheet score 'Northgate FC 1-1 Eastmoor Comets'. No 1-8 score appears in the fact sheet."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_022296",
    "mutation": "number_swap",
-   "text": "minute 90, Ferrari heads home from a corner, assisted by Morales, and it's Northgate FC 1-8 Eastmoor Comets."
+   "text": "minute 90, Ferrari heads in from a corner assisted by Morales to make it Northgate FC 1-8 Eastmoor Comets, beating Gelashvili with a header."
   },
   {
    "facts": {
@@ -4201,14 +4204,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name mismatch: text names Diallo as scorer, but fact sheet lists Ferrari as shooter.",
-    "Text includes player name 'Diallo' which is not present in the fact sheet."
+    "Shooter name mismatch: text says 'Diallo' scored, but fact sheet lists shooter as 'Ferrari' (no 'Diallo' in fact sheet). All other numbers, teams, minute, goalkeeper, assist and moment type match."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_022296",
    "mutation": "name_not_in_sheet",
-   "text": "minute 90, Diallo heads home from a corner, assisted by Morales, and it's Northgate FC 1-1 Eastmoor Comets."
+   "text": "minute 90, Diallo heads in from a corner assisted by Morales to make it Northgate FC 1-1 Eastmoor Comets, beating Gelashvili with a header."
   },
   {
    "facts": {
@@ -4239,13 +4241,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter name mismatch: text says 'Martinez' scored, fact sheet lists shooter as 'Ferrari'."
+    "Shooter name mismatch: text says 'Martinez' but fact sheet lists shooter as 'Ferrari'."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_022296",
    "mutation": "fabricated_name",
-   "text": "minute 90, Martinez heads home from a corner, assisted by Morales, and it's Northgate FC 1-1 Eastmoor Comets."
+   "text": "minute 90, Martinez heads in from a corner assisted by Morales to make it Northgate FC 1-1 Eastmoor Comets, beating Gelashvili with a header."
   },
   {
    "facts": {
@@ -4276,13 +4278,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shooter/assistant roles are reversed: fact sheet shows Ferrari as shooter (scorer) and Morales as assist provider, but the text says Morales scored (headed) and was assisted by Ferrari."
+    "Shooter and goalkeeper swapped: fact sheet lists Ferrari as shooter (scorer) and Gelashvili as goalkeeper; text claims Gelashvili scored and beat Ferrari, which is reversed.",
+    "Text states 'Gelashvili heads in' implying the goalkeeper scored with a header; fact sheet records the header goal by Ferrari with Gelashvili as goalkeeper."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_022296",
    "mutation": "names_swapped",
-   "text": "minute 90, Morales heads home from a corner, assisted by Ferrari, and it's Northgate FC 1-1 Eastmoor Comets."
+   "text": "minute 90, Gelashvili heads in from a corner assisted by Morales to make it Northgate FC 1-1 Eastmoor Comets, beating Ferrari with a header."
   },
   {
    "facts": {
@@ -4313,13 +4316,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The text claims \"He has scored 12 goals this season.\" — the fact sheet contains no information about the player's season goal tally, so this number is unsupported."
+    "The text claims \"He has scored 12 goals this season.\" — the fact sheet does not contain any season goal tally for Ferrari, so this number is unsupported."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_022296",
    "mutation": "invented_number",
-   "text": "minute 90, Ferrari heads home from a corner, assisted by Morales, and it's Northgate FC 1-1 Eastmoor Comets. He has scored 12 goals this season."
+   "text": "minute 90, Ferrari heads in from a corner assisted by Morales to make it Northgate FC 1-1 Eastmoor Comets, beating Gelashvili with a header. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -4350,14 +4353,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "Claim 'It was his first goal for the club' is not supported by the fact sheet (no information on whether this is his first club goal).",
-    "Phrase 'the crowd erupted' (describing crowd reaction) is not supported by the fact sheet (no crowd reaction recorded)."
+    "The claim \"It was his first goal for the club\" is not stated in the fact sheet and is unsupported.",
+    "The statement \"the crowd erupted\" is not in the fact sheet and is an unsupported description of the reaction."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_022296",
    "mutation": "invented_claim",
-   "text": "minute 90, Ferrari heads home from a corner, assisted by Morales, and it's Northgate FC 1-1 Eastmoor Comets. It was his first goal for the club and the crowd erupted."
+   "text": "minute 90, Ferrari heads in from a corner assisted by Morales to make it Northgate FC 1-1 Eastmoor Comets, beating Gelashvili with a header. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -4388,13 +4391,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The text claims \"The goalkeeper saved it comfortably,\" which contradicts the fact sheet outcome (goal). The fact sheet lists Gelashvili as goalkeeper, but no save occurred."
+    "The text says \"The goalkeeper saved it comfortably,\" which contradicts the fact sheet outcome (goal). A shot cannot be both a goal and saved; this claim is unsupported by the fact sheet."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_ev_022296",
    "mutation": "contradiction",
-   "text": "minute 90, Ferrari heads home from a corner, assisted by Morales, and it's Northgate FC 1-1 Eastmoor Comets. The goalkeeper saved it comfortably."
+   "text": "minute 90, Ferrari heads in from a corner assisted by Morales to make it Northgate FC 1-1 Eastmoor Comets, beating Gelashvili with a header. The goalkeeper saved it comfortably."
   },
   {
    "facts": {
@@ -4426,7 +4429,7 @@
    "mode": "analyst",
    "moment_id": "mom_full_time",
    "mutation": "none",
-   "text": "Final score Northgate FC 1-1 Eastmoor Comets; Đorđević for Eastmoor Comets minute 74, Ferrari for Northgate FC minute 90. Possession 49%-51%, shots 6-8 with shots on target 3-2, xG 0.57-0.87, pass accuracy 83%-81%, top speed Buchanan 33 km/h, distance leader Morales 11.7 km."
+   "text": "Full time 1-1: Northgate FC 1-1 Eastmoor Comets; xG 0.57-0.87, possession 49%-51%. Shots 6-8, shots on target 3-2, pass accuracy 83%-81%; goals Đorđević minute 74 and Ferrari minute 90; Buchanan top speed 33 km/h, Morales 11.7 km."
   },
   {
    "facts": {
@@ -4454,13 +4457,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Ferrari's goal minute is listed as 97 in the text but the fact sheet records Ferrari scoring in minute 90."
+    "Possession figures do not match the fact sheet: text states 56%-51% while fact sheet lists home possession 49% and away possession 51% (49%-51%)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_full_time",
    "mutation": "number_swap",
-   "text": "Final score Northgate FC 1-1 Eastmoor Comets; Đorđević for Eastmoor Comets minute 74, Ferrari for Northgate FC minute 97. Possession 49%-51%, shots 6-8 with shots on target 3-2, xG 0.57-0.87, pass accuracy 83%-81%, top speed Buchanan 33 km/h, distance leader Morales 11.7 km."
+   "text": "Full time 1-1: Northgate FC 1-1 Eastmoor Comets; xG 0.57-0.87, possession 56%-51%. Shots 6-8, shots on target 3-2, pass accuracy 83%-81%; goals Đorđević minute 74 and Ferrari minute 90; Buchanan top speed 33 km/h, Morales 11.7 km."
   },
   {
    "facts": {
@@ -4488,13 +4491,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Shots on target in text given as 10-2, but fact sheet records 3-2 (home 3, away 2)."
+    "Ferrari's goal minute is incorrect: fact sheet lists Ferrari scoring in minute 90, but the text states minute 97."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_full_time",
    "mutation": "number_swap",
-   "text": "Final score Northgate FC 1-1 Eastmoor Comets; Đorđević for Eastmoor Comets minute 74, Ferrari for Northgate FC minute 90. Possession 49%-51%, shots 6-8 with shots on target 10-2, xG 0.57-0.87, pass accuracy 83%-81%, top speed Buchanan 33 km/h, distance leader Morales 11.7 km."
+   "text": "Full time 1-1: Northgate FC 1-1 Eastmoor Comets; xG 0.57-0.87, possession 49%-51%. Shots 6-8, shots on target 3-2, pass accuracy 83%-81%; goals Đorđević minute 74 and Ferrari minute 97; Buchanan top speed 33 km/h, Morales 11.7 km."
   },
   {
    "facts": {
@@ -4522,13 +4525,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Top speed player name mismatch: fact sheet lists Buchanan as top speed player (33 km/h), but text names Benítez."
+    "Top speed player mismatch: fact sheet lists Buchanan as top speed player (33 km/h) but text names Valencia as top speed 33 km/h (Valencia not in fact sheet)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_full_time",
    "mutation": "name_not_in_sheet",
-   "text": "Final score Northgate FC 1-1 Eastmoor Comets; Đorđević for Eastmoor Comets minute 74, Ferrari for Northgate FC minute 90. Possession 49%-51%, shots 6-8 with shots on target 3-2, xG 0.57-0.87, pass accuracy 83%-81%, top speed Benítez 33 km/h, distance leader Morales 11.7 km."
+   "text": "Full time 1-1: Northgate FC 1-1 Eastmoor Comets; xG 0.57-0.87, possession 49%-51%. Shots 6-8, shots on target 3-2, pass accuracy 83%-81%; goals Đorđević minute 74 and Ferrari minute 90; Valencia top speed 33 km/h, Morales 11.7 km."
   },
   {
    "facts": {
@@ -4556,13 +4559,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Top speed player mismatch: fact sheet lists Buchanan as top_speed_player with 33 km/h, but text names Martinez as top speed."
+    "Top speed attribution incorrect: fact sheet lists Buchanan as top speed player (33 km/h), but text names Martinez. Martinez does not appear in the fact sheet."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_full_time",
    "mutation": "fabricated_name",
-   "text": "Final score Northgate FC 1-1 Eastmoor Comets; Đorđević for Eastmoor Comets minute 74, Ferrari for Northgate FC minute 90. Possession 49%-51%, shots 6-8 with shots on target 3-2, xG 0.57-0.87, pass accuracy 83%-81%, top speed Martinez 33 km/h, distance leader Morales 11.7 km."
+   "text": "Full time 1-1: Northgate FC 1-1 Eastmoor Comets; xG 0.57-0.87, possession 49%-51%. Shots 6-8, shots on target 3-2, pass accuracy 83%-81%; goals Đorđević minute 74 and Ferrari minute 90; Martinez top speed 33 km/h, Morales 11.7 km."
   },
   {
    "facts": {
@@ -4590,13 +4593,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Top speed and distance leader are swapped: fact sheet lists Buchanan as top speed 33 km/h and Morales as distance leader 11.7 km, but the text states top speed Morales 33 km/h and distance leader Buchanan 11.7 km."
+    "Top speed and distance leader are swapped: fact sheet lists Buchanan as top speed 33 km/h and Morales as distance leader 11.7 km, but the text states Morales top speed 33 km/h and Buchanan 11.7 km (presenting Buchanan's value as distance)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_full_time",
    "mutation": "names_swapped",
-   "text": "Final score Northgate FC 1-1 Eastmoor Comets; Đorđević for Eastmoor Comets minute 74, Ferrari for Northgate FC minute 90. Possession 49%-51%, shots 6-8 with shots on target 3-2, xG 0.57-0.87, pass accuracy 83%-81%, top speed Morales 33 km/h, distance leader Buchanan 11.7 km."
+   "text": "Full time 1-1: Northgate FC 1-1 Eastmoor Comets; xG 0.57-0.87, possession 49%-51%. Shots 6-8, shots on target 3-2, pass accuracy 83%-81%; goals Đorđević minute 74 and Ferrari minute 90; Morales top speed 33 km/h, Buchanan 11.7 km."
   },
   {
    "facts": {
@@ -4624,13 +4627,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Claim 'He has scored 12 goals this season.' is not supported by the fact sheet (no seasonal goal total provided)."
+    "The statement \"He has scored 12 goals this season.\" is not supported by the fact sheet—no seasonal goal totals are provided."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_full_time",
    "mutation": "invented_number",
-   "text": "Final score Northgate FC 1-1 Eastmoor Comets; Đorđević for Eastmoor Comets minute 74, Ferrari for Northgate FC minute 90. Possession 49%-51%, shots 6-8 with shots on target 3-2, xG 0.57-0.87, pass accuracy 83%-81%, top speed Buchanan 33 km/h, distance leader Morales 11.7 km. He has scored 12 goals this season."
+   "text": "Full time 1-1: Northgate FC 1-1 Eastmoor Comets; xG 0.57-0.87, possession 49%-51%. Shots 6-8, shots on target 3-2, pass accuracy 83%-81%; goals Đorđević minute 74 and Ferrari minute 90; Buchanan top speed 33 km/h, Morales 11.7 km. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -4658,13 +4661,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "The sentence \"It was his first goal for the club and the crowd erupted.\" is unsupported by the fact sheet (no information about it being a player's first goal or crowd reaction)."
+    "The sentence \"It was his first goal for the club\" is not supported by the fact sheet (no information about it being a first goal).",
+    "The claim \"and the crowd erupted\" is not supported by the fact sheet (no crowd reaction or attendance details provided)."
    ],
    "llm_verified": false,
    "mode": "analyst",
    "moment_id": "mom_full_time",
    "mutation": "invented_claim",
-   "text": "Final score Northgate FC 1-1 Eastmoor Comets; Đorđević for Eastmoor Comets minute 74, Ferrari for Northgate FC minute 90. Possession 49%-51%, shots 6-8 with shots on target 3-2, xG 0.57-0.87, pass accuracy 83%-81%, top speed Buchanan 33 km/h, distance leader Morales 11.7 km. It was his first goal for the club and the crowd erupted."
+   "text": "Full time 1-1: Northgate FC 1-1 Eastmoor Comets; xG 0.57-0.87, possession 49%-51%. Shots 6-8, shots on target 3-2, pass accuracy 83%-81%; goals Đorđević minute 74 and Ferrari minute 90; Buchanan top speed 33 km/h, Morales 11.7 km. It was his first goal for the club and the crowd erupted."
   },
   {
    "facts": {
@@ -4696,7 +4700,7 @@
    "mode": "casual",
    "moment_id": "mom_full_time",
    "mutation": "none",
-   "text": "Full time 1-1. Ferrari's minute 90 strike rescued a draw for Northgate FC after Đorđević opened the scoring for Eastmoor Comets."
+   "text": "Full time 1-1, Ferrari's minute 90 equalizer kept Northgate FC level after Đorđević's earlier strike for Eastmoor Comets."
   },
   {
    "facts": {
@@ -4724,13 +4728,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Ferrari's goal minute is stated as 97 in the text, but the fact sheet records Ferrari scoring in minute 90."
+    "Text states score as '15-1' at full time, but fact sheet gives final score 1-1. The score '15-1' is not in the fact sheet and is incorrect."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_full_time",
    "mutation": "number_swap",
-   "text": "Full time 1-1. Ferrari's minute 97 strike rescued a draw for Northgate FC after Đorđević opened the scoring for Eastmoor Comets."
+   "text": "Full time 15-1, Ferrari's minute 90 equalizer kept Northgate FC level after Đorđević's earlier strike for Eastmoor Comets."
   },
   {
    "facts": {
@@ -4758,13 +4762,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "Scoreline is incorrect in the text: it states \"15-1\" at full time but the fact sheet score is 1-1."
+    "The text states Ferrari scored a minute 97 equalizer, but the fact sheet records Ferrari's goal at minute 90. The minute '97' does not appear in the fact sheet and is incorrect."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_full_time",
    "mutation": "number_swap",
-   "text": "Full time 15-1. Ferrari's minute 90 strike rescued a draw for Northgate FC after Đorđević opened the scoring for Eastmoor Comets."
+   "text": "Full time 1-1, Ferrari's minute 97 equalizer kept Northgate FC level after Đorđević's earlier strike for Eastmoor Comets."
   },
   {
    "facts": {
@@ -4792,13 +4796,13 @@
    },
    "label": "false",
    "llm_issues": [
-    "The statement 'He has scored 12 goals this season.' is not supported by the fact sheet (no season goal totals are provided for any player)."
+    "Claim that Ferrari has scored 12 goals this season is not supported by the fact sheet (no season goal totals provided)."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_full_time",
    "mutation": "invented_number",
-   "text": "Full time 1-1. Ferrari's minute 90 strike rescued a draw for Northgate FC after Đorđević opened the scoring for Eastmoor Comets. He has scored 12 goals this season."
+   "text": "Full time 1-1, Ferrari's minute 90 equalizer kept Northgate FC level after Đorđević's earlier strike for Eastmoor Comets. He has scored 12 goals this season."
   },
   {
    "facts": {
@@ -4826,14 +4830,14 @@
    },
    "label": "false",
    "llm_issues": [
-    "The phrase \"It was his first goal for the club\" includes the number word \"first\" and asserts a fact that is not present in the fact sheet (no information about this being Đorđević's first goal).",
-    "The statement \"the crowd erupted\" describes an event (reaction) not supported by the fact sheet."
+    "The claim \"It was his first goal for the club\" is not supported by the fact sheet (no mention of it being a first goal).",
+    "The statement \"the crowd erupted\" is not present in the fact sheet and is an unsupported descriptive claim."
    ],
    "llm_verified": false,
    "mode": "casual",
    "moment_id": "mom_full_time",
    "mutation": "invented_claim",
-   "text": "Full time 1-1. Ferrari's minute 90 strike rescued a draw for Northgate FC after Đorđević opened the scoring for Eastmoor Comets. It was his first goal for the club and the crowd erupted."
+   "text": "Full time 1-1, Ferrari's minute 90 equalizer kept Northgate FC level after Đorđević's earlier strike for Eastmoor Comets. It was his first goal for the club and the crowd erupted."
   }
  ],
  "roster": [
