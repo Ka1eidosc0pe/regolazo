@@ -82,7 +82,8 @@ def player_ap50(model: YOLO, imgsz: int) -> float:
     scored: list[tuple[float, bool]] = []
     n_gt = 0
     for img in sorted((VISION / "yolo" / "images" / "test").glob("*.jpg")):
-        lab = np.loadtxt(img.parents[2] / "labels" / "test" / f"{img.stem}.txt", ndmin=2)
+        txt = img.parents[2] / "labels" / "test" / f"{img.stem}.txt"
+        lab = np.loadtxt(txt, ndmin=2) if txt.stat().st_size else np.zeros((0, 5))
         r = model.predict(str(img), imgsz=imgsz, conf=0.001, device="mps", verbose=False)[0]
         w, h = r.orig_shape[1], r.orig_shape[0]
         gt = lab[np.isin(lab[:, 0], [0, 1])] if len(lab) else np.zeros((0, 5))
