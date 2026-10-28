@@ -17,6 +17,7 @@ from vision.tracking import Tracks
 
 POSSESSION_RADIUS_M = 1.5
 MIN_CONTROL_FRAMES = 3
+MIN_POSSESSION_S = 0.4
 MIN_PASS_TRAVEL_M = 4.0
 SHOT_MIN_SPEED_MPS = 12.0
 SHOT_MAX_DIST_M = 35.0
@@ -121,6 +122,31 @@ def controls(owner: np.ndarray, teams: dict[int, TeamSide], min_frames: int = MI
     return runs
 
 
+def possession_ids(runs: list[Control], t: F64, min_s: float = MIN_POSSESSION_S) -> list[int]:
+    """Possession id per control run. A brief opponent contact (< min_s, and the ball comes straight back) does not
+    end a possession; otherwise a run by the other team starts a new one."""
+    ids: list[int] = []
+    current: TeamSide | None = None
+    pid = 0
+    for k, r in enumerate(runs):
+        if current is None:
+            current = r.team
+        elif r.team != current:
+            nxt = runs[k + 1] if k + 1 < len(runs) else None
+            brief = t[r.i1] - t[r.i0] < min_s and nxt is not None and nxt.team == current
+            if not brief:
+                pid += 1
+                current = r.team
+        ids.append(pid)
+    return ids
+
+
+def possession_changes(runs: list[Control], t: F64) -> list[tuple[float, TeamSide]]:
+    """(time, team gaining) at each new possession."""
+    ids = possession_ids(runs, t)
+    return [(float(t[r.i0]), r.team) for k, r in enumerate(runs) if k > 0 and ids[k] != ids[k - 1]]
+
+
 def _length_class(m: float) -> PassLength:
     return "short" if m < 15 else "medium" if m <= 30 else "long"
 
@@ -172,10 +198,9 @@ def detect(
     kin = {k: kinematics(v, t) for k, v in tracks.players.items() if k in teams}
     runs = controls(owners(ball.pos, {k: v.pos for k, v in kin.items()}, teams), teams)
     raw: list[Raw] = []
-    possession = 0
+    poss_ids = possession_ids(runs, t)
     for r_i, r in enumerate(runs):
-        if r_i > 0 and r.team != runs[r_i - 1].team:
-            possession += 1
+        possession = poss_ids[r_i]
         nxt = runs[r_i + 1] if r_i + 1 < len(runs) else None
         start = ball.pos[r.i1]
         tr = float(t[r.i1])

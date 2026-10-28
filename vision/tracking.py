@@ -80,8 +80,8 @@ class Tracks:
 
 def make_tracker(fps: float) -> BYTETracker:
     cfg = YAML.load(ROOT / "cfg" / "trackers" / "bytetrack.yaml")
-    cfg.update(track_buffer=50, track_low_thresh=0.1, new_track_thresh=0.3)
-    return BYTETracker(IterableSimpleNamespace(**cfg), frame_rate=round(fps))
+    cfg.update(track_buffer=round(2 * fps), track_low_thresh=0.1, new_track_thresh=0.3)  # keep lost tracks 2 s
+    return BYTETracker(IterableSimpleNamespace(**cfg))
 
 
 class Spotter:
