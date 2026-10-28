@@ -18,6 +18,7 @@ import { PitchControlLayer, PreviewArc, RealityGhosts, straightArc } from "../wo
 import type { Api, RolloutBody } from "./api.ts";
 import type { Hud } from "./hud.ts";
 import {
+  dedupeOptions,
   distributionBars,
   eventCard,
   FRAMING_TEXT,
@@ -342,7 +343,7 @@ export class Rewind {
     head.append(el("span", "rw-kicker", m.origin === "fan" ? "Your rewind" : "Flagged moment"), el("span", "rw-title", `${this.hud.name(m.ball_carrier)} on the ball`));
     this.panel.appendChild(head);
     const list = el("div", "rw-options");
-    const ranked = [...m.options].filter((o) => o.viable || o === this.selected).sort((a, b) => b.decision_value - a.decision_value).slice(0, 7);
+    const ranked = dedupeOptions(m.options).filter((o) => o.viable || o === this.selected).sort((a, b) => b.decision_value - a.decision_value).slice(0, 7);
     if (this.selected && !ranked.includes(this.selected)) ranked.unshift(this.selected);
     for (const o of ranked) {
       const b = el("button", "rw-opt");
@@ -603,7 +604,12 @@ export class Rewind {
       row.append(el("span", "vd-bar-k", b.text), track, el("span", "vd-bar-v", `${b.count}`));
       bars.appendChild(row);
     }
-    body.append(bars, this.samplePlot(d));
+    const xs = d.samples.map((q) => q.end_xy[0]);
+    const ys = d.samples.map((q) => q.end_xy[1]);
+    const spread = xs.length ? Math.max(...xs) - Math.min(...xs) + Math.max(...ys) - Math.min(...ys) : 0;
+    body.append(bars);
+    if (spread > 0.5) body.append(this.samplePlot(d));
+    else body.classList.add("bars-only");
     dist.append(stats, body);
     dist.dataset.n = String(d.n);
     dist.dataset.pSuccess = String(d.p_primary_success);

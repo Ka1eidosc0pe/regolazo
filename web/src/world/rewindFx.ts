@@ -41,7 +41,7 @@ export class PitchControlLayer {
         data[i] = Math.round(c.r * 255);
         data[i + 1] = Math.round(c.g * 255);
         data[i + 2] = Math.round(c.b * 255);
-        data[i + 3] = Math.round(Math.min(1, Math.abs(d) ** 0.8) * 150);
+        data[i + 3] = Math.round(Math.min(1, Math.abs(d) ** 1.4) * 120);
       }
     }
     this.tex?.dispose();
@@ -142,7 +142,7 @@ export class PreviewArc {
     }
     if (!points || points.length < 2) return;
     const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...worldToThree(p[0], p[1], Math.max(0.12, p[2])))));
-    this.mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, Math.min(120, points.length * 3), 0.11, 8, false), this.mat);
+    this.mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, Math.min(120, points.length * 3), 0.2, 8, false), this.mat);
     this.group.add(this.mesh);
   }
 }

@@ -183,23 +183,24 @@ export function sameCall(a: OptionEvaluation["intent"], b: OptionEvaluation["int
   if (a.kind !== b.kind) return false;
   if (a.kind === "pass_player") return a.target_player === b.target_player;
   if (a.kind === "shot") return true;
-  if (!a.target || !b.target) return false;
+  if (!a.target || !b.target) return !a.target && !b.target;
   return Math.hypot(a.target[0] - b.target[0], a.target[1] - b.target[1]) < 3;
 }
 
 /**
  * Verdict framing (judgement-free until here). "Good" means the fan's action itself succeeded.
- * Low-probability success beats the odds; a likely action that failed was unlucky.
+ * A low-probability success beats the odds, a risky one (under 65 %) was bold and paid off, and a likely action
+ * that failed was unlucky.
  */
 export function verdictFraming(
-  user: Pick<OptionEvaluation, "p_success" | "decision_value" | "intent">,
-  real: Pick<OptionEvaluation, "decision_value" | "intent"> | null,
+  user: Pick<OptionEvaluation, "p_success" | "intent">,
+  real: Pick<OptionEvaluation, "intent"> | null,
   outcome: Pick<RolloutOutcome, "primary_success" | "label">,
 ): Framing {
   if (real && sameCall(user.intent, real.intent)) return "same_call_as_reality";
   const good = outcome.primary_success || outcome.label === "goal";
   if (good && user.p_success < 0.4) return "beat_the_odds";
-  if (good && real && user.decision_value > real.decision_value) return "bold_and_paid_off";
+  if (good && user.p_success < 0.65) return "bold_and_paid_off";
   if (!good && user.p_success >= 0.5) return "unlucky";
   return "as_expected";
 }
@@ -234,12 +235,29 @@ export function distributionBars(d: Pick<RolloutDistribution, "outcome_counts" |
     .map((c) => ({ label: c.label, text: OUTCOME_TEXT[c.label], count: c.count, fraction: c.count / total }));
 }
 
-/** The "open teammate" for the scripted demo: the viable pass with the highest completion that is not the real choice. */
+/**
+ * The "open teammate" for the scripted demo: among viable passes (not the real choice) that are at least even money,
+ * the one that gains the most ground (value if it works); falls back to the best decision value.
+ */
 export function openTeammate(m: Pick<DecisionMoment, "options" | "real_action">): OptionEvaluation | null {
   const real = realOption(m);
   const passes = m.options.filter((o) => o.intent.kind === "pass_player" && o.viable && !(real && sameCall(o.intent, real.intent)));
-  passes.sort((a, b) => b.decision_value - a.decision_value || b.p_success - a.p_success);
+  const even = passes.filter((o) => o.p_success >= 0.5).sort((a, b) => b.value_if_success - a.value_if_success);
+  if (even[0]) return even[0];
+  passes.sort((a, b) => b.decision_value - a.decision_value);
   return passes[0] ?? null;
+}
+
+/** One entry per distinct choice (the engine scores several carry directions; the panel shows the best). */
+export function dedupeOptions(options: readonly OptionEvaluation[]): OptionEvaluation[] {
+  const best = new Map<string, OptionEvaluation>();
+  for (const o of options) {
+    const k = o.intent.kind;
+    const key = k === "pass_player" ? `p:${o.intent.target_player}` : k === "carry" || k === "shot" ? k : o.label;
+    const cur = best.get(key);
+    if (!cur || o.decision_value > cur.decision_value) best.set(key, o);
+  }
+  return [...best.values()];
 }
 
 export function pct(p: number): string {
