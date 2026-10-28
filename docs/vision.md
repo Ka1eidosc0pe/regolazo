@@ -64,6 +64,7 @@ match. Matching is greedy and one-to-one: same team and |Δt| ≤ **1.0 s**. The
 | pass | 33 | 33 | 18 | 0.545 | 0.545 | **0.545** | 0.576 |
 | shot | 3 | 1 | 1 | 1.000 | 0.333 | **0.500** | 0.500 |
 | possession change | 12 | 8 | 4 | 0.500 | 0.333 | **0.400** | 0.500 |
+| sprint (> 25.2 km/h for ≥ 1 s; matched on start time) | 25 | 15 | 12 | 0.800 | 0.480 | **0.600** | 0.650 |
 
 The ground-truth possession changes come from the recording's `events.jsonl`, wherever `possession_team` switches
 between consecutive events. The detected ones are wherever the team of the control run changes, after the
@@ -76,6 +77,7 @@ brief-touch smoothing.
 | Player speed (track matched to a GT player within 1 m) | **1.0 km/h** | 41,996 track-frames |
 | Pass length (matched passes) | 6.3 m | 18 passes |
 | Shot speed (matched shots) | 48 km/h | 1 shot |
+| Sprint peak speed (matched sprints) | 1.6 km/h | 12 sprints |
 
 Ball and player speeds are horizontal speeds, compared with the ground truth's horizontal `|vel|`.
 
@@ -97,6 +99,7 @@ renders and spots at the same time and runs at 12.8 frames/s. There the renderer
   tracks of the same player are dropped by the ≥ 4 m travel rule, but they still cost some precision.
 - **Ball recall.** The gated ball track covers 50 % of frames in the first segment and 36 % in the second. Fast or airborne balls are often missed, which
   hurts the timing of pass receptions and possession changes.
+- Sprints are matched by team and start time only, not by player, because tracks have no player id.
 - Events are passes, shots, possession and sprints only: no receipts, carries, duels or qualifiers beyond pass
   length and outcome. Thresholds were set from the taxonomy and the training matches, not tuned on candidate-2004.
 

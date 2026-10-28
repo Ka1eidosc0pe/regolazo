@@ -78,8 +78,8 @@ class Report:
         for name, s in self.scores.items():
             rows.append(
                 AccuracyRow(
-                    event_type="pass" if name == "pass" else "shot" if name == "shot" else None,
-                    qualifier=None if name in ("pass", "shot") else name,
+                    event_type=name if name in ("pass", "shot", "sprint") else None,
+                    qualifier=None if name in ("pass", "shot", "sprint") else name,
                     precision=round(s.precision, 3),
                     recall=round(s.recall, 3),
                     f1=round(s.f1, 3),
@@ -87,7 +87,7 @@ class Report:
                 )
             )
         for name, (mae, n, unit) in self.mae.items():
-            et = "shot" if name.startswith("shot") else "pass" if name.startswith("pass") else None
+            et = next((x for x in ("shot", "pass", "sprint") if name.startswith(x)), None)
             rows.append(
                 AccuracyRow(event_type=et, qualifier=name, metric="mae", mae=round(mae, 2), unit=unit, support=n)
             )
@@ -108,6 +108,7 @@ def evaluate(
     scores = {
         "pass": match(key(det, "pass"), key(gt, "pass"), tol),
         "shot": match(key(det, "shot"), key(gt, "shot"), tol),
+        "sprint": match(key(det, "sprint"), key(gt, "sprint"), tol),
         "possession_change": match(
             [c for c in possession_changes(runs, t) if t0 <= c[0] <= t1], gt_possession_changes(gt), tol
         ),
@@ -163,6 +164,17 @@ def evaluate(
     ]
     if serr:
         mae["shot_speed"] = (float(np.mean(serr)), len(serr), "km/h")
+    dsp, gsp = [e for e in det if e.type == "sprint"], [e for e in gt if e.type == "sprint"]
+    sp_err = [
+        abs(q.peak_speed_mps - g.peak_speed_mps) * 3.6
+        for i, j in scores["sprint"].pairs
+        if (q := dsp[i].qualifiers) is not None
+        and q.kind == "physical"
+        and (g := gsp[j].qualifiers) is not None
+        and g.kind == "physical"
+    ]
+    if sp_err:
+        mae["sprint_peak_speed"] = (float(np.mean(sp_err)), len(sp_err), "km/h")
     team_acc = (float(np.mean(team_hits)) if team_hits else 0.0, len(team_hits))
     return Report(t0, t1, tol, scores, mae, team_acc)
 
