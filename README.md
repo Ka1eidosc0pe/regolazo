@@ -13,7 +13,7 @@ Built for the Premier League × Microsoft **"Inside the Game"** hackathon.
 | Category requirement | How ReGolazo does it |
 |---|---|
 | **Synthetic dataset creation** | A full 90-minute match engine (`sim/`): 3D ball physics (drag, bounce, spin), player kinematics, tactics, and execution noise scaled by player attributes. Every frame is recorded with ground-truth events using a StatsBomb-style taxonomy (`docs/event_taxonomy.md`). Over 200 simulated matches it lands inside real-football bands for shots, pass completion, passes, headers, shot distance, distance covered and possession spread (`docs/sim_realism.md`). |
-| **Auto-eventing from a video feed** | The **Spotter** (`vision/`) renders the broadcast and fine-tunes a YOLO detector on frames labelled by the renderer. It tracks players and ball, projects them onto the pitch with camera calibration, infers events from the tracks, and is scored against simulator ground truth (`docs/vision.md`). |
+| **Auto-eventing from a video feed** | The **Spotter** (`vision/`) watches the rendered broadcast pixels and produces events on its own. It runs a YOLO11n detector fine-tuned on renderer-labelled frames, ByteTrack tracking, team assignment from kit colour, a homography from the broadcast camera calibration, and rule-based event inference. On a held-out match it is scored against simulator ground truth, and a live accuracy panel shows the scores (`docs/vision.md`). |
 | **Ingest → interpret → explain → render → personalize** | Engine and Spotter (ingest) → analytics models and Moment Scout (interpret) → Storyteller and Fact-Checker agents (explain) → Three.js broadcast renderer with overlays (render) → mode, language and voice per viewer (personalize). |
 | **Player name tags, speed and distance badges** | Overlays on the ball carrier and key players, with sprint and top-speed badges at the taxonomy's thresholds. |
 | **Pass distance, accuracy, difficulty; ball and shot speed** | Pass cards (distance, difficulty from xPass) and shot cards (xG, shot speed). |
@@ -32,6 +32,24 @@ At a flagged moment, or any moment the fan pauses on:
 - probabilities stay hidden until the fan commits.
 
 The 1,000-reality distribution and the single replay come from the same engine, and a test checks that they agree statistically.
+
+### The Spotter, measured honestly
+
+It's scored on the held-out demo match, which it never trained on, over 178 s of broadcast; an event counts as a match within 1 s.
+
+| | Precision | Recall | F1 |
+|---|---|---|---|
+| Passes | 0.55 | 0.55 | 0.55 |
+| Sprints (> 25.2 km/h) | 0.80 | 0.48 | 0.60 |
+| Possession changes | 0.50 | 0.33 | 0.40 |
+| Shots (3 in the window) | 1.00 | 0.33 | 0.50 |
+
+- **Detector:** person AP50 is 0.99 and ball AP50 is 0.63.
+- **Speed error:** player speed MAE is 1.0 km/h, and ground-ball speed MAE is 2.4 km/h.
+- **What doesn't work well yet:**
+  - Ball height isn't estimated yet, so lofted-ball speeds are unreliable; captions hide speeds above 120 km/h.
+  - Tracking has frequent ID switches.
+- **Two better variants** (higher inference resolution; 9 more minutes of training) improve most numbers. For example, pass F1 rises to 0.66 and ball AP50 to 0.67. Both lose the one detected shot to a team-colour error, and choosing between them on the test match would bias the scores, so they're documented but not shipped.
 
 ### The agents
 
@@ -103,6 +121,8 @@ cd web && npm run dev
 ```
 
 Without Azure keys, everything except narration works.
+
+The **Spotter's** weights and training renders live under `data/` and aren't committed. To rebuild them, render the dataset with `scripts/spotter_dataset.py`, train with `scripts/spotter_train.py`, then run `scripts/spotter_run.py offline` or `scripts/spotter_demo.py`. Training takes about 25 minutes on an M3 Pro. The full steps are in [docs/vision.md](docs/vision.md).
 
 ### Checks
 
