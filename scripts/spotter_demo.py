@@ -19,7 +19,7 @@ from shared.schemas.meta import MatchMeta
 from vision.evaluate import shot_speeds
 from vision.events import track_teams
 from vision.pipeline import load_results
-from vision.tracking import load_frame_meta, to_tracks
+from vision.tracking import kits_from_meta, load_frame_meta, to_tracks
 
 REPO = Path(__file__).resolve().parents[1]
 DATA = Path(os.environ.get("REGOLAZO_DATA_DIR", REPO / "data"))
@@ -61,7 +61,7 @@ def main() -> None:
     meta = MatchMeta.model_validate_json((DATA / "matches" / DEMO / "meta.json").read_text())
     frames = load_frame_meta(RENDER)
     results = load_results(out_dir / "detections.json")
-    tracks = to_tracks(results)
+    tracks = to_tracks(results, kits_from_meta(meta))
     teams = track_teams(tracks, 1, meta.home_attacks_positive_x_first_half)
     events = [
         MatchEvent.model_validate_json(x) for x in (out_dir / "detected_events.jsonl").read_text().splitlines() if x

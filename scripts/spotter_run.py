@@ -23,7 +23,7 @@ from vision.clips import export_clip
 from vision.evaluate import evaluate, shot_speeds
 from vision.events import detect
 from vision.pipeline import default_weights, load_results, run_frames, save_results
-from vision.tracking import FrameMeta, FrameResult, Spotter, load_frame_meta, to_tracks
+from vision.tracking import FrameMeta, FrameResult, Spotter, kits_from_meta, load_frame_meta, to_tracks
 
 REPO = Path(__file__).resolve().parents[1]
 DATA = Path(os.environ.get("REGOLAZO_DATA_DIR", REPO / "data"))
@@ -45,7 +45,7 @@ def offline(rerun: bool) -> None:
         print(f"spotter: {len(frames)} frames in {secs:.1f} s ({len(frames) / secs:.1f} frames/s)")
         save_results(results, cache)
     results = load_results(cache)
-    tracks = to_tracks(results)
+    tracks = to_tracks(results, kits_from_meta(rec.meta))
     events, runs = detect(tracks, PERIOD, rec.meta.home_attacks_positive_x_first_half)
     (out / "detected_events.jsonl").write_text("".join(e.model_dump_json() + "\n" for e in events))
     report = evaluate(rec, events, runs, tracks, tol=1.0)
@@ -105,7 +105,7 @@ def live(match: str, start: float, end: float, fps: int) -> None:
             results.append(spotter.step(fm))
             k += 1
             if k % fps == 0 and len(results) > 10:
-                tracks = to_tracks(results)
+                tracks = to_tracks(results, kits_from_meta(rec.meta))
                 events, _ = detect(tracks, period, rec.meta.home_attacks_positive_x_first_half)  # type: ignore[arg-type]
                 for e in events:
                     if (e.type, round(e.t, 1)) in seen or e.t > tracks.t[-1] - 1.0:

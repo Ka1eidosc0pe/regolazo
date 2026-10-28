@@ -37,9 +37,15 @@ def load_results(path: Path) -> list[FrameResult]:
             float(d["conf"]),  # type: ignore[arg-type]
             tuple(d["box"]),  # type: ignore[arg-type]
             tuple(d["pitch"]),  # type: ignore[arg-type]
+            tuple(d["colour"]) if d.get("colour") else None,  # type: ignore[arg-type]
         )
 
     return [
-        FrameResult(float(r["t"]), [det(p) for p in r["players"]], det(r["ball"]) if r["ball"] else None)
+        FrameResult(
+            float(r["t"]),
+            [det(p) for p in r["players"]],
+            det(r["ball"]) if r["ball"] else None,
+            [det(b) for b in r.get("balls", [])],
+        )
         for r in json.loads(path.read_text())
     ]
