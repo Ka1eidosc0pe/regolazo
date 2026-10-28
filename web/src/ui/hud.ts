@@ -239,21 +239,21 @@ export class Hud {
     this.cardEl.style.setProperty("--club", team.kit.primary);
     const head = el("div", "sc-head");
     const rows = el("div", "sc-rows");
-    const row = (k: string, v: string) => {
+    const row = (k: string, v: string, word = false) => {
       const r = el("div", "sc-row");
-      r.append(el("span", "sc-k", k), el("span", "sc-v", v));
+      r.append(el("span", "sc-k", k), el("span", word ? "sc-v word" : "sc-v", v));
       rows.appendChild(r);
     };
     if (card.kind === "pass") {
       head.append(el("span", "sc-kind", "Pass"), el("span", "sc-who", `${this.name(card.passer)} → ${this.name(card.recipient)}`));
       row("Distance", `${card.distanceM.toFixed(0)} m`);
       if (card.xpass !== null) row("Difficulty", `${card.difficulty} · ${pct(card.xpass)} xPass`);
-      if (card.technique) row("Technique", card.technique.replace(/_/g, " "));
+      if (card.technique) row("Technique", card.technique.replace(/_/g, " "), true);
     } else {
       head.append(el("span", "sc-kind shot", "Shot"), el("span", "sc-who", this.name(card.shooter)));
       if (card.xg !== null) row("xG", card.xg.toFixed(2));
       if (card.speedKmh !== null) row("Shot speed", `${card.speedKmh.toFixed(0)} km/h`);
-      row("Result", card.outcome.replace(/_/g, " "));
+      row("Result", card.outcome.replace(/_/g, " "), true);
     }
     this.cardEl.append(head, rows);
     this.cardEl.dataset.kind = card.kind;

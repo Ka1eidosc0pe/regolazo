@@ -228,7 +228,9 @@ body[data-ui="live"] .brand-bug {
 .sc-v {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  text-transform: capitalize;
+}
+.sc-v.word::first-letter {
+  text-transform: uppercase;
 }
 
 /* timeline */
@@ -402,6 +404,8 @@ body[data-rewind="idle"] .tl-marker:hover .tl-tip {
 .acc-table td {
   text-align: right;
   padding: 2px 8px;
+}
+.acc-table td:first-child {
   text-transform: capitalize;
 }
 .acc-table td:first-child,
