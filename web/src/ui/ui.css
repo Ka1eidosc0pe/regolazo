@@ -954,3 +954,24 @@ body[data-rewind="realities"] .stat-card {
 .vd-dot.bad {
   fill: var(--flare);
 }
+.rw-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -2px 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.rw-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--cyan);
+}
+.rw-legend i.opp {
+  margin-left: 6px;
+  background: var(--flare);
+}

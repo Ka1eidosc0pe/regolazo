@@ -342,6 +342,13 @@ export class Rewind {
     const head = el("div", "rw-head");
     head.append(el("span", "rw-kicker", m.origin === "fan" ? "Your rewind" : "Flagged moment"), el("span", "rw-title", `${this.hud.name(m.ball_carrier)} on the ball`));
     this.panel.appendChild(head);
+    if (this.pc.mesh.visible) {
+      const team = m.team === "home" ? this.app.meta.home : this.app.meta.away;
+      const opp = m.team === "home" ? this.app.meta.away : this.app.meta.home;
+      const legend = el("div", "rw-legend");
+      legend.append(el("i", "own"), el("span", undefined, `${team.short_name} control`), el("i", "opp"), el("span", undefined, opp.short_name));
+      this.panel.appendChild(legend);
+    }
     const list = el("div", "rw-options");
     const ranked = dedupeOptions(m.options).filter((o) => o.viable || o === this.selected).sort((a, b) => b.decision_value - a.decision_value).slice(0, 7);
     if (this.selected && !ranked.includes(this.selected)) ranked.unshift(this.selected);
@@ -686,7 +693,7 @@ export class Rewind {
     this.app.ball.reset();
     this.app.setCamera("broadcast", 1.0);
     this.hud.tagsEnabled = true;
-    if (m) this.source.live.seek(Math.max(0, m.t - 4));
+    if (m) this.source.live.seek(Math.max(0, m.t - 2));
     this.source.live.play();
     this.moment = null;
     this.setPhase("idle");

@@ -67,7 +67,7 @@ test("demo: live -> rewind -> rewrite -> verdict -> 1,000 realities -> live", as
   // 7. back to live: reality resumes a few seconds before the moment
   await page.getByTestId("back-to-live").click();
   await expect.poll(() => phase(page)).toBe("idle");
-  await beat(page, "07_back_to_live", 9000);
+  await beat(page, "07_back_to_live", 13500);
 
   await page.close();
   const video = page.video();
