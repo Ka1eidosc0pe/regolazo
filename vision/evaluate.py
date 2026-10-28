@@ -8,7 +8,7 @@ from shared.recording import Recording
 from shared.schemas.common import TeamSide
 from shared.schemas.events import MatchEvent
 from shared.schemas.overlay import AccuracyPanelPayload, AccuracyRow
-from vision.events import Control, kinematics, possession_changes
+from vision.events import Control, ball_kinematics, kinematics, possession_changes
 from vision.tracking import Tracks
 
 
@@ -129,7 +129,7 @@ def evaluate(
     # ball and player speed per frame
     a = rec.arrays
     idx = np.array([rec.index_at(float(x) + 1e-6) for x in t])
-    ball = kinematics(tracks.ball, t, max_gap_s=0.5, win_s=0.12)
+    ball = ball_kinematics(tracks.ball, t)
     gt_ball_v = np.linalg.norm(a["ball_vel"][idx, :2], axis=1)
     ground = a["ball_pos"][idx, 2] < 0.5
     seen = ~np.isnan(tracks.ball[:, 0]) & ~np.isnan(ball.speed)
@@ -181,7 +181,7 @@ def evaluate(
 
 def shot_speeds(tracks: Tracks, shots: list[MatchEvent]) -> list[float]:
     """Peak detected ball speed (m/s) in the 0.5 s after each detected shot."""
-    ball = kinematics(tracks.ball, tracks.t, max_gap_s=0.5, win_s=0.12)
+    ball = ball_kinematics(tracks.ball, tracks.t)
     out = []
     for e in shots:
         m = (tracks.t >= e.t) & (tracks.t <= e.t + 0.5) & ~np.isnan(ball.speed)

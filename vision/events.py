@@ -28,6 +28,8 @@ SPRINT_MIN_S = 1.0
 SPRINT_MERGE_GAP_S = 0.5
 MAX_PLAYER_MPS = 12.0
 GOAL_X = 52.5
+BALL_MAX_GAP_S = 0.5
+BALL_WIN_S = 0.12
 
 
 @dataclass
@@ -72,6 +74,11 @@ def kinematics(xy: F64, t: F64, max_gap_s: float = 0.6, win_s: float = 0.5) -> K
         vel[1:-1] = (pos[2:] - pos[:-2]) / (t[2:] - t[:-2])[:, None]
     speed = np.linalg.norm(vel, axis=1)
     return Kinematics(pos, vel, speed)
+
+
+def ball_kinematics(xy: F64, t: F64) -> "Kinematics":
+    """Ball kinematics: short smoothing window (kicks are sharp), gaps up to BALL_MAX_GAP_S interpolated."""
+    return kinematics(xy, t, max_gap_s=BALL_MAX_GAP_S, win_s=BALL_WIN_S)
 
 
 def track_teams(tracks: Tracks, period: Period, home_pos_first: bool) -> dict[int, TeamSide]:
@@ -195,7 +202,7 @@ def detect(
     """Detected events (passes, shots, sprints) ordered by time, plus the control runs (possession)."""
     t = tracks.t
     teams = track_teams(tracks, period, home_pos_first)
-    ball = kinematics(tracks.ball, t, max_gap_s=0.5, win_s=0.12)
+    ball = ball_kinematics(tracks.ball, t)
     kin = {k: kinematics(v, t) for k, v in tracks.players.items() if k in teams}
     owner = owners(ball.pos, {k: v.pos for k, v in kin.items()}, teams)
     runs = controls(owner, teams, MIN_CONTROL_FRAMES)
