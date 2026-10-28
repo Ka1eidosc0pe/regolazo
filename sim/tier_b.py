@@ -344,7 +344,6 @@ def _step_ups(c: _Ctx) -> None:
     attack = a["attacking_positive_x"].astype(int)
     n = len(c.t)
     win = int(STEP_UP_WINDOW_S / DT)
-    offs = [(r["t"], r["team"]) for r in c.log.records if r["type"] == "offside"]
     passes = [(r["t"], r["team"], r["q"].get("outcome")) for r in c.log.records if r["type"] == "pass"]
     for team in (0, 1):
         players = [j for j in c.on if c.team_of[j] == team and j not in c.gk]
@@ -363,7 +362,9 @@ def _step_ups(c: _Ctx) -> None:
                 s = k - win
                 t_end = float(c.t[k])
                 opp = SIDE[1 - team]
-                trap = any(0 <= t - t_end <= 1.5 and tm == opp for t, tm in offs)
+                # the line stepped up as (or just before) an opponent pass was played that was then flagged offside
+                t_start = float(c.t[s])
+                trap = any(t_start <= t <= t_end + 1.5 and tm == opp and o == "offside" for t, tm, o in passes)
                 beaten = any(0 <= t - t_end <= 1.5 and tm == opp and o == "complete" for t, tm, o in passes)
                 outcome = "trap_success" if trap else ("trap_beaten" if beaten else "reset")
                 ids = [c.ids[players[i]] for i in order[k]]

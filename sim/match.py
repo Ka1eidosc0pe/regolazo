@@ -618,7 +618,7 @@ class Match:
         w.carry_speed[b] = 2.0
         press, _, _ = self._pressure(b, i)
         tempo = self.styles[team].tempo
-        w.act_timer[b] = (0.74 + 1.3 * self.rng.random() * (1.0 - 0.6 * press)) / tempo
+        w.act_timer[b] = (0.74 + 1.5 * self.rng.random() * (1.0 - 0.7 * press)) / tempo
         w.ball_vel[b] = 0.0
         w.ball_spin[b] = 0.0
         self._resolve_clearance(b, team)
@@ -1168,7 +1168,7 @@ class Match:
                 (restart is not None and restart[1] == R_KICK_OFF)
                 or (
                     w.last_restart_type[b] == R_KICK_OFF
-                    and w.t[b] - w.last_restart_t[b] <= 10
+                    and w.t[b] - w.last_restart_t[b] <= 15
                     and w.restart_poss_id[b] == w.possession_id[b]
                 ),
             )
@@ -1278,7 +1278,7 @@ class Match:
         w = self.w
         self._launch_pending(pend)
         shots = [p for p in pend if p.flight == FLIGHT_SHOT]
-        n_mc = 64  # enough samples that 1 / E[on x psxg] is not biased upward
+        n_mc = 64  # Monte Carlo samples of the execution noise for the on-target x psxg calibration
         pos = np.stack([w.ball_pos[p.b] for p in pend])
         vel = np.stack([w.ball_vel[p.b] for p in pend])
         spin = np.stack([w.ball_spin[p.b] for p in pend])
@@ -1408,7 +1408,7 @@ class Match:
                 if sq.is_gk[icp] and path[min(int(k[icp]), len(path) - 1), 2] > 1.4:
                     mode = FM_CLAIM
                     r = self.rng.random()
-                    sub = CLAIM_CATCH if r < 0.62 else (CLAIM_PUNCH if r < 0.94 else CLAIM_FAIL)
+                    sub = CLAIM_CATCH if r < 0.55 else (CLAIM_PUNCH if r < 0.92 else CLAIM_FAIL)
             elif k_rec < PL.NEVER:
                 coll, mode = rec, FM_MISCONTROL
             elif (k_m < PL.NEVER).any():
@@ -1460,7 +1460,9 @@ class Match:
         cross = self._goal_crossings(paths, np.concatenate([[j], mc]), s)
         on, ey, ez, spd = cross
         psx = self._psxg(b, team, ey, ez, spd, p)
-        e_on = float(np.mean(on[1:] * psx[1:])) if len(mc) else float(on[0] * psx[0])
+        # the actual shot is one of the samples: by exchangeability E[x_0 / mean(x_0..x_n)] = 1, so P(goal) equals
+        # the target exactly (a mean over the other samples alone is biased upward through 1 / E)
+        e_on = float(np.mean(on * psx))
         target_p = p.p_success
         kfac = target_p / max((1.0 - p_block) * e_on, 1e-6)
         r = self.rng.random()
@@ -1540,7 +1542,7 @@ class Match:
         sq = self.sq
         speed = float(np.linalg.norm(v))
         handling = sq.attr["gk_handling"][gk]
-        p_catch = float(sigmoid(np.array(1.2 + 0.05 * (handling - 70) - 0.13 * (speed - 16)))) * 0.85
+        p_catch = float(sigmoid(np.array(1.2 + 0.05 * (handling - 70) - 0.13 * (speed - 16)))) * 0.72
         r = self.rng.random()
         if r < p_catch:
             return SAVE_CATCH
@@ -1564,13 +1566,13 @@ class Match:
         if abs(lateral) < 0.9 and pt[2] < 1.9:
             return
         side_right = (lateral * self.sign[b, sq.team[gk]]) < 0
-        reach_m = float(np.clip(abs(lateral) - (0.5 if reach else -0.3), 0.0, 3.0))
+        reach_m = float(np.clip(abs(lateral) - (0.2 if reach else -0.3), 0.0, 3.0))
         dur = float(np.clip(t_arr, 0.3, 0.9))
         w.dive_vel[b, gk] = (0.0, np.sign(lateral) * reach_m / dur)
         w.dive_until[b, gk] = w.t[b] + dur
         w.vz[b, gk] = 1.6 if pt[2] > 0.6 else 0.9
         self._set_anim(b, gk, "gk_dive_right" if side_right else "gk_dive_left")
-        w.stun[b, gk] = min(t_arr + 0.9, 1.6)
+        w.stun[b, gk] = min(t_arr + 1.2, 2.0)  # down on the ground after the dive
 
     # ------------------------------------------------------------------------------------------------------
     # movement
@@ -1805,6 +1807,7 @@ class Match:
             pos, vel, spin = w.ball_pos[bi], w.ball_vel[bi], w.ball_spin[bi]
             flags = step_ball(pos, vel, spin)
             w.ball_pos[bi], w.ball_vel[bi], w.ball_spin[bi] = pos, vel, spin
+            w.last_bounce_t[bi[flags.bounced]] = w.t[bi[flags.bounced]]
             w.flight_peak[bi] = np.maximum(w.flight_peak[bi], pos[:, 2])
             self._wood[bi] = flags.woodwork
             poss = w.poss_team[bi]
@@ -1928,6 +1931,14 @@ class Match:
             # projection of the ball on his running direction: the first touch can take it across his body
             ahead = float(np.dot(bp[:2] - w.pos[b, c], v)) / max(sp, 1e-6) > -0.35
             in_front = ahead or sp < 1.5 or save
+            if save and d > CONTROL_RADIUS:
+                # the keeper meets the ball at its closest approach (where he can hold it), not at first reach
+                nb = bp[:2] + w.ball_vel[b, :2] * DT
+                d_next = float(np.linalg.norm(nb - (w.pos[b, c] + w.vel[b, c] * DT)))
+                z_next = bp[2] + w.ball_vel[b, 2] * DT
+                closer = d_next < d - 0.02 and d_next <= reach - 0.1 and 0.0 <= z_next <= reach_z - 0.05
+                if closer and abs(nb[0]) < HALF_LENGTH - 0.2:
+                    in_front = False
             if due and d <= reach and bp[2] <= reach_z and in_front:
                 self._collect(b, c)
                 return
@@ -2081,9 +2092,16 @@ class Match:
         k = min(len(path) - 1, max(int((self.w.t[b] - self.w.flight_t0[b]) / DT), 2))
         seg = path[: k + 1, :2] * s
         a, e = seg[0], seg[-1]
-        mid = seg[len(seg) // 2]
-        chord_mid = 0.5 * (a + e)
-        dev = mid[0] - chord_mid[0]  # toward the goal line is +x in the attacking frame
+        # largest sideways bend of the flight off its chord; positive bends toward the goal line (+x, attacking frame)
+        ch = e - a
+        n_ch = float(np.linalg.norm(ch))
+        if n_ch < 1.0:
+            return "straight"
+        perp = np.array([-ch[1], ch[0]]) / n_ch
+        if perp[0] < 0:
+            perp = -perp
+        off = (seg - a) @ perp
+        dev = float(off[int(np.argmax(np.abs(off)))])
         if dev >= 1.0:
             return "inswinging"
         if dev <= -1.0:
@@ -2210,7 +2228,7 @@ class Match:
             w.carry_speed[b] = 1.5
         self._mark_run_targeted(b, c)
 
-    def _first_time(self, b: int, c: int, bp: F, aerial: bool, pass_ev: int) -> bool:
+    def _first_time(self, b: int, c: int, bp: F, aerial: bool, pass_ev: int, rebound: bool = False) -> bool:
         """One-touch actions on arrival: headers and volleys at goal, flick-ons, cutback finishes, clearances."""
         w, sq = self.w, self.sq
         team = int(sq.team[c])
@@ -2231,11 +2249,11 @@ class Match:
             elif z > 1.55:
                 kind = I_PASS_PLAYER if r < 0.6 else None
         elif z > 0.35:
-            if in_box and dist < 16.0 and r < 0.45:
+            if in_box and dist < 16.0 and r < (0.6 if rebound else 0.45):
                 kind = I_SHOT
         elif in_box and dist < 14.0:
             cut = pass_ev >= 0 and self.logs[b].q(pass_ev).get("pass_type") in ("cutback", "cross")
-            if r < (0.55 if cut else 0.22):
+            if r < (0.55 if cut or rebound else 0.22):
                 kind = I_SHOT
         if kind is None and z > HEAD_ONLY_Z and not sq.is_gk[c]:
             kind = I_CLEARANCE if x_t < -20.0 else I_PASS_PLAYER  # too high to control: head it on
@@ -2249,7 +2267,7 @@ class Match:
         w.receive_t[b] = w.t[b]
         w.receipt_ev[b] = rq
         w.ball_pos[b] = bp
-        bounced = bool(0.12 < bp[2] < 0.7 and w.ball_vel[b, 2] > 0.3)  # rising off a bounce
+        bounced = bool(w.t[b] - w.last_bounce_t[b] <= 0.25 and bp[2] <= 0.5)  # struck just after a bounce
         self._one_touch(b, c, kind, bp, bounced)
         return True
 
@@ -2321,6 +2339,11 @@ class Match:
         if w.flight_kind[b] == FLIGHT_PASS:
             self._finish_pass(b, "incomplete", bp)
         if aerial and self._first_time(b, c, bp, aerial, -1):
+            return
+        # a loose ball in front of goal (a rebound, a scramble) is often hit first time
+        s = self.sign[b, team]
+        near_goal = bp[0] * s >= BOX_X and abs(bp[1]) <= BOX_HALF_WIDTH and not sq.is_gk[c]
+        if not aerial and near_goal and self._first_time(b, c, bp, aerial, -1, rebound=True):
             return
         offensive = bool(w.last_touch_team[b] == team)
         self._ev(b, "ball_recovery", c, team, bp, {"offensive": offensive, "recovery_failure": False})
@@ -2451,7 +2474,7 @@ class Match:
                 w.clear_ev[b] = ev
                 self.logs[b].link(ev, pass_ev)
                 self._set_anim(b, c, "header_jumping")
-                if bp[0] * s < -HALF_LENGTH + 18.0 and self.rng.random() < 0.3:
+                if bp[0] * s < -HALF_LENGTH + 18.0 and self.rng.random() < 0.4:
                     self.logs[b].q(ev)["outcome"] = "out_of_play"
                     self._behind(b, c, scale=0.4)
                     return
@@ -2615,7 +2638,10 @@ class Match:
             w.act_timer[b] = 2.5 + 3.0 * self.rng.random()
             if technique == "standing":
                 self._set_anim(b, c, "gk_catch_high" if bp[2] > 1.2 else "gk_catch_low")
-        elif sub == SAVE_PARRY_OUT:
+            return
+        if technique == "diving":
+            w.stun[b, c] = max(float(w.stun[b, c]), 2.0)  # on the floor after the parry: a rebound finds him down
+        if sub == SAVE_PARRY_OUT:
             self._behind(b, c, scale=0.35, min_speed=6.0)  # over the bar / round the post
             w.ball_vel[b, 2] = 3.0 if bp[2] > 1.4 else 1.0
         elif sub == SAVE_TO_POST:
@@ -2654,7 +2680,7 @@ class Match:
         if self.rng.random() < 0.035:
             self._foul(b, c, int(w.flight_passer[b]), "handball")
             return
-        if self.rng.random() < 0.35:
+        if self.rng.random() < 0.45:
             self._behind(b, c, scale=0.4)
             return
         self._deflect(b, c, scale=0.4, spread=0.9, toward=-w.ball_vel[b, :2])  # off the body, back out
@@ -2832,7 +2858,7 @@ class Match:
         loc = w.ball_pos[b].copy()
         tq = a["tackling"][j] / 99.0
         slide = self.rng.random() < 0.2 and np.linalg.norm(w.vel[b, j]) > 3.0
-        p_foul = (0.032 + 0.083 * (1.0 - tq)) * (1.6 if slide else 1.0)
+        p_foul = (0.027 + 0.07 * (1.0 - tq)) * (1.6 if slide else 1.0)
         if sq.is_gk[j]:
             p_foul = 0.06
         team_j = int(sq.team[j])
@@ -2846,7 +2872,7 @@ class Match:
             return
         z = 0.25 + 0.045 * (a["tackling"][j] - a["dribbling"][c]) + 0.02 * (a["strength"][j] - a["strength"][c])
         if sq.is_gk[j]:
-            z = 0.4 + 0.04 * (a["gk_positioning"][j] - a["dribbling"][c])
+            z = 0.2 + 0.04 * (a["gk_positioning"][j] - a["dribbling"][c])
         won = self.rng.random() < float(sigmoid(np.array(z)))
         self._set_anim(b, j, "slide_tackle" if slide else "tackle")
         w.stun[b, j] = 0.5 if won else 0.7

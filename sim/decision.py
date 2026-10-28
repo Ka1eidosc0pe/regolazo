@@ -316,7 +316,7 @@ def enumerate_slots(sq: Squad, di: DeciderInput, cm: Common, rng: np.random.Gene
     clr_t = np.column_stack([np.minimum(cpos_t[:, 0] + 42.0, 30.0), np.clip(cpos_t[:, 1] + side * 14.0, -30, 30)])
     if rng is not None:
         # hemmed in near his own byline a defender often just puts it behind for a corner
-        behind = (cpos_t[:, 0] < -40.0) & (np.abs(cpos_t[:, 1]) > 6.0) & (rng.random(d) < 0.3)
+        behind = (cpos_t[:, 0] < -40.0) & (np.abs(cpos_t[:, 1]) > 6.0) & (rng.random(d) < 0.4)
         clr_t[behind, 0] = -HALF_LENGTH - 4.0
         clr_t[behind, 1] = side[behind] * np.clip(np.abs(cpos_t[behind, 1]) + 6.0, 9.0, 30.0)
     target[:, S_CLEAR, :2] = clr_t * s[:, None]
@@ -550,13 +550,18 @@ def score_table(
     util = dv_seen.copy().reshape(d, o)
     arch = np.array([sq.players[i].archetype for i in range(len(sq.players))])
     arch_c = arch[c]
-    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.033
+    shot_bias = 0.5 * np.array([ARCH_SHOT_BIAS.get(a, -0.006) for a in arch_c]) - 0.031
     # speculative efforts from distance are part of the game (about a fifth of all shots come from 25 m+)
     long_try = (sdist > 22.0) * (0.007 + 0.012 * (sq.attr["long_shots"][c] - 70) / 20)
     # in the box players shoot through bodies rather than wait for a clear lane
     box_try = 0.026 * ((cpos_t[:, 0] > 36.0) & (np.abs(cpos_t[:, 1]) < 20.16))
     util += (cat == S_SHOT) * (shot_bias + long_try + box_try)[:, None]
     util += (cat == S_SHOT) * (0.02 * (box_try > 0))[:, None] * cone_o.reshape(d, o)
+    # free kicks within range are hit at goal more often than the chance alone suggests
+    util += (cat == S_SHOT) * (0.03 * (di.situation == SIT_DIRECT_FK))[:, None]
+    # keepers kick long from their hands about half the time
+    kick_long = (np.linalg.norm(end_t - origin_t, axis=1) > 34.0).reshape(d, o)
+    util += (kick_long & (cat < S_SHOT)) * (0.03 * (di.ctx == CTX_GK_HANDS))[:, None]
     vision = sq.attr["vision"][c] / 99.0
     directness = np.array([styles[0].directness, styles[1].directness])[c // N_ON]
     util += (cat == S_THROUGH0) * (0.006 * (arch_c == "advanced_playmaker") + 0.003 * directness)[:, None]
@@ -579,6 +584,7 @@ def score_table(
         long_ = (np.linalg.norm(end_t - origin_t, axis=1) > 30.0).reshape(d, o)
         long_ |= cat == S_THROUGH0
         seen = rng.random((d, o)) < (0.3 + 0.7 * vision[:, None] ** 1.3)
+        seen |= (di.ctx == CTX_GK_HANDS)[:, None]  # a keeper with the ball in his hands always sees the long kick
         valid &= ~long_ | seen
     composure = sq.attr["composure"][c] / 99.0
     tau = 0.011 * (1.25 - 0.5 * vision) * (1.0 + 0.8 * pressure * (1.0 - composure))

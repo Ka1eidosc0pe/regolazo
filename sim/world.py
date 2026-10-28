@@ -246,6 +246,8 @@ class World:
     receipt_ev: IA
     last_dribble_t: F
     aerial_won_t: F
+    last_bounce_t: F
+    """Clock time of the ball's last bounce (half-volleys are struck just after one)."""
     hands: BA
     """Keeper holding the ball in his hands."""
 
@@ -345,6 +347,7 @@ class World:
             receipt_ev=i(),
             last_dribble_t=np.full(b, -1e9),
             aerial_won_t=np.full(b, -1e9),
+            last_bounce_t=np.full(b, -1e9),
             hands=bo(),
         )
 
@@ -357,6 +360,10 @@ class World:
 
     @classmethod
     def from_snapshot(cls, snap: dict[str, npt.NDArray[Any]], b: int) -> "World":
+        missing = [f.name for f in fields(cls) if f.name not in snap]
+        if missing:  # snapshots written before a field existed get its default
+            blank = cls.empty(1)
+            snap = {**snap, **{k: getattr(blank, k)[0] for k in missing}}
         kw = {f.name: np.repeat(np.asarray(snap[f.name])[None, ...], b, axis=0) for f in fields(cls)}
         return cls(**kw)
 
