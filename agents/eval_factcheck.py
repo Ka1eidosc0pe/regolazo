@@ -57,6 +57,20 @@ def mutations(text: str, moment: Moment, roster: set[str], rng: random.Random) -
     for m in rng.sample(tokens, min(2, len(tokens))):
         new = _bump(m.group(), allowed)
         out.append(("number_swap", text[: m.start()] + new + text[m.end() :]))
+    # Subtle: a number that IS in the fact sheet but means something else (code cannot see this; the LLM must).
+    other = sorted(a for a in allowed if all(abs(a - float(m.group())) > 1e-9 for m in tokens))
+    if tokens and other:
+        m = rng.choice(tokens)
+        decimals = len(m.group().split(".")[1]) if "." in m.group() else 0
+        swap_in = [
+            f"{a:.{decimals}f}" if decimals else str(int(a)) for a in other if float(a).is_integer() != bool(decimals)
+        ]
+        if swap_in:
+            out.append(("number_from_other_fact", text[: m.start()] + rng.choice(swap_in) + text[m.end() :]))
+    home, away = str(sheet.facts.get("home_team", "")), str(sheet.facts.get("away_team", ""))
+    if home and away and (home in text) != (away in text):
+        present, absent = (home, away) if home in text else (away, home)
+        out.append(("team_swapped", text.replace(present, absent)))
     in_text = sorted(n for n in sheet.names() if n in text and n in roster)
     people = [n for n in in_text if n not in (sheet.facts.get("home_team"), sheet.facts.get("away_team"))]
     outsiders = sorted(roster - set(sheet.names()))
