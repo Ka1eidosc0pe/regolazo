@@ -3,6 +3,8 @@
 //   ?cam=broadcast|tactical|replay [&target=H08]                         ?t=<match seconds>      start (or freeze) time
 //   ?paused=1  freeze                                       ?quality=low            1k shadows, no MSAA
 //   ?w=1920&h=1080  fixed render size (recording / screenshots)
+//   ?live=1  live server through the dev / preview proxy (/ws, /api), with the broadcast UI and Rewind & Rewrite
+//   (?ws=... also mounts the UI, talking REST to the same origin as the socket; ?ui=0 turns the UI off)
 import "./style.css";
 import * as THREE from "three";
 import { App } from "./app.ts";
@@ -11,6 +13,9 @@ import { installAutomation } from "./record/automation.ts";
 import { ClipSource } from "./source/ClipSource.ts";
 import type { FrameSource } from "./source/FrameSource.ts";
 import { WsSource } from "./source/WsSource.ts";
+import { Api } from "./ui/api.ts";
+import { mountUi } from "./ui/index.ts";
+import { SwitchSource } from "./ui/switchSource.ts";
 
 const params = new URLSearchParams(location.search);
 const root = document.querySelector<HTMLDivElement>("#app")!;
@@ -20,8 +25,11 @@ root.innerHTML = `
   <div class="brand-bug"><span data-testid="title">ReGolazo</span></div>`;
 
 const stageRoot = root.querySelector<HTMLDivElement>("#stage-root")!;
-const wsUrl = params.get("ws");
-const source: FrameSource = wsUrl ? new WsSource(wsUrl) : new ClipSource(params.get("clip") ?? "/dev/clip_demo.json");
+const wsUrl = params.get("live") === "1" ? `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws` : params.get("ws");
+const withUi = wsUrl !== null && params.get("ui") !== "0";
+const liveSource: FrameSource = wsUrl ? new WsSource(wsUrl) : new ClipSource(params.get("clip") ?? "/dev/clip_demo.json");
+const switcher = withUi ? new SwitchSource(liveSource) : null;
+const source: FrameSource = switcher ?? liveSource;
 const w = params.get("w");
 const h = params.get("h");
 const app = new App(stageRoot, source, {
@@ -33,7 +41,7 @@ const app = new App(stageRoot, source, {
   record: params.get("record") === "1",
 });
 
-const ready = app.init().then(() => {
+const ready = app.init().then(async () => {
   const cam = params.get("cam") as CameraMode | null;
   app.director.replayTarget = params.get("target");
   if (cam) app.setCamera(cam, 0);
@@ -43,6 +51,10 @@ const ready = app.init().then(() => {
   if (params.get("record") !== "1") {
     app.start();
     installKeys();
+  }
+  if (switcher && wsUrl) {
+    if (params.get("paused") !== "1") source.play();
+    await mountUi(app, switcher, params.get("live") === "1" ? new Api(location.origin) : Api.fromWs(wsUrl));
   }
   document.body.dataset.ready = "1";
 });
@@ -55,6 +67,7 @@ ready.catch((err: unknown) => {
 /** Live-view keys: 1 broadcast, 2 tactical, 3 replay (follows the ball carrier), space play/pause, arrows seek. */
 function installKeys(): void {
   window.addEventListener("keydown", (e) => {
+    if (switcher && !switcher.isLive) return; // Rewind owns playback
     const c = source.clock();
     switch (e.key) {
       case "1":
