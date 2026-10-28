@@ -20,11 +20,10 @@ REPO = Path(__file__).resolve().parents[1]
 VISION = Path(os.environ.get("REGOLAZO_DATA_DIR", REPO / "data")) / "vision"
 DATA_YAML = VISION / "yolo" / "data.yaml"
 RUNS = VISION / "runs"
-WEIGHTS = RUNS / "spotter" / "weights" / "best.pt"
 
 
-def train(hours: float, imgsz: int) -> None:
-    model = YOLO("yolo11n.pt")
+def train(hours: float, imgsz: int, init: str = "yolo11n.pt", name: str = "spotter") -> None:
+    model = YOLO(init)
     model.train(
         data=str(DATA_YAML),
         imgsz=imgsz,
@@ -34,7 +33,7 @@ def train(hours: float, imgsz: int) -> None:
         device="mps",
         workers=4,
         project=str(RUNS),
-        name="spotter",
+        name=name,
         exist_ok=True,
         close_mosaic=3,
         patience=100,
@@ -43,8 +42,8 @@ def train(hours: float, imgsz: int) -> None:
     )
 
 
-def test(imgsz: int) -> None:
-    model = YOLO(str(WEIGHTS))
+def test(imgsz: int, name: str = "spotter") -> None:
+    model = YOLO(str(RUNS / name / "weights" / "best.pt"))
     m = model.val(
         data=str(DATA_YAML), split="test", imgsz=imgsz, device="mps", plots=False, project=str(RUNS), name="test"
     )
@@ -60,7 +59,8 @@ def test(imgsz: int) -> None:
         "per_class": per_class,
         "player_any_team_ap50": player_ap50(model, imgsz),
     }
-    (VISION / "detector_metrics.json").write_text(json.dumps(out, indent=2) + "\n")
+    suffix = "" if name == "spotter" else f"_{name}"
+    (VISION / f"detector_metrics{suffix}.json").write_text(json.dumps(out, indent=2) + "\n")
     print(json.dumps(out, indent=2))
 
 
@@ -121,11 +121,13 @@ def main() -> None:
     ap.add_argument("cmd", choices=["train", "test"])
     ap.add_argument("--hours", type=float, default=0.28)
     ap.add_argument("--imgsz", type=int, default=960)
+    ap.add_argument("--init", default="yolo11n.pt", help="starting weights (e.g. a previous best.pt to train longer)")
+    ap.add_argument("--name", default="spotter", help="run name under $DATA/vision/runs")
     a = ap.parse_args()
     if a.cmd == "train":
-        train(a.hours, a.imgsz)
+        train(a.hours, a.imgsz, a.init, a.name)
     else:
-        test(a.imgsz)
+        test(a.imgsz, a.name)
 
 
 if __name__ == "__main__":
