@@ -23,6 +23,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 from starlette.websockets import WebSocketDisconnect, WebSocketState
@@ -46,6 +47,8 @@ from shared.schemas.state import SimState
 from shared.schemas.stream import ErrorMsg
 
 log = logging.getLogger("regolazo.server")
+
+MATCH_FILE_TYPES = {".json", ".jsonl", ".mp3", ".wav", ".png", ".jpg", ".mp4", ".webm"}
 
 
 class PreviewRequest(Contract):
@@ -202,6 +205,16 @@ def create_app(recording_dir: Path, engine: RolloutEngine, settings: Settings | 
     ) -> RolloutDistribution:
         key = None if body.seed is None else "distribution:" + body.model_dump_json()
         return await _call_engine(run, tl, body.snapshot_ref, lambda: eng.distribution(body), key)
+
+    match_root = Path(recording_dir).resolve()
+
+    @app.get("/api/files/{path:path}")
+    async def get_match_file(path: str) -> FileResponse:
+        """Files that other components write next to the recording (narratives, TTS audio, Spotter output)."""
+        target = (match_root / path).resolve()
+        if not target.is_relative_to(match_root) or not target.is_file() or target.suffix not in MATCH_FILE_TYPES:
+            raise HTTPException(404, "no such match file")
+        return FileResponse(target)
 
     # --- WebSocket ----------------------------------------------------------------------------------------
 
