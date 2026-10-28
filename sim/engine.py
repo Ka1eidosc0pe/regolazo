@@ -818,4 +818,13 @@ def _end_xy(m: Match, b: int, prep: _Prepared) -> tuple[float, float]:
     return (float(m.w.ball_pos[b, 0]), float(m.w.ball_pos[b, 1]))
 
 
-__all__ = ["SimEngine", "parse_ref", "snapshot_ref", "state_of", "wilson"]
+def create_engine(match_id: str | None = None) -> SimEngine:
+    """Server factory: ``REGOLAZO_ENGINE=sim.engine:create_engine``. Recordings (with their fork snapshots) are read
+    from ``$REGOLAZO_DATA_DIR/matches/<match_id>/``; the named match is loaded up front so a bad id fails at start."""
+    eng = SimEngine()
+    if match_id:
+        eng.snapshot_ticks(match_id)
+    return eng
+
+
+__all__ = ["SimEngine", "create_engine", "parse_ref", "snapshot_ref", "state_of", "wilson"]

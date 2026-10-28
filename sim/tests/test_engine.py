@@ -107,3 +107,13 @@ def test_fork_from_a_written_recording(tmp_path: Path) -> None:
         mo = eng.options(state.snapshot_ref)
         assert mo.ball_carrier is not None and mo.tick >= state.tick
         assert mo.ball_carrier == state.possession.player or state.possession.player is None
+
+
+def test_server_factory_loads_a_written_recording(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from server.engine import load_engine
+
+    meta = generate_meta(33, "factory")
+    write_match(simulate(meta, until_t=30.0), tmp_path / "matches" / "factory")
+    monkeypatch.setenv("REGOLAZO_DATA_DIR", str(tmp_path))
+    eng = load_engine("sim.engine:create_engine", "factory")
+    assert isinstance(eng, RolloutEngine)
