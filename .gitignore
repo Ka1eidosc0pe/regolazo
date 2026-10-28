@@ -38,3 +38,5 @@ assets/third_party/
 .claude/worktrees/
 .claude/launch.json
 data/matches/
+data/vision/
+data/demo/
