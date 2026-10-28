@@ -60,11 +60,13 @@ def main() -> None:
     out_dir = DATA / "matches" / DEMO / "spotter"
     meta = MatchMeta.model_validate_json((DATA / "matches" / DEMO / "meta.json").read_text())
     frames = load_frame_meta(RENDER)
-    results = load_results(out_dir / "detections.json")
+    results = load_results(out_dir / f"detections-{RENDER.name}.json")
     tracks = to_tracks(results, kits_from_meta(meta))
     teams = track_teams(tracks, 1, meta.home_attacks_positive_x_first_half)
     events = [
-        MatchEvent.model_validate_json(x) for x in (out_dir / "detected_events.jsonl").read_text().splitlines() if x
+        e
+        for x in (out_dir / "detected_events.jsonl").read_text().splitlines()
+        if x and (e := MatchEvent.model_validate_json(x)).period == 1
     ]
     shots = [e for e in events if e.type == "shot"]
     shot_kMH = {e.id: v * 3.6 for e, v in zip(shots, shot_speeds(tracks, shots), strict=True)}

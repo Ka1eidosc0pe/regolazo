@@ -34,6 +34,8 @@ for _m in TRAIN + VAL:
         WINDOWS.append(Window(_m, float(_t0), float(_t0 + 40), _cam, 4, _split))
 WINDOWS.append(Window(DEMO_MATCH, DEMO_START, DEMO_END, "broadcast", 25, "test"))
 WINDOWS.append(Window(DEMO_MATCH, 2890.0, 2920.0, "replay", 4, "test"))
+# second-half event-evaluation segment (two shots); not part of the YOLO test split
+WINDOWS.append(Window(DEMO_MATCH, 4060.0, 4120.0, "broadcast", 25, "eval"))
 
 
 def render(only: str | None) -> None:

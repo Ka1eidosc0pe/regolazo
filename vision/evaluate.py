@@ -70,6 +70,8 @@ class Report:
     scores: dict[str, Score]
     mae: dict[str, tuple[float, int, str]]
     """name -> (mae, support, unit)"""
+    team_accuracy: tuple[float, int] = (0.0, 0)
+    """Share of outfield track-frames (matched to a GT player within 1 m) whose team is right."""
 
     def payload(self) -> AccuracyPanelPayload:
         rows = []
@@ -135,7 +137,8 @@ def evaluate(
             mae[name] = (float(np.mean(np.abs(ball.speed[m] - gt_ball_v[m]))) * 3.6, int(m.sum()), "km/h")
     pp, pv = a["player_pos"][idx], np.linalg.norm(a["player_vel"][idx], axis=2)
     on = a["player_on_pitch"][idx].astype(bool)
-    perr = []
+    perr: list[float] = []
+    team_hits: list[bool] = []
     for k, xy in tracks.players.items():
         if tracks.role.get(k) == "referee":
             continue
@@ -146,6 +149,9 @@ def evaluate(
             j = int(np.argmin(d))
             if d[j] < 1.0:
                 perr.append(abs(min(float(kn.speed[i]), 12.0) - float(pv[i, j])))
+                gt_team = rec.player_ids[j][0]
+                if tracks.role.get(k) in ("home", "away"):
+                    team_hits.append(tracks.role[k][0].upper() == gt_team)
     if perr:
         mae["player_speed"] = (float(np.mean(perr)) * 3.6, len(perr), "km/h")
     ds, gs = [e for e in det if e.type == "shot"], [e for e in gt if e.type == "shot"]
@@ -157,7 +163,8 @@ def evaluate(
     ]
     if serr:
         mae["shot_speed"] = (float(np.mean(serr)), len(serr), "km/h")
-    return Report(t0, t1, tol, scores, mae)
+    team_acc = (float(np.mean(team_hits)) if team_hits else 0.0, len(team_hits))
+    return Report(t0, t1, tol, scores, mae, team_acc)
 
 
 def shot_speeds(tracks: Tracks, shots: list[MatchEvent]) -> list[float]:
@@ -168,3 +175,24 @@ def shot_speeds(tracks: Tracks, shots: list[MatchEvent]) -> list[float]:
         m = (tracks.t >= e.t) & (tracks.t <= e.t + 0.5) & ~np.isnan(ball.speed)
         out.append(float(np.max(ball.speed[m])) if m.any() else 0.0)
     return out
+
+
+def combine(reports: list[Report]) -> Report:
+    """Pool several evaluated segments: counts add up, MAEs are support-weighted."""
+    scores = {
+        k: Score(
+            sum(r.scores[k].tp for r in reports),
+            sum(r.scores[k].fp for r in reports),
+            sum(r.scores[k].fn for r in reports),
+            [],
+        )
+        for k in reports[0].scores
+    }
+    mae: dict[str, tuple[float, int, str]] = {}
+    for r in reports:
+        for k, (m, n, unit) in r.mae.items():
+            m0, n0, _ = mae.get(k, (0.0, 0, unit))
+            mae[k] = ((m0 * n0 + m * n) / (n0 + n), n0 + n, unit)
+    hits = sum(r.team_accuracy[0] * r.team_accuracy[1] for r in reports)
+    n = sum(r.team_accuracy[1] for r in reports)
+    return Report(reports[0].t0, reports[-1].t1, reports[0].tol, scores, mae, (hits / n if n else 0.0, n))

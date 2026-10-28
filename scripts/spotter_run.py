@@ -1,8 +1,9 @@
 """Run the Spotter on rendered broadcast video.
 
-Offline, on the rendered demo segment of candidate-2004 (t 1180-1300 s, first half):
-    uv run python scripts/spotter_run.py offline
-  -> $DATA/matches/candidate-2004/spotter/{detections.json, detected_events.jsonl, accuracy.json, metrics.json}
+Offline, on two rendered segments of the held-out demo match candidate-2004 (t 1180-1300 s, first half, the demo
+clip; t 4060-4120 s, second half):
+    uv run python scripts/spotter_run.py offline [--rerun]
+  -> $DATA/matches/candidate-2004/spotter/{detections-*.json, detected_events.jsonl, accuracy.json, metrics.json}
 
 Live, on a short clip: renders it in headless Chromium and runs detection + tracking + event rules on each frame as
 it arrives, printing events as they are detected:
@@ -19,8 +20,9 @@ from pathlib import Path
 
 from shared.recording import Recording
 from shared.schemas.common import Period
+from shared.schemas.events import MatchEvent
 from vision.clips import export_clip
-from vision.evaluate import evaluate, shot_speeds
+from vision.evaluate import Report, combine, evaluate, shot_speeds
 from vision.events import detect
 from vision.pipeline import default_weights, load_results, run_frames, save_results
 from vision.tracking import FrameMeta, FrameResult, Spotter, kits_from_meta, load_frame_meta, to_tracks
@@ -28,44 +30,72 @@ from vision.tracking import FrameMeta, FrameResult, Spotter, kits_from_meta, loa
 REPO = Path(__file__).resolve().parents[1]
 DATA = Path(os.environ.get("REGOLAZO_DATA_DIR", REPO / "data"))
 DEMO = "candidate-2004"
-DEMO_RENDER = DATA / "vision" / "renders" / "candidate-2004-1180-1300-broadcast-25fps"
-PERIOD: Period = 1
+SEGMENTS: list[tuple[str, Period]] = [
+    ("candidate-2004-1180-1300-broadcast-25fps", 1),  # demo clip
+    ("candidate-2004-4060-4120-broadcast-25fps", 2),
+]
+
+
+def cache_path(segment: str) -> Path:
+    return DATA / "matches" / DEMO / "spotter" / f"detections-{segment}.json"
+
+
+def scores_json(r: Report) -> dict[str, dict[str, float]]:
+    return {
+        k: {"precision": s.precision, "recall": s.recall, "f1": s.f1, "tp": s.tp, "fp": s.fp, "fn": s.fn}
+        for k, s in r.scores.items()
+    }
 
 
 def offline(rerun: bool) -> None:
     out = DATA / "matches" / DEMO / "spotter"
-    cache = out / "detections.json"
     rec = Recording.open(DATA / "matches" / DEMO)
-    if rerun or not cache.exists():
-        frames = load_frame_meta(DEMO_RENDER)
-        spotter = Spotter(default_weights(DATA), fps=25)
-        t0 = time.time()
-        results = run_frames(spotter, frames)
-        secs = time.time() - t0
-        print(f"spotter: {len(frames)} frames in {secs:.1f} s ({len(frames) / secs:.1f} frames/s)")
-        save_results(results, cache)
-    results = load_results(cache)
-    tracks = to_tracks(results, kits_from_meta(rec.meta))
-    events, runs = detect(tracks, PERIOD, rec.meta.home_attacks_positive_x_first_half)
+    events: list[MatchEvent] = []
+    strict: list[Report] = []
+    loose: list[Report] = []
+    seg_info = []
+    for n_seg, (segment, period) in enumerate(SEGMENTS):
+        render = DATA / "vision" / "renders" / segment
+        if not (render / "manifest.json").exists():
+            print("missing render", render, file=sys.stderr)
+            continue
+        cache = cache_path(segment)
+        if rerun or not cache.exists():
+            frames = load_frame_meta(render)
+            spotter = Spotter(default_weights(DATA), fps=25)
+            t0 = time.time()
+            results = run_frames(spotter, frames)
+            secs = time.time() - t0
+            print(f"spotter: {len(frames)} frames in {secs:.1f} s ({len(frames) / secs:.1f} frames/s)")
+            save_results(results, cache)
+        results = load_results(cache)
+        tracks = to_tracks(results, kits_from_meta(rec.meta))
+        seg_events, runs = detect(tracks, period, rec.meta.home_attacks_positive_x_first_half, f"ev_det_s{n_seg}")
+        events += seg_events
+        strict.append(evaluate(rec, seg_events, runs, tracks, tol=1.0))
+        loose.append(evaluate(rec, seg_events, runs, tracks, tol=2.0))
+        seg_info.append(
+            {
+                "render": segment,
+                "period": period,
+                "t": [float(tracks.t[0]), float(tracks.t[-1])],
+                "evaluated_t": [strict[-1].t0, strict[-1].t1],
+                "frames": len(results),
+                "tracks": len(tracks.players),
+                "detection_tol_1s": scores_json(strict[-1]),
+            }
+        )
+    events = [e.model_copy(update={"index": k}) for k, e in enumerate(events)]
     (out / "detected_events.jsonl").write_text("".join(e.model_dump_json() + "\n" for e in events))
-    report = evaluate(rec, events, runs, tracks, tol=1.0)
-    loose = evaluate(rec, events, runs, tracks, tol=2.0)
+    report, report2 = combine(strict), combine(loose)
     (out / "accuracy.json").write_text(report.payload().model_dump_json(indent=2) + "\n")
     metrics = {
         "match": DEMO,
-        "segment_t": [float(tracks.t[0]), float(tracks.t[-1])],
-        "evaluated_t": [report.t0, report.t1],
-        "frames": len(results),
-        "tracks": len(tracks.players),
+        "segments": seg_info,
         "events": {k: sum(e.type == k for e in events) for k in ("pass", "shot", "sprint")},
-        "detection": {
-            f"tol_{r.tol:g}s": {
-                k: {"precision": s.precision, "recall": s.recall, "f1": s.f1, "tp": s.tp, "fp": s.fp, "fn": s.fn}
-                for k, s in r.scores.items()
-            }
-            for r in (report, loose)
-        },
+        "detection": {"tol_1s": scores_json(report), "tol_2s": scores_json(report2)},
         "mae": {k: {"mae": v[0], "support": v[1], "unit": v[2]} for k, v in report.mae.items()},
+        "team_accuracy": {"accuracy": report.team_accuracy[0], "track_frames": report.team_accuracy[1]},
     }
     (out / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     print(json.dumps(metrics, indent=2))
