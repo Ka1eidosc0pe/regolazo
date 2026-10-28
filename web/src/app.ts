@@ -63,6 +63,8 @@ export class App {
   private readonly opts: AppOptions;
   private readonly container: HTMLElement;
   fps = 0;
+  /** Called after every rendered frame of the live loop (UI overlays track the camera through these). */
+  readonly frameHooks: ((dt: number) => void)[] = [];
 
   constructor(container: HTMLElement, source: FrameSource, opts: AppOptions = {}) {
     this.opts = opts;
@@ -345,6 +347,7 @@ export class App {
       this.lastT = t;
       this.step(t, dt);
       this.render();
+      for (const hook of this.frameHooks) hook(dt);
       frames++;
       acc += dt;
       if (acc >= 0.5) {
