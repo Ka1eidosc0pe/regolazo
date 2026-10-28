@@ -11,9 +11,10 @@ Clock semantics
 - ``events`` / ``moment`` messages are delivered when the clock passes them during playback, on every pass,
   always after the frame whose time covers them. A backward seek followed by play therefore re-delivers
   everything after the new position, in order, once per pass; clients dedupe by ``MatchEvent.id`` /
-  ``DecisionMoment.id``. A forward seek skips the span without sending it; clients fetch history from
-  ``GET /api/events`` and ``GET /api/moments``. Seeking to the first frame rewinds the cursors fully, so
-  events at ``t <= 0`` (the kickoff) are delivered again with that frame.
+  ``DecisionMoment.id``. ``narrative`` messages work the same way, for the session's current language and mode,
+  keyed by ``Narrative.id``. A forward seek skips the span without sending it; clients fetch history from
+  ``GET /api/events``, ``GET /api/moments`` and ``GET /api/narratives``. Seeking to the first frame rewinds
+  the cursors fully, so events at ``t <= 0`` (the kickoff) are delivered again with that frame.
 - After a seek the clock snaps to the frame at the requested time, then ``clock`` and ``frame`` are sent.
   Pause freezes the clock at the last frame sent.
 - Consecutive ``seek`` (or ``speed``) commands that are already queued are coalesced: only the last is applied.
@@ -29,6 +30,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
+from server.narration import NarrationStore
 from server.timeline import Timeline
 from shared.schemas.narrative import ViewerProfile
 from shared.schemas.stream import (
@@ -39,6 +41,7 @@ from shared.schemas.stream import (
     EventsMsg,
     HelloMsg,
     MomentMsg,
+    NarrativeMsg,
     PauseCmd,
     PlayCmd,
     ProfileCmd,
@@ -83,6 +86,7 @@ class Session:
         profile: ViewerProfile,
         languages: tuple[str, ...],
         max_fps: float = 25.0,
+        narratives: NarrationStore | None = None,
     ) -> None:
         self.id = session_id
         self.timeline = timeline
@@ -103,6 +107,9 @@ class Session:
         """Earliest wall time of the next frame (drift-free grid of 1 / max_fps)."""
         self._event_cursor = 0
         self._moment_cursor = 0
+        self.narratives = narratives
+        self._narrated_t = -1.0
+        """Match time up to which this session's narratives have been delivered (they follow the live profile)."""
         self._send: Send | None = None
         self.frames_sent = 0
 
@@ -245,6 +252,12 @@ class Session:
             moment = tl.moments[self._moment_cursor]
             self._moment_cursor += 1
             await self._send(MomentMsg(moment=moment).model_dump_json())
+        if self.narratives is not None:
+            for narrative in self.narratives.between(
+                self.profile.language, self.profile.mode, self._narrated_t, t_frame
+            ):
+                await self._send(NarrativeMsg(narrative=narrative).model_dump_json())
+            self._narrated_t = t_frame
 
     async def _send_clock(self) -> None:
         assert self._send is not None
@@ -334,12 +347,14 @@ class Session:
         if idx == 0:
             # Back to the very start: rewind the cursors so events at t <= 0 (kickoff) go out with this frame.
             self._event_cursor = self._moment_cursor = 0
+            self._narrated_t = -1.0
             self._idx = 0
             await self._send_clock()
             await self._emit_frame(0)
             return
         self._event_cursor = bisect.bisect_right(tl.event_times, t_frame)
         self._moment_cursor = bisect.bisect_right(tl.moment_times, t_frame)
+        self._narrated_t = t_frame
         self._idx = idx
         await self._send_clock()
         assert self._send is not None

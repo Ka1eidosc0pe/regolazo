@@ -32,6 +32,7 @@ from websockets.exceptions import ConnectionClosed
 from server.config import Settings
 from server.engine import UnknownSnapshotError, parse_snapshot_ref
 from server.engine_runner import EngineRunner
+from server.narration import NarrationStore
 from server.session import Session
 from server.timeline import Timeline
 from shared.engine_api import RolloutEngine
@@ -41,7 +42,7 @@ from shared.schemas.events import MatchEvent
 from shared.schemas.meta import MatchMeta
 from shared.schemas.models import ModelOutputs
 from shared.schemas.moments import DecisionMoment
-from shared.schemas.narrative import ViewerProfile
+from shared.schemas.narrative import Narrative, ViewerProfile
 from shared.schemas.rollout import RolloutDistribution, RolloutRequest, RolloutResult
 from shared.schemas.state import SimState
 from shared.schemas.stream import ErrorMsg
@@ -141,6 +142,8 @@ def create_app(recording_dir: Path, engine: RolloutEngine, settings: Settings | 
     app.state.timeline = timeline
     app.state.engine = engine
     app.state.settings = settings
+    narration = NarrationStore.load(Path(recording_dir))
+    app.state.narratives = narration
     app.state.sessions = {}  # session_id -> Session, for other components to push cues / narratives
 
     app.add_middleware(
@@ -180,6 +183,11 @@ def create_app(recording_dir: Path, engine: RolloutEngine, settings: Settings | 
     @app.get("/api/moments", response_model=list[DecisionMoment])
     async def get_moments(tl: TimelineDep) -> list[DecisionMoment]:
         return tl.moments
+
+    @app.get("/api/narratives", response_model=list[Narrative])
+    async def get_narratives(language: str = "en", mode: str = "casual") -> list[Narrative]:
+        """Precomputed narratives for one language and mode (``audio_url`` is served by ``/api/files``)."""
+        return narration.for_profile(language, mode)
 
     @app.get("/api/state", response_model=SimState)
     async def get_state(tl: TimelineDep, t: Annotated[float, Query(ge=0)]) -> SimState:
@@ -249,7 +257,7 @@ def create_app(recording_dir: Path, engine: RolloutEngine, settings: Settings | 
                 "language": language or default_language,
             }
         )
-        session = Session(session_id, timeline, profile, languages, settings.max_fps)
+        session = Session(session_id, timeline, profile, languages, settings.max_fps, narration)
         for problem in problems:
             session.push(problem)  # delivered right after hello and the first frame
         app.state.sessions[session_id] = session
