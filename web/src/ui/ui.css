@@ -326,8 +326,12 @@ body[data-ui="live"] .brand-bug {
   padding: 4px 8px;
   border-radius: 4px;
 }
-.tl-marker:hover .tl-tip {
+body:not([data-rewind]) .tl-marker:hover .tl-tip,
+body[data-rewind="idle"] .tl-marker:hover .tl-tip {
   display: block;
+}
+.vd-dbody.bars-only {
+  grid-template-columns: 1fr;
 }
 
 /* profile picker + accuracy */

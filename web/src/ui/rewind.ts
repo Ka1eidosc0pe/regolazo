@@ -608,7 +608,7 @@ export class Rewind {
     const ys = d.samples.map((q) => q.end_xy[1]);
     const spread = xs.length ? Math.max(...xs) - Math.min(...xs) + Math.max(...ys) - Math.min(...ys) : 0;
     body.append(bars);
-    if (spread > 0.5) body.append(this.samplePlot(d));
+    if (spread > 4) body.append(this.samplePlot(d));
     else body.classList.add("bars-only");
     dist.append(stats, body);
     dist.dataset.n = String(d.n);
@@ -680,6 +680,7 @@ export class Rewind {
     const m = this.moment;
     this.teardown();
     this.source.backToLive();
+    this.hud.hideCard();
     this.app.ball.reset();
     this.app.setCamera("broadcast", 1.0);
     this.hud.tagsEnabled = true;
